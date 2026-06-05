@@ -25,7 +25,7 @@ const CSP_DIRECTIVES = [
   "img-src 'self' data: blob: https://res.cloudinary.com https://*.cloudinary.com https://images.unsplash.com",
 
   // XHR / fetch: same origin + Razorpay API + Sentry ingest
-  "connect-src 'self' https://api.razorpay.com https://lumberjack.razorpay.com https://*.sentry.io https://o*.ingest.sentry.io",
+  "connect-src 'self' https://api.razorpay.com https://lumberjack.razorpay.com https://*.sentry.io",
 
   // Frames: Razorpay uses an iframe for payment
   "frame-src https://api.razorpay.com",
