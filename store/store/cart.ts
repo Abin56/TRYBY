@@ -18,6 +18,7 @@ export type CartItem = {
 type CartStore = {
   items: CartItem[];
   isOpen: boolean;
+  hasHydrated: boolean;
 
   // Actions
   addItem: (item: Omit<CartItem, "quantity">) => void;
@@ -27,6 +28,7 @@ type CartStore = {
   openCart: () => void;
   closeCart: () => void;
   toggleCart: () => void;
+  setHasHydrated: (v: boolean) => void;
 
   // Computed (derived)
   itemCount: () => number;
@@ -38,6 +40,7 @@ export const useCartStore = create<CartStore>()(
     (set, get) => ({
       items: [],
       isOpen: false,
+      hasHydrated: false,
 
       addItem: (newItem) => {
         set((state) => {
@@ -75,6 +78,7 @@ export const useCartStore = create<CartStore>()(
       openCart:   () => set({ isOpen: true }),
       closeCart:  () => set({ isOpen: false }),
       toggleCart: () => set((s) => ({ isOpen: !s.isOpen })),
+      setHasHydrated: (v) => set({ hasHydrated: v }),
 
       itemCount: () => get().items.reduce((sum, i) => sum + i.quantity, 0),
       subtotal:  () => get().items.reduce((sum, i) => sum + i.price * i.quantity, 0),
@@ -82,6 +86,9 @@ export const useCartStore = create<CartStore>()(
     {
       name: "tryby-sports-cart",
       partialize: (s) => ({ items: s.items }),
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
     }
   )
 );

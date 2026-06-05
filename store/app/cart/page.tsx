@@ -324,8 +324,20 @@ function OrderSummary() {
 /* ─── Main page ─────────────────────────────────────────────── */
 
 export default function CartPage() {
-  const { items, itemCount } = useCartStore();
+  const { items, itemCount, hasHydrated } = useCartStore();
   const count = itemCount();
+
+  /* ── Pre-hydration skeleton: don't flash empty state before localStorage loads ── */
+  if (!hasHydrated) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-8 w-8 rounded-full border-[3px] border-[#F5C518] border-t-transparent animate-spin" />
+          <p className="text-[13px] text-[#888] font-medium">Loading your cart…</p>
+        </div>
+      </div>
+    );
+  }
 
   /* ── Empty state ── */
   if (count === 0) {

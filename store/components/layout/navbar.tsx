@@ -137,8 +137,8 @@ export function Navbar() {
   const [mounted,     setMounted]     = useState(false);
 
   const accountTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const { toggleCart, itemCount } = useCartStore();
-  const count = mounted ? itemCount() : 0;
+  const { toggleCart, itemCount, hasHydrated } = useCartStore();
+  const count = (mounted && hasHydrated) ? itemCount() : 0;
 
   useEffect(() => { setMounted(true); }, []);
 

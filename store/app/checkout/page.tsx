@@ -42,7 +42,7 @@ function fmt(n: number) { return "₹" + n.toLocaleString("en-IN"); }
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, subtotal, clearCart } = useCartStore();
+  const { items, subtotal, clearCart, hasHydrated } = useCartStore();
   const sub = subtotal();
 
   const [savedAddresses, setSavedAddresses] = useState<Address[]>([]);
@@ -214,6 +214,20 @@ export default function CheckoutPage() {
       setErrors({ form: "Something went wrong — try again" });
       setPlacing(false);
     }
+  }
+
+  // Wait for Zustand persist to rehydrate from localStorage before evaluating cart.
+  // Without this guard, a page refresh or direct navigation renders "empty cart"
+  // for ~16 ms before hydration completes — causing a false empty-cart redirect.
+  if (!hasHydrated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#F8F8F8" }}>
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-8 w-8 rounded-full border-[3px] border-[#F5C518] border-t-transparent animate-spin" />
+          <p className="text-[13px] text-[#888] font-medium">Loading your cart…</p>
+        </div>
+      </div>
+    );
   }
 
   if (items.length === 0) {

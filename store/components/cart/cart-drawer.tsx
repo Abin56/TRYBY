@@ -16,7 +16,7 @@ function formatPrice(n: number) {
 }
 
 export function CartDrawer() {
-  const { items, isOpen, closeCart, removeItem, updateQuantity, itemCount, subtotal } =
+  const { items, isOpen, closeCart, removeItem, updateQuantity, itemCount, subtotal, hasHydrated } =
     useCartStore();
   const overlayRef = useRef<HTMLDivElement>(null);
 
@@ -108,7 +108,16 @@ export function CartDrawer() {
             {/* Items */}
             <div className="flex-1 overflow-y-auto py-4 px-5">
               <AnimatePresence initial={false}>
-                {items.length === 0 ? (
+                {!hasHydrated ? (
+                  <motion.div
+                    key="loading"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="flex flex-col items-center justify-center h-full gap-4 py-20"
+                  >
+                    <div className="h-7 w-7 rounded-full border-[3px] border-[#F5C518] border-t-transparent animate-spin" />
+                  </motion.div>
+                ) : items.length === 0 ? (
                   <motion.div
                     key="empty"
                     initial={{ opacity: 0, y: 16 }}
