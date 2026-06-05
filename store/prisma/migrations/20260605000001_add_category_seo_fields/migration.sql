@@ -1,0 +1,1 @@
+ALTER TABLE "Category" ADD COLUMN IF NOT EXISTS "metaTitle" TEXT, ADD COLUMN IF NOT EXISTS "metaDescription" TEXT;

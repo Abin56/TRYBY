@@ -1,0 +1,2003 @@
+================================================================================
+  TRYBY SPORTS — PHASE 2 COMPLETE REBUILD & EXPANSION SPECIFICATION
+  Lead: Product Designer + UX Architect + Senior Next.js Engineer
+  Generated: 2026-06-03
+================================================================================
+
+
+================================================================================
+  PHASE A — PRODUCT STRATEGY REVIEW
+================================================================================
+
+─── INFORMATION ARCHITECTURE PROBLEMS ─────────────────────────────────────────
+
+PROBLEM 1: Flat navigation with no sports context
+  Current: Trending | New Arrivals | Best Sellers | Categories | Deals
+  Risk:    Generic links that feel like any dropship site
+  Fix:     Sport-first mega menu (Cricket > Football > Gym > Running > Recovery)
+
+PROBLEM 2: No category hierarchy
+  Current: Categories are extracted dynamically from mock data
+           ("Desk & Productivity", "Home & Living" — wrong domain entirely)
+  Risk:    Zero relevance to sports buyer intent
+  Fix:     Hardcoded sports taxonomy with subcategory drill-down
+
+PROBLEM 3: Search has no sports intelligence
+  Current: Cmd+K palette filters product names only
+  Risk:    "football jersey size XL" will return nothing useful
+  Fix:     Search with sport tags, size filters, team name support
+
+PROBLEM 4: No size/variant system
+  Current: Products have no size, color, or variant concept at all
+  Risk:    Sports products (jerseys, shoes, gear) all require variants
+  Fix:     Variant model in product type (size, color, stock per variant)
+
+PROBLEM 5: Checkout has no guest path awareness
+  Current: Navbar shows "Sign In" but no auth exists — clicking breaks
+  Risk:    100% of users will see broken auth flow
+  Fix:     Guest checkout + post-purchase account creation prompt
+
+PROBLEM 6: PDP has no sports-specific trust signals
+  Current: Generic "Fast Delivery", "Easy Returns", "Secure Payment"
+  Risk:    Sports buyers need: Size Guide, Authenticity, Official License
+  Fix:     Sport-specific trust: Certified Gear, Size Chart, Team Authenticity
+
+─── CUSTOMER JOURNEY GAPS ──────────────────────────────────────────────────────
+
+MISSING: Discovery → Intent signal capture
+  A gym user and a cricket player land on same homepage with same hero.
+  No sport-selector, no personalization, no "shop by sport" entry point.
+
+MISSING: Social proof at decision point
+  Reviews exist as a homepage section. Zero reviews on the PDP review form.
+  Buy decision happens on PDP — reviews must appear there.
+
+MISSING: Urgency mechanics
+  No stock counters. No "X people viewing this". No limited-edition signals.
+  Sports gear sells on scarcity + hype. None implemented.
+
+MISSING: Post-purchase lifecycle
+  Order Success page exists but is a dead end.
+  No: "Complete your kit", "Track order", "Refer a friend", loyalty points.
+
+MISSING: Mobile-first sports experience
+  Sports buyers primarily shop on phones. Cart drawer width is 420px fixed.
+  No bottom-sheet cart on mobile, no swipe gestures on PDP gallery.
+
+─── CONVERSION FUNNEL RISKS ────────────────────────────────────────────────────
+
+  Homepage → PLP:      No sport-entry CTA, just generic "Shop Now"
+  PLP → PDP:           No quick-view, no size on card hover, no wishlist on hover
+  PDP → Cart:          Add to Cart exists but no upsell ("Complete your kit")
+  Cart → Checkout:     No coupon field in cart drawer
+  Checkout → Payment:  3 shipping options hardcoded (not weight/pincode based)
+  Payment → Success:   No order tracking link, no WhatsApp notification hook
+
+─── SUPPLIER INTEGRATION READINESS ─────────────────────────────────────────────
+
+  Current:  ZERO. All data is static mock.ts.
+  Risk:     No product sync, no inventory, no pricing rules, no supplier margin
+  Required: Supplier model, product sourcing table, cost price tracking, MOQ
+
+─── SCALABILITY RISKS ──────────────────────────────────────────────────────────
+
+  1. Zustand cart is localStorage only — no server cart, no cross-device sync
+  2. No ISR — every product page is client-rendered with mock data
+  3. Admin and Store are two completely separate Next.js apps sharing nothing
+     (no shared types, no shared UI, no API layer)
+  4. No CDN image pipeline — Unsplash direct URLs will be slow in production
+  5. No error boundaries on any page
+
+
+================================================================================
+  PHASE B — UX AUDIT
+================================================================================
+
+─── HOMEPAGE ───────────────────────────────────────────────────────────────────
+
+  UX Score:         6.5 / 10
+  Conversion Score: 5.0 / 10
+
+  DONE WELL:
+  - Hero rotating word animation creates energy
+  - Announcement bar is present
+  - Multiple social proof sections exist
+
+  MISSING SECTIONS:
+  - Sport entry grid (Shop by Sport) — most critical missing section
+  - Instagram-style UGC feed
+  - Featured athlete / brand ambassador section
+  - Live stock / trending ticker
+  - Size guide CTA
+  - Featured collections (World Cup jerseys, IPL kits, etc.)
+
+  MISSING TRUST ELEMENTS:
+  - No "X orders shipped today" live counter
+  - No press logos (Times of India, Sportskeeda, etc.)
+  - No official licensing badges
+  - No COD available badge above fold
+
+  MISSING ANIMATIONS:
+  - No parallax on hero
+  - No stagger on product card entrance
+  - No number count-up on stats
+  - No scroll-triggered section reveals
+
+  MOBILE ISSUES:
+  - Hero text size unconfirmed for <375px screens
+  - Announcement bar may overflow on small devices
+  - No sticky sport-category tab bar for mobile
+
+  ACCESSIBILITY:
+  - No skip-to-main link
+  - Rotating announcement bar needs aria-live region
+  - Color contrast of tertiary text (#6B7280) on dark bg: borderline fail
+
+─── PRODUCT LISTING PAGE (PLP) ─────────────────────────────────────────────────
+
+  UX Score:         7.5 / 10
+  Conversion Score: 6.0 / 10
+
+  DONE WELL:
+  - Filters work (category, price, rating)
+  - Infinite scroll is smooth
+  - Sort options are comprehensive
+  - Skeleton loading is present
+
+  MISSING:
+  - No size filter (critical for sports apparel)
+  - No color swatch filter
+  - No "In Stock Only" toggle
+  - No sport-type filter (Cricket / Football / Gym)
+  - No quick-view drawer on card hover
+  - No wishlist heart on card hover
+  - No "Compare" feature
+  - Active filter chips with remove (no way to see what's active)
+  - Filter state not synced to URL (back button breaks)
+
+  MOBILE ISSUES:
+  - Filter panel behavior on mobile not confirmed
+  - Bottom filter sheet vs sidebar not implemented
+
+─── PRODUCT DETAIL PAGE (PDP) ──────────────────────────────────────────────────
+
+  UX Score:         7.0 / 10
+  Conversion Score: 6.5 / 10
+
+  DONE WELL:
+  - Gallery with lightbox
+  - Sticky purchase bar
+  - FAQ accordion
+  - Trust signals row
+  - Related products
+  - Problem/solution narrative
+
+  MISSING:
+  - SIZE SELECTOR (critical — no size/variant system at all)
+  - Size guide modal with chest/waist measurements
+  - Color variant switcher
+  - "X people viewing this" social urgency
+  - Stock countdown ("Only 3 left")
+  - Pincode delivery checker
+  - EMI options display
+  - Video embed slot (product demo)
+  - 360° view option
+  - "Notify me when back in stock" for OOS items
+
+  MOBILE ISSUES:
+  - Gallery swipe behavior not confirmed
+  - Sticky bar height may push content on small screens
+
+─── CART ───────────────────────────────────────────────────────────────────────
+
+  UX Score:         6.0 / 10
+  Conversion Score: 5.5 / 10
+
+  DONE WELL:
+  - Zustand store with localStorage persistence
+  - Cart drawer exists
+
+  MISSING:
+  - Coupon code input in cart drawer
+  - "You might also like" upsell row
+  - Free shipping progress bar ("Add ₹299 more for free shipping")
+  - Quantity change feedback animation
+  - Save for later option
+  - Cart page (exists as route but content unknown)
+
+─── CHECKOUT ───────────────────────────────────────────────────────────────────
+
+  UX Score:         7.0 / 10
+  Conversion Score: 6.0 / 10
+
+  DONE WELL:
+  - Two-step flow (Address → Payment)
+  - Saved address selector
+  - Order summary sidebar
+  - Shipping method options
+
+  MISSING:
+  - Progress indicator showing steps
+  - Auto-fill from Google Maps API (pincode lookup)
+  - Express checkout (Razorpay one-click)
+  - Coupon application at checkout
+  - Order editing ("Go back and change")
+  - Trust badges at payment step (SSL, Razorpay secure)
+  - GST invoice option for business orders
+
+─── PAYMENT PAGE ───────────────────────────────────────────────────────────────
+
+  UX Score:         7.5 / 10
+  Conversion Score: 7.0 / 10
+
+  DONE WELL:
+  - All Indian payment methods covered (UPI, Card, NetBanking, Wallet, COD)
+  - UPI app selector (GPay, PhonePe, Paytm, BHIM)
+  - Card number formatting
+
+  MISSING:
+  - Razorpay SDK not wired (UI only, no actual payment)
+  - No order total confirmation before payment
+  - No "Paying for" item summary
+  - No loading state after payment click
+
+─── ORDER SUCCESS ───────────────────────────────────────────────────────────────
+
+  UX Score:         4.0 / 10
+  Conversion Score: 3.0 / 10
+
+  MISSING (entire page needs redesign):
+  - Order number display
+  - Estimated delivery date
+  - Order summary recap
+  - "Track your order" button
+  - "Continue shopping" with sport-specific suggestions
+  - WhatsApp order confirmation option
+  - Refer a friend section
+  - App download prompt (if applicable)
+
+
+================================================================================
+  PHASE C — SPORTS BRAND IDENTITY: TRYBY SPORTS
+================================================================================
+
+─── BRAND POSITIONING ──────────────────────────────────────────────────────────
+
+  Name:          TRYBY SPORTS
+  Tagline:       "Gear Up. Play Hard."
+  Sub-tagline:   "Premium Sports Essentials for Everyday Athletes"
+
+  Brand Personality:
+    - Energetic but not aggressive
+    - Aspirational but accessible
+    - Indian but globally aware
+    - Performance-first but style-conscious
+
+  Tone of Voice:
+    - Direct: "Get the gear. Hit the field."
+    - Motivating: "Your next goal starts here."
+    - Inclusive: "For every athlete. Every sport. Every budget."
+    - Confident: "Certified. Tested. Delivered."
+
+─── TARGET AUDIENCE ────────────────────────────────────────────────────────────
+
+  PRIMARY:
+    Football fans (18-28, tier 1-2 cities, jersey culture)
+    Cricket players (16-35, all tiers, seasonal buyers)
+    Gym users (20-35, consistent spend, brand-aware)
+
+  SECONDARY:
+    Students (14-22, budget-conscious, trend-driven)
+    Amateur athletes (25-45, quality-focused, research buyers)
+
+─── COLOR STRATEGY ─────────────────────────────────────────────────────────────
+
+  REPLACE the generic blue (#2563EB) primary with a sports-grade palette:
+
+  Primary Action:      #FF3B30    (Performance Red — Nike red energy)
+  Primary Hover:       #E5352B
+  Primary Muted:       rgba(255, 59, 48, 0.12)
+  Primary Glow:        rgba(255, 59, 48, 0.30)
+
+  Secondary Accent:    #00C6FF    (Electric Cyan — speed, hydration)
+  Secondary Hover:     #00A8D6
+
+  Brand Gold:          #FFB800    (Victory Gold — trophies, achievement)
+
+  Surface BG:          #080808    (Deeper black — more premium than #0A0A0A)
+  Surface Card:        #0F0F0F
+  Surface Raised:      #141414
+  Surface Overlay:     #1A1A1A
+
+  Text Primary:        #FFFFFF
+  Text Secondary:      #A0A0A0
+  Text Tertiary:       #606060
+
+  Success:             #00E676    (Brighter sports green)
+  Error:               #FF3B30    (Same as primary — reinforces brand)
+  Warning:             #FFB800    (Brand gold doubles as warning)
+
+  Sport Tags (badge colors):
+    Cricket:           #4CAF50 / rgba(76,175,80,0.15)
+    Football:          #2196F3 / rgba(33,150,243,0.15)
+    Gym:               #FF3B30 / rgba(255,59,48,0.15)
+    Running:           #FF9800 / rgba(255,152,0,0.15)
+    Recovery:          #9C27B0 / rgba(156,39,176,0.15)
+
+─── TYPOGRAPHY STRATEGY ────────────────────────────────────────────────────────
+
+  Heading Font:   "Barlow Condensed" (Google Fonts) — weight 700, 800
+                  Wide tracking, sports scoreboard energy
+                  Alternate: "Bebas Neue" for all-caps headers
+
+  Body Font:      "Inter" (keep existing) — clean, readable, premium
+
+  Mono Font:      "JetBrains Mono" (keep for prices, codes, order numbers)
+
+  Typography Rules:
+    - Hero headlines: Barlow Condensed 800, tracking-wider, UPPERCASE
+    - Section titles: Barlow Condensed 700, normal case
+    - Body text: Inter 400/500
+    - Prices: Inter 700, tabular-nums
+    - Sport category labels: Barlow Condensed 600, uppercase, tracked wide
+    - CTA buttons: Barlow Condensed 700, 1rem, uppercase, tracked wide
+
+─── MOTION STRATEGY ────────────────────────────────────────────────────────────
+
+  Philosophy: "Fast in, slower out" — like a sprint
+
+  Entrance animations:  spring() — bouncy, athletic feel
+  Exit animations:      ease-out — quick departure
+  Hover states:         150ms — instant response to touch
+  Page transitions:     slide-up 300ms ease-expo-out
+  Loading states:       pulse shimmer on dark (#1A1A1A → #222)
+
+  Signature Animations:
+    1. Score counter — numbers roll up like a scoreboard
+    2. Jersey flip — product card flips on hover to show back
+    3. Field reveal — hero section scans like a camera pan
+    4. Kit builder — items snap into position
+    5. Streak fire — "🔥 Trending" badge pulses with glow
+    6. Winner ribbon — confetti burst on order success
+
+
+================================================================================
+  PHASE D — HOMEPAGE 2.0 SPECIFICATION
+================================================================================
+
+─── SECTION 1: ANNOUNCEMENT BAR ────────────────────────────────────────────────
+
+  Objective:  Drive urgency + delivery trust + seasonal offer
+  Height:     36px desktop, 32px mobile
+  Behavior:   Auto-rotate 3 messages every 3.5s with fade crossfade
+  Dismissible: No (always visible)
+
+  Messages:
+    "🏏 IPL Season Sale — Up to 40% OFF on Cricket Kits"
+    "⚡ Free Delivery on orders above ₹499 — Shop Now"
+    "🔥 Official Jerseys | 100% Authentic | COD Available"
+
+  Layout:
+    [← arrow] [centered message text] [→ arrow] [close-ish link]
+
+─── SECTION 2: NAVBAR ──────────────────────────────────────────────────────────
+
+  Objective:  Sport-first navigation with mega menu
+
+  Desktop layout (64px height, glassmorphism):
+    [TRYBY SPORTS logo] | [Sports▾] [Jerseys▾] [Gear▾] [Deals] | [Search] [Wishlist] [Account▾] [Cart(3)]
+
+  Mega Menu — "Sports":
+    ┌─────────────────────────────────────────────┐
+    │  🏏 Cricket    🟢 Football   💪 Gym & Fitness │
+    │  🏃 Running    🏸 Badminton  🥊 Combat Sports │
+    │  🏊 Swimming   ⚽ Team Kits  🛡️ Protection    │
+    │  ─────────────────────────────────────────── │
+    │  FEATURED: IPL 2026 Kits    [Shop All]       │
+    └─────────────────────────────────────────────┘
+
+  Mobile layout (56px, bottom-anchored menu):
+    Hamburger opens full-screen sport grid
+    Bottom tab bar: Home | Sports | Search | Account | Cart
+
+─── SECTION 3: HERO ────────────────────────────────────────────────────────────
+
+  Objective:  Immediate sport identity + conversion
+
+  Layout (desktop): Split — 55% content left, 45% product/visual right
+  Layout (mobile):  Stacked, content above fold, CTA visible
+
+  Content:
+    EYEBROW:  "⚡ OFFICIALLY LICENSED GEAR"
+    HEADLINE: "GEAR UP." (Barlow Condensed 800, 80px, white)
+              "PLAY HARD." (same, but gradient: #FF3B30 → #FFB800)
+    BODY:     "Premium sports essentials for cricket, football,
+               gym, and beyond. Delivered across India."
+    CTA ROW:  [Shop Cricket Gear →] [Shop Football Kits]
+              (Primary red button + ghost button)
+    TRUST:    ★★★★★ 4.8 · 50,000+ orders · Free delivery ₹499+
+
+  Visual (right):
+    Floating product image (jersey or shoe) with:
+    - Radial red glow behind product
+    - Floating badge: "LIMITED" top-right
+    - Floating stat: "🔥 1,247 sold this week" bottom-left
+    - Background: subtle mesh gradient, dark
+
+  Framer Motion:
+    - Headline: staggered word entrance (0.1s per word, spring)
+    - Product image: float Y ±8px loop (3s ease-in-out infinite)
+    - Trust bar: fade-in 0.6s delay
+    - Background glow: pulse scale 1.0→1.05 (4s infinite)
+
+─── SECTION 4: FEATURED JERSEYS ────────────────────────────────────────────────
+
+  Objective:  Capture the jersey culture buyer (highest margin item)
+
+  Layout:     Full-width horizontal scroll carousel
+  Eyebrow:    "🏅 OFFICIAL LICENSED JERSEYS"
+  Headline:   "Rep Your Team."
+  Cards:      Large jersey cards (280px wide)
+              — Team badge + jersey image
+              — Team name + league
+              — Price + "Shop →"
+              — "OFFICIAL" authenticity chip
+
+  Teams shown: MI, CSK, RCB, India Cricket, Real Madrid, Barcelona, Man City
+
+─── SECTION 5: TRENDING SPORTS GEAR ────────────────────────────────────────────
+
+  Objective:  Surface trending products with urgency
+
+  Layout:     4-col grid desktop, 2-col mobile
+  Eyebrow:    "🔥 TRENDING NOW"
+  Headline:   "What Athletes Are Buying."
+  Filter tabs: All | Cricket | Football | Gym | Running
+
+  Product card upgrades:
+    - "X sold today" counter (orange badge)
+    - Stock bar: ████░░░ (visual scarcity)
+    - Quick Add button appears on hover
+    - Wishlist heart top-right
+    - Sport tag bottom-left
+
+  Framer Motion:
+    - Tab switch: layout animation, content fade
+    - Card entrance: stagger 0.05s, slide-up 24px
+
+─── SECTION 6: SPORTS CATEGORIES ───────────────────────────────────────────────
+
+  Objective:  Intent-capture for different sport audiences
+
+  Layout:     3×2 grid desktop, 2×3 mobile (large visual cards)
+
+  Categories:
+    [🏏 Cricket]      [⚽ Football]     [💪 Gym & Fitness]
+    [🏃 Running]      [🏸 Racket Sports] [🥊 Combat Sports]
+
+  Card design:
+    - Full-bleed sport action image (dark overlay)
+    - Sport name Barlow Condensed 700 bottom-left
+    - Product count "47 products" bottom-left sub
+    - Hover: image zooms 1.05×, overlay lightens slightly
+    - CTA: "Explore →" slides up on hover
+
+─── SECTION 7: BEST SELLERS ────────────────────────────────────────────────────
+
+  Objective:  Social proof + trust at the product level
+
+  Layout:     Horizontal scroll, 5 cards visible desktop
+  Eyebrow:    "🥇 COMMUNITY FAVOURITES"
+  Headline:   "India's Most Ordered."
+
+  Card additions:
+    - "#1 Best Seller in Cricket" ribbon
+    - Total reviews count
+    - "Free delivery" tag if applicable
+
+─── SECTION 8: WHY TRYBY ───────────────────────────────────────────────────────
+
+  Objective:  Overcome purchase objections
+
+  Layout:     4-col icon grid desktop, 2-col mobile
+  Headline:   "Why Athletes Choose TRYBY."
+
+  Items:
+    ✅ Official Licensed Products    — "Every jersey is genuine and verified."
+    🚚 Fast Pan-India Delivery       — "Reach 27,000+ pincodes in 2-5 days."
+    💰 Best Price Guarantee          — "Found cheaper? We'll match it."
+    🔄 7-Day Easy Returns            — "No questions asked returns."
+
+  Animation: Counter-up on scroll-enter (0 → final value)
+
+─── SECTION 9: ATHLETE REVIEWS ─────────────────────────────────────────────────
+
+  Objective:  Sport-specific social proof
+
+  Layout:     Auto-scrolling dual marquee (opposite directions)
+  Eyebrow:    "⭐ ATHLETE REVIEWS"
+  Headline:   "Trusted by 50,000+ Athletes."
+
+  Review card includes:
+    - Avatar + name + city
+    - Sport played (Cricket / Football / Gym)
+    - Star rating
+    - Review text (sport-specific)
+    - Product purchased (with thumbnail)
+    - Verified Purchase badge
+
+─── SECTION 10: INSTAGRAM FEED ─────────────────────────────────────────────────
+
+  Objective:  UGC social proof, build community feel
+
+  Layout:     Horizontal scroll grid of 8 photos (240px squares)
+  Eyebrow:    "#TRYBY SPORTS"
+  Headline:   "Join the Community."
+  CTA:        "Follow @trybysports →" (links to Instagram)
+
+  Card: photo only (cropped square), hover shows caption + like count
+
+─── SECTION 11: FAQ ────────────────────────────────────────────────────────────
+
+  Objective:  Pre-purchase objection removal
+
+  Layout:     Two-column accordion (6 questions)
+  Headline:   "Frequently Asked Questions"
+
+  Questions:
+    1. Are your jerseys officially licensed?
+    2. How do I choose the right size?
+    3. What is your return policy for sports gear?
+    4. Do you offer Cash on Delivery?
+    5. How long does delivery take?
+    6. Can I track my order?
+
+─── SECTION 12: NEWSLETTER ──────────────────────────────────────────────────────
+
+  Objective:  Email capture with sports motivation
+
+  Layout:     Full-width band, red gradient bg (#FF3B30 → #B91C1C)
+  Headline:   "Get Early Access to Drops."
+  Body:       "New jersey releases. Exclusive deals. Training tips."
+  CTA:        [Email input] [GET ACCESS] button
+
+─── SECTION 13: FOOTER ──────────────────────────────────────────────────────────
+
+  4-col layout:
+    Col 1: TRYBY SPORTS logo + tagline + social icons
+    Col 2: Sports (Cricket, Football, Gym, Running, All Sports)
+    Col 3: Help (Track Order, Returns, Size Guide, Contact)
+    Col 4: Company (About, Careers, Press, Privacy, Terms)
+
+  Bottom strip:
+    © 2026 TRYBY SPORTS · Made in India 🇮🇳 · All Rights Reserved
+    Payment icons: Razorpay | UPI | Visa | Mastercard | COD
+
+
+================================================================================
+  PHASE E — AUTH EXPERIENCE SPECIFICATION
+================================================================================
+
+─── /auth/login ─────────────────────────────────────────────────────────────────
+
+  Layout:  Split screen, 50/50
+  Left:    Full-height sport action image (dark overlay)
+           Floating TRYBY SPORTS logo top-left
+           Quote bottom: "Champions don't quit. — TRYBY"
+  Right:   Centered auth card (max-width 400px)
+
+  Card content:
+    Eyebrow:   "Welcome Back"
+    Headline:  "Sign in to your account"
+
+    [Google Login] ← full-width, white border button with Google icon
+    [Phone Login]  ← full-width, with flag + number input (OTP flow)
+
+    ──── or continue with email ────
+
+    Email input (label: "Email address")
+    Password input (label: "Password", show/hide toggle)
+    [Forgot password?] — right-aligned link
+    [Sign In] — full-width, red primary button
+
+    Footer: "New to TRYBY? [Create account]"
+
+  Mobile: full screen, no split, sport image as hero banner above card
+
+─── /auth/register ──────────────────────────────────────────────────────────────
+
+  Layout:  Same split as login
+
+  Card content:
+    Headline:  "Create your account"
+
+    [Google] [Phone] buttons same as login
+
+    ──── or continue with email ────
+
+    Full Name (split: First | Last)
+    Email address
+    Password (strength indicator bar below)
+    Confirm Password
+
+    [✓] I agree to Terms & Privacy Policy
+
+    [Create Account] — red primary button
+
+    Footer: "Already have an account? [Sign in]"
+
+  Post-register: redirect to /auth/verify
+
+─── /auth/forgot-password ───────────────────────────────────────────────────────
+
+  Layout:  Centered card (max-width 400px), dark bg
+
+  Step 1 (Enter email):
+    Icon:      Back arrow (link to /auth/login)
+    Headline:  "Forgot your password?"
+    Body:      "We'll send a reset link to your email."
+    Email input
+    [Send Reset Link] button
+
+  Step 2 (Sent confirmation — same page, replace content):
+    Icon:      ✉ Mail check icon (green)
+    Headline:  "Check your inbox"
+    Body:      "We sent a link to hello@example.com"
+    [Open Gmail] [Open Outlook] quick links
+    [Resend in 60s] countdown link
+
+─── /auth/reset-password ────────────────────────────────────────────────────────
+
+  URL token: /auth/reset-password?token=xxxxx
+
+  Card content:
+    Headline:  "Set new password"
+    New Password (strength bar)
+    Confirm Password
+    [Update Password] button
+
+  On success: auto-redirect to /auth/login with toast "Password updated ✓"
+
+─── /auth/verify ────────────────────────────────────────────────────────────────
+
+  States:
+    Loading:  Spinner + "Verifying your account..."
+    Success:  ✓ icon (green) + "Account verified!" + "Continue shopping →"
+    Error:    ✗ icon (red) + "Link expired or invalid" + "Resend verification"
+
+
+================================================================================
+  PHASE F — CUSTOMER ACCOUNT SYSTEM
+================================================================================
+
+─── LAYOUT: /account/* ──────────────────────────────────────────────────────────
+
+  Desktop:  Fixed left sidebar (240px) + scrollable main content
+  Mobile:   No sidebar — hamburger opens bottom sheet with nav links
+
+  Sidebar nav items:
+    [Avatar + Name + email]
+    ─────────────────────
+    Overview
+    My Orders
+    Wishlist (badge: count)
+    My Addresses
+    Profile Settings
+    Account Settings
+    ─────────────────────
+    [Sign Out]
+
+─── /account (Overview) ─────────────────────────────────────────────────────────
+
+  Sections:
+    1. Welcome banner: "Hey Arjun 👋 You have 2 active orders"
+    2. Stats row: [Total Orders] [Total Spent] [Wishlist Items] [Reward Points]
+    3. Recent Orders: last 3 orders, status chip, "View All"
+    4. Recently Viewed: last 4 products
+    5. Sport Profile: "Your top sport: Cricket" with personalized suggestions
+
+─── /account/orders ─────────────────────────────────────────────────────────────
+
+  Table columns:  Order ID | Date | Items | Total | Status | Action
+  Status chips:   Processing (orange) | Shipped (blue) | Delivered (green) | Cancelled (red)
+  Filter tabs:    All | Active | Delivered | Cancelled
+  Search:         Search by Order ID or product name
+
+  Empty state:
+    Icon:     Shopping bag (outline)
+    Headline: "No orders yet"
+    Body:     "When you place your first order, it'll show up here."
+    CTA:      [Start Shopping →]
+
+─── /account/orders/[id] (Order Detail) ─────────────────────────────────────────
+
+  Sections:
+    1. Order header: Order #TRB-20260601-001 | Placed: 1 Jun 2026
+    2. Status pipeline: [Placed ✓] → [Confirmed ✓] → [Packed] → [Shipped] → [Delivered]
+    3. Items list with images, sizes, quantities, prices
+    4. Delivery address block
+    5. Payment summary (subtotal, shipping, discount, total)
+    6. Payment method used
+    7. Actions: [Download Invoice] [Track Order] [Request Return]
+
+─── /account/wishlist ───────────────────────────────────────────────────────────
+
+  Layout:     Product grid (same as PLP), 4-col desktop, 2-col mobile
+
+  Card additions:
+    - "Remove from wishlist" X button top-right
+    - "Move to cart" button on hover
+    - Stock status indicator ("Low Stock")
+    - Price change indicator ("Price dropped ₹200 ↓")
+
+  Empty state:
+    Icon:     Heart (outline, pulsing)
+    Headline: "Your wishlist is empty"
+    Body:     "Save items you love and come back to them later."
+    CTA:      [Explore Sports Gear →]
+
+─── /account/addresses ──────────────────────────────────────────────────────────
+
+  Layout:     Grid of address cards (2-col desktop, 1-col mobile)
+
+  Address card:
+    - Name, phone, full address
+    - "HOME" / "OFFICE" / "OTHER" tag
+    - Default badge (starred)
+    - Actions: [Edit] [Delete] [Set as Default]
+
+  Add button:  [+ Add New Address] — opens modal
+
+  Modal — Add/Edit Address:
+    Full Name | Phone Number
+    Address Line 1 | Line 2
+    City | State (dropdown) | PIN Code
+    Address Type: Home / Office / Other
+    [✓] Set as default
+    [Save Address] button
+
+─── /account/profile ────────────────────────────────────────────────────────────
+
+  Sections:
+    1. Avatar upload (click to change, Cloudinary)
+    2. Personal info form: Name, Email (readonly), Phone, DOB, Gender
+    3. Sport preferences: Multi-select (Cricket, Football, Gym, Running...)
+    4. [Save Changes] button
+
+  Feedback: Inline field-level validation, toast on save
+
+
+================================================================================
+  PHASE G — ADMIN PANEL 2.0
+================================================================================
+
+─── /admin/analytics ────────────────────────────────────────────────────────────
+
+  KPI Cards (top row, 4-col):
+    Revenue Today | Revenue MTD | Revenue YTD | Projected Month
+
+  KPI Cards (second row, 4-col):
+    Total Orders Today | Avg Order Value | Conversion Rate | Cart Abandonment %
+
+  Charts:
+    - Revenue Line Chart (7d / 30d / 90d / 1y toggle)
+    - Orders Bar Chart (daily, same toggle)
+    - Revenue by Sport Category (pie)
+    - Hourly orders heatmap (7×24 grid)
+
+  Tables:
+    - Top Products by Revenue (last 30d)
+    - Top Categories by Orders
+
+─── /admin/inventory ────────────────────────────────────────────────────────────
+
+  KPI Cards:  Total SKUs | Out of Stock | Low Stock (<10) | Overstock (>200)
+
+  Table columns:
+    Product | SKU | Category | Stock | Reorder Point | Last Restocked | Status | Actions
+
+  Status chips:  In Stock (green) | Low Stock (amber) | Out of Stock (red)
+
+  Filters:  Category | Status | Supplier
+  Bulk actions: Adjust Stock | Reorder | Archive
+
+  Drawer — Stock Adjustment:
+    Product info
+    Current stock input
+    Reason dropdown: Restock / Damage / Return / Correction
+    Notes textarea
+    [Save Adjustment] button
+
+─── /admin/coupons ──────────────────────────────────────────────────────────────
+
+  KPI Cards:  Active Coupons | Total Redeemed | Revenue Impact | Avg Discount %
+
+  Table columns:
+    Code | Type | Value | Min Order | Used / Limit | Expiry | Status | Actions
+
+  Coupon types:  Flat ₹ | Percentage % | Free Shipping | First Order
+
+  Drawer — Create/Edit Coupon:
+    Code (auto-generate button)
+    Discount Type + Value
+    Minimum Order Value
+    Usage Limit (total + per user)
+    Applicable categories (multi-select)
+    Valid from / Valid until
+    [Active] toggle
+    [Save Coupon]
+
+─── /admin/marketing ────────────────────────────────────────────────────────────
+
+  Tabs:  Announcements | Email Campaigns | Push Notifications | Banners
+
+  Announcements tab:
+    - Reorder announcement bar messages
+    - Add / edit / delete messages
+    - Toggle active
+
+  Email tab:
+    - Campaign list (name, status, sent count, open rate)
+    - [Create Campaign] opens drawer with: subject, body (rich text), segment filter
+
+─── /admin/reviews ──────────────────────────────────────────────────────────────
+
+  KPI Cards:  Avg Rating | Pending Approval | Total Reviews | 5-Star Count
+
+  Filter tabs:  All | Pending | Approved | Rejected | Flagged
+
+  Table columns:
+    Customer | Product | Rating | Review Text (truncated) | Date | Status | Actions
+
+  Actions per row:
+    Approve | Reject | Flag | Reply
+
+  Bulk: Approve All Pending
+
+─── /admin/suppliers ────────────────────────────────────────────────────────────
+
+  KPI Cards:  Total Suppliers | Active | Products Sourced | Pending POs
+
+  Table columns:
+    Supplier Name | Contact | Location | Products | Lead Time | Rating | Status
+
+  Drawer — Supplier Profile:
+    Business name, contact, email, phone, GST
+    Product categories supplied
+    Lead time, MOQ, payment terms
+    Documents (upload GST cert, agreement)
+    Notes
+
+─── /admin/returns ──────────────────────────────────────────────────────────────
+
+  KPI Cards:  Return Rate % | Pending Requests | Approved | Refunded ₹
+
+  Table columns:
+    Return ID | Order ID | Customer | Product | Reason | Requested | Status | Actions
+
+  Reasons:  Wrong size | Defective | Wrong item | Changed mind | Other
+
+  Drawer — Return Request:
+    Order and item detail
+    Customer reason
+    Customer-uploaded photos
+    Decision: Approve / Reject / Partial refund
+    Refund amount input
+    Refund method: Original payment / Store credit
+    [Process Return] button
+
+─── /admin/support ──────────────────────────────────────────────────────────────
+
+  KPI Cards:  Open Tickets | Avg Response Time | Resolved Today | CSAT Score
+
+  Filter tabs:  Open | In Progress | Waiting | Resolved | Closed
+
+  Table columns:
+    Ticket # | Customer | Subject | Category | Priority | Assigned | Updated | Status
+
+  Priority chips:  Urgent (red) | High (orange) | Normal (blue) | Low (gray)
+
+  Drawer — Ticket Detail:
+    Full conversation thread
+    Reply box (rich text)
+    Internal note tab
+    Status changer
+    Priority changer
+    Assign to agent
+    Link to order
+
+─── /admin/profit ───────────────────────────────────────────────────────────────
+
+  KPI Cards:  Gross Profit | Net Profit | Profit Margin % | Cost of Goods
+
+  Charts:
+    - Profit vs Revenue line chart
+    - Margin by category bar chart
+    - Cost breakdown donut (COGS / Shipping / Marketing / Returns)
+
+  Table:
+    Product | Revenue | COGS | Gross Profit | Margin % | Orders
+
+─── /admin/settings ─────────────────────────────────────────────────────────────
+
+  Tabs:
+    General | Shipping | Payments | Notifications | Team | Integrations | Danger Zone
+
+  General: Store name, tagline, logo upload, timezone, currency, GST number
+
+  Shipping: Free shipping threshold, zones and rates, courier partners
+
+  Payments: Razorpay keys (masked), enabled methods, COD toggle, GST invoice
+
+  Notifications: Email/SMS/WhatsApp triggers (order, shipping, returns)
+
+  Team: Admin users list, invite by email, role assignment (Admin / Manager / Support)
+
+  Integrations: Google Analytics ID, Facebook Pixel, Hotjar, Cloudinary
+
+  Danger Zone: Export data, Reset demo data, Delete account
+
+
+================================================================================
+  PHASE H — COMPLETE PRISMA DATABASE SCHEMA
+================================================================================
+
+File: prisma/schema.prisma
+
+────────────────────────────────────────────────────────────────────────────────
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── ENUMS ──────────────────────────────────────────────────────────────────
+
+enum Role {
+  CUSTOMER
+  ADMIN
+  MANAGER
+  SUPPORT
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  PACKED
+  SHIPPED
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+  RETURN_REQUESTED
+  RETURNED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+enum PaymentMethod {
+  UPI
+  CARD
+  NET_BANKING
+  WALLET
+  COD
+  RAZORPAY
+}
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  OUT_OF_STOCK
+  ARCHIVED
+}
+
+enum CouponType {
+  FLAT
+  PERCENTAGE
+  FREE_SHIPPING
+  FIRST_ORDER
+}
+
+enum ReturnStatus {
+  REQUESTED
+  APPROVED
+  REJECTED
+  PICKED_UP
+  REFUNDED
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING_CUSTOMER
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum AddressType {
+  HOME
+  OFFICE
+  OTHER
+}
+
+enum Sport {
+  CRICKET
+  FOOTBALL
+  GYM
+  RUNNING
+  BADMINTON
+  TENNIS
+  SWIMMING
+  COMBAT
+  CYCLING
+  OTHER
+}
+
+// ─── USER & AUTH ─────────────────────────────────────────────────────────────
+
+model User {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  emailVerified   DateTime?
+  phone           String?   @unique
+  phoneVerified   DateTime?
+  name            String?
+  firstName       String?
+  lastName        String?
+  avatar          String?   // Cloudinary URL
+  role            Role      @default(CUSTOMER)
+  dateOfBirth     DateTime?
+  gender          String?
+  gstin           String?
+  sportPrefs      Sport[]
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime? // soft delete
+
+  accounts        Account[]
+  sessions        Session[]
+  addresses       Address[]
+  orders          Order[]
+  reviews         Review[]
+  wishlistItems   WishlistItem[]
+  cartItems       CartItem[]
+  supportTickets  SupportTicket[]
+  returnRequests  ReturnRequest[]
+
+  @@index([email])
+  @@index([phone])
+  @@index([role])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ─── ADDRESSES ───────────────────────────────────────────────────────────────
+
+model Address {
+  id         String      @id @default(cuid())
+  userId     String
+  type       AddressType @default(HOME)
+  isDefault  Boolean     @default(false)
+  firstName  String
+  lastName   String
+  phone      String
+  line1      String
+  line2      String?
+  city       String
+  state      String
+  pincode    String
+  country    String      @default("IN")
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders     Order[]
+
+  @@index([userId])
+}
+
+// ─── PRODUCTS ────────────────────────────────────────────────────────────────
+
+model Category {
+  id          String     @id @default(cuid())
+  name        String
+  slug        String     @unique
+  sport       Sport?
+  description String?
+  image       String?
+  parentId    String?
+  sortOrder   Int        @default(0)
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  parent      Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children    Category[] @relation("CategoryTree")
+  products    Product[]
+
+  @@index([slug])
+  @@index([parentId])
+}
+
+model Brand {
+  id        String    @id @default(cuid())
+  name      String
+  slug      String    @unique
+  logo      String?
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  products  Product[]
+
+  @@index([slug])
+}
+
+model Supplier {
+  id           String   @id @default(cuid())
+  name         String
+  contactName  String?
+  email        String?
+  phone        String?
+  address      String?
+  gstin        String?
+  leadTimeDays Int      @default(7)
+  moq          Int      @default(1)
+  paymentTerms String?
+  rating       Float?
+  notes        String?  @db.Text
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  products     Product[]
+
+  @@index([name])
+}
+
+model Product {
+  id               String        @id @default(cuid())
+  name             String
+  slug             String        @unique
+  tagline          String?
+  description      String        @db.Text
+  categoryId       String
+  brandId          String?
+  supplierId       String?
+  sport            Sport[]
+  status           ProductStatus @default(DRAFT)
+  price            Float
+  compareAtPrice   Float?
+  costPrice        Float?
+  sku              String?       @unique
+  barcode          String?
+  weight           Float?
+  metaTitle        String?
+  metaDescription  String?
+  tags             String[]
+  isFeatured       Boolean       @default(false)
+  isTrending       Boolean       @default(false)
+  isNewArrival     Boolean       @default(false)
+  rating           Float?        @default(0)
+  reviewCount      Int           @default(0)
+  totalSold        Int           @default(0)
+  viewCount        Int           @default(0)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  deletedAt        DateTime?
+
+  category         Category      @relation(fields: [categoryId], references: [id])
+  brand            Brand?        @relation(fields: [brandId], references: [id])
+  supplier         Supplier?     @relation(fields: [supplierId], references: [id])
+  variants         ProductVariant[]
+  images           ProductImage[]
+  reviews          Review[]
+  wishlistItems    WishlistItem[]
+  cartItems        CartItem[]
+  orderItems       OrderItem[]
+
+  @@index([slug])
+  @@index([categoryId])
+  @@index([status])
+  @@index([isTrending])
+  @@index([totalSold])
+  @@index([createdAt])
+}
+
+model ProductVariant {
+  id          String  @id @default(cuid())
+  productId   String
+  size        String?
+  color       String?
+  colorHex    String?
+  sku         String? @unique
+  price       Float?
+  stock       Int     @default(0)
+  reorderAt   Int     @default(5)
+  image       String?
+  isActive    Boolean @default(true)
+
+  product     Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  cartItems   CartItem[]
+  orderItems  OrderItem[]
+
+  @@index([productId])
+  @@index([sku])
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  url       String
+  alt       String?
+  sortOrder Int     @default(0)
+  isPrimary Boolean @default(false)
+
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+}
+
+// ─── WISHLIST ─────────────────────────────────────────────────────────────────
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([userId])
+}
+
+// ─── CART ─────────────────────────────────────────────────────────────────────
+
+model CartItem {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  variantId String?
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant   ProductVariant? @relation(fields: [variantId], references: [id])
+
+  @@unique([userId, productId, variantId])
+  @@index([userId])
+}
+
+// ─── COUPONS ─────────────────────────────────────────────────────────────────
+
+model Coupon {
+  id              String     @id @default(cuid())
+  code            String     @unique
+  type            CouponType
+  value           Float
+  minOrderAmount  Float?
+  maxDiscount     Float?
+  usageLimit      Int?
+  usageLimitPerUser Int?
+  usedCount       Int        @default(0)
+  applicableSports Sport[]
+  isActive        Boolean    @default(true)
+  startsAt        DateTime   @default(now())
+  expiresAt       DateTime?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  orders          Order[]
+
+  @@index([code])
+  @@index([isActive])
+}
+
+// ─── ORDERS ──────────────────────────────────────────────────────────────────
+
+model Order {
+  id              String        @id @default(cuid())
+  orderNumber     String        @unique @default(cuid())
+  userId          String?
+  guestEmail      String?
+  guestPhone      String?
+  addressId       String?
+  couponId        String?
+  status          OrderStatus   @default(PENDING)
+  paymentStatus   PaymentStatus @default(PENDING)
+  paymentMethod   PaymentMethod?
+  razorpayOrderId String?
+  razorpayPaymentId String?
+  subtotal        Float
+  shippingCost    Float         @default(0)
+  discount        Float         @default(0)
+  tax             Float         @default(0)
+  total           Float
+  notes           String?
+  gstInvoice      Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  user            User?         @relation(fields: [userId], references: [id])
+  address         Address?      @relation(fields: [addressId], references: [id])
+  coupon          Coupon?       @relation(fields: [couponId], references: [id])
+  items           OrderItem[]
+  shipments       Shipment[]
+  returnRequests  ReturnRequest[]
+
+  @@index([userId])
+  @@index([orderNumber])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id          String  @id @default(cuid())
+  orderId     String
+  productId   String
+  variantId   String?
+  productName String
+  variantName String?
+  image       String?
+  quantity    Int
+  price       Float
+  costPrice   Float?
+  total       Float
+
+  order       Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product     Product        @relation(fields: [productId], references: [id])
+  variant     ProductVariant? @relation(fields: [variantId], references: [id])
+  returnItems ReturnRequest[]
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+// ─── SHIPMENTS ────────────────────────────────────────────────────────────────
+
+model Shipment {
+  id             String   @id @default(cuid())
+  orderId        String
+  courier        String?
+  trackingNumber String?
+  trackingUrl    String?
+  shippedAt      DateTime?
+  expectedAt     DateTime?
+  deliveredAt    DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  order          Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+}
+
+// ─── REVIEWS ─────────────────────────────────────────────────────────────────
+
+model Review {
+  id         String   @id @default(cuid())
+  productId  String
+  userId     String
+  rating     Int
+  title      String?
+  body       String   @db.Text
+  images     String[]
+  isVerified Boolean  @default(false)
+  isApproved Boolean  @default(false)
+  isFlagged  Boolean  @default(false)
+  helpfulCount Int    @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([productId])
+  @@index([isApproved])
+}
+
+// ─── SUPPORT ─────────────────────────────────────────────────────────────────
+
+model SupportTicket {
+  id         String         @id @default(cuid())
+  ticketNumber String       @unique @default(cuid())
+  userId     String
+  orderId    String?
+  subject    String
+  category   String?
+  priority   TicketPriority @default(NORMAL)
+  status     TicketStatus   @default(OPEN)
+  assignedTo String?
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  user       User           @relation(fields: [userId], references: [id])
+  messages   TicketMessage[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+model TicketMessage {
+  id        String   @id @default(cuid())
+  ticketId  String
+  senderId  String
+  isInternal Boolean @default(false)
+  body      String   @db.Text
+  createdAt DateTime @default(now())
+
+  ticket    SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+}
+
+// ─── RETURNS ─────────────────────────────────────────────────────────────────
+
+model ReturnRequest {
+  id            String       @id @default(cuid())
+  returnNumber  String       @unique @default(cuid())
+  orderId       String
+  userId        String
+  orderItemId   String
+  reason        String
+  description   String?      @db.Text
+  images        String[]
+  status        ReturnStatus @default(REQUESTED)
+  refundAmount  Float?
+  refundMethod  String?
+  resolvedAt    DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  order         Order        @relation(fields: [orderId], references: [id])
+  user          User         @relation(fields: [userId], references: [id])
+  orderItem     OrderItem    @relation(fields: [orderItemId], references: [id])
+
+  @@index([orderId])
+  @@index([userId])
+  @@index([status])
+}
+
+// ─── NEWSLETTER ───────────────────────────────────────────────────────────────
+
+model NewsletterSubscriber {
+  id         String   @id @default(cuid())
+  email      String   @unique
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  @@index([email])
+}
+
+
+================================================================================
+  PHASE I — API ARCHITECTURE
+================================================================================
+
+─── FOLDER STRUCTURE ────────────────────────────────────────────────────────────
+
+store/app/api/
+├── auth/
+│   └── [...nextauth]/route.ts        Auth.js handler
+│
+├── products/
+│   ├── route.ts                      GET (list, filter, search, paginate)
+│   ├── trending/route.ts             GET trending products
+│   ├── [slug]/
+│   │   ├── route.ts                  GET product by slug
+│   │   └── reviews/route.ts          GET reviews for product
+│
+├── categories/
+│   └── route.ts                      GET category tree
+│
+├── cart/
+│   └── route.ts                      GET, POST, PATCH, DELETE (server cart)
+│
+├── wishlist/
+│   └── route.ts                      GET, POST, DELETE
+│
+├── orders/
+│   ├── route.ts                      GET (user's orders), POST (create order)
+│   └── [id]/route.ts                 GET order detail
+│
+├── checkout/
+│   ├── validate-coupon/route.ts      POST — validate coupon code
+│   └── create-payment/route.ts       POST — create Razorpay order
+│
+├── reviews/
+│   └── route.ts                      POST new review
+│
+├── addresses/
+│   ├── route.ts                      GET all, POST create
+│   └── [id]/route.ts                 PATCH, DELETE
+│
+├── newsletter/
+│   └── route.ts                      POST subscribe
+│
+├── upload/
+│   └── route.ts                      POST Cloudinary signed upload
+│
+└── webhooks/
+    └── razorpay/route.ts             POST payment webhook
+
+admin/app/api/
+├── admin/products/
+│   ├── route.ts                      GET (paginated), POST create
+│   └── [id]/route.ts                 GET, PATCH, DELETE
+│
+├── admin/orders/
+│   ├── route.ts                      GET all orders (admin view)
+│   └── [id]/
+│       ├── route.ts                  GET, PATCH status
+│       └── shipment/route.ts         POST create shipment
+│
+├── admin/customers/route.ts          GET customers
+├── admin/analytics/route.ts          GET analytics aggregations
+├── admin/inventory/route.ts          GET, PATCH stock
+├── admin/coupons/
+│   ├── route.ts                      GET, POST
+│   └── [id]/route.ts                 PATCH, DELETE
+├── admin/reviews/
+│   └── [id]/route.ts                 PATCH (approve/reject/flag)
+├── admin/returns/
+│   └── [id]/route.ts                 PATCH (approve/reject/refund)
+└── admin/upload/route.ts             POST Cloudinary signed upload
+
+─── ROUTE HANDLER PATTERNS ─────────────────────────────────────────────────────
+
+Every route handler follows this pattern:
+
+  import { NextRequest, NextResponse } from "next/server"
+  import { auth } from "@/lib/auth"
+  import { db } from "@/lib/db"
+  import { z } from "zod"
+
+  export async function GET(req: NextRequest) {
+    try {
+      const session = await auth()
+      // if route requires auth: if (!session) return unauthorized()
+
+      const { searchParams } = req.nextUrl
+      // parse + validate params with zod
+
+      const data = await db.model.findMany({ ... })
+      return NextResponse.json({ data }, { status: 200 })
+    } catch (err) {
+      return NextResponse.json(
+        { error: "Internal server error" },
+        { status: 500 }
+      )
+    }
+  }
+
+─── ERROR HANDLING ──────────────────────────────────────────────────────────────
+
+  lib/api.ts — shared response helpers:
+
+  success(data, status = 200)      → { data, timestamp }
+  error(message, status, code)     → { error: { message, code }, timestamp }
+  unauthorized()                   → error("Unauthorized", 401, "UNAUTHORIZED")
+  forbidden()                      → error("Forbidden", 403, "FORBIDDEN")
+  notFound(entity)                 → error(`${entity} not found`, 404, "NOT_FOUND")
+  validationError(issues)          → error("Validation failed", 422, "VALIDATION_ERROR")
+
+─── SECURITY STRATEGY ───────────────────────────────────────────────────────────
+
+  1. Auth.js session on every protected route
+  2. Role check (ADMIN / MANAGER) on all /api/admin/* routes
+  3. Input validation via Zod on every POST/PATCH
+  4. SQL injection: Prisma parameterized queries (automatic)
+  5. CORS: restricted to own domains only
+  6. Webhook verification: Razorpay HMAC signature check
+  7. Cloudinary: signed uploads only (no unsigned upload key exposed)
+  8. Rate limiting: Upstash Redis + @upstash/ratelimit
+     — Auth endpoints: 10 req / minute per IP
+     — API endpoints: 100 req / minute per user
+
+─── RATE LIMITING ───────────────────────────────────────────────────────────────
+
+  middleware.ts handles rate limiting before route handlers:
+
+  import { Ratelimit } from "@upstash/ratelimit"
+  import { Redis } from "@upstash/redis"
+
+  const ratelimit = new Ratelimit({
+    redis: Redis.fromEnv(),
+    limiter: Ratelimit.slidingWindow(100, "1 m"),
+  })
+
+─── LOGGING STRATEGY ────────────────────────────────────────────────────────────
+
+  Use: pino (structured JSON logging)
+
+  Log levels:
+    info  — successful operations (order created, payment confirmed)
+    warn  — suspicious activity (multiple failed auth, coupon abuse)
+    error — exceptions, DB errors, payment failures
+
+  All logs include: timestamp, userId, orderId, route, duration
+
+
+================================================================================
+  PHASE J — PRODUCTION DEPLOYMENT
+================================================================================
+
+─── ENVIRONMENT VARIABLES (.env) ────────────────────────────────────────────────
+
+  # Database
+  DATABASE_URL="postgresql://user:pass@host:5432/tryby_sports?sslmode=require"
+
+  # Auth.js
+  NEXTAUTH_URL="https://trybysports.in"
+  NEXTAUTH_SECRET="<generate: openssl rand -base64 32>"
+
+  # OAuth
+  GOOGLE_CLIENT_ID=""
+  GOOGLE_CLIENT_SECRET=""
+
+  # Razorpay
+  RAZORPAY_KEY_ID=""
+  RAZORPAY_KEY_SECRET=""
+  NEXT_PUBLIC_RAZORPAY_KEY_ID=""
+
+  # Cloudinary
+  NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=""
+  CLOUDINARY_API_KEY=""
+  CLOUDINARY_API_SECRET=""
+
+  # Upstash Redis (rate limiting)
+  UPSTASH_REDIS_REST_URL=""
+  UPSTASH_REDIS_REST_TOKEN=""
+
+  # Email (Resend)
+  RESEND_API_KEY=""
+  FROM_EMAIL="noreply@trybysports.in"
+
+  # App
+  NEXT_PUBLIC_APP_URL="https://trybysports.in"
+  NEXT_PUBLIC_ADMIN_URL="https://admin.trybysports.in"
+
+─── VERCEL SETUP ────────────────────────────────────────────────────────────────
+
+  Project: trybysports-store   → trybysports.in
+  Project: trybysports-admin   → admin.trybysports.in
+
+  Settings per project:
+    Framework:       Next.js
+    Root Directory:  store/  (or admin/)
+    Build command:   prisma generate && next build
+    Install command: npm install
+
+  vercel.json (store):
+  {
+    "rewrites": [{ "source": "/(.*)", "destination": "/" }],
+    "headers": [
+      {
+        "source": "/api/(.*)",
+        "headers": [
+          { "key": "X-Content-Type-Options", "value": "nosniff" },
+          { "key": "X-Frame-Options", "value": "DENY" }
+        ]
+      }
+    ]
+  }
+
+─── POSTGRESQL SETUP (Supabase or Neon) ─────────────────────────────────────────
+
+  Recommended: Neon (serverless Postgres, Vercel partner)
+
+  Steps:
+  1. Create project at neon.tech
+  2. Copy connection string to DATABASE_URL
+  3. npx prisma migrate deploy
+  4. npx prisma db seed (load initial categories, admin user)
+
+─── PRISMA SETUP ────────────────────────────────────────────────────────────────
+
+  # Install
+  npm install prisma @prisma/client
+  npx prisma init
+
+  # After schema changes
+  npx prisma migrate dev --name "init"
+  npx prisma generate
+
+  # Seed
+  npx prisma db seed
+
+─── CLOUDINARY SETUP ────────────────────────────────────────────────────────────
+
+  1. Create account at cloudinary.com
+  2. Create upload preset "tryby-sports-products" (signed, folder: products/)
+  3. Create upload preset "tryby-sports-avatars" (signed, folder: avatars/)
+  4. Add API keys to .env
+
+─── RAZORPAY INTEGRATION ────────────────────────────────────────────────────────
+
+  1. Create account at razorpay.com
+  2. Enable: UPI, Cards, NetBanking, Wallets, COD
+  3. Add webhook: https://trybysports.in/api/webhooks/razorpay
+  4. Webhook events: payment.captured, payment.failed, refund.created
+  5. HMAC webhook signature verification required
+
+  Flow:
+    Client: clicks Pay →
+    Server: POST /api/checkout/create-payment → Razorpay creates order →
+    Client: Razorpay checkout modal opens with order_id →
+    Client: Payment completes → razorpay_payment_id, razorpay_signature returned →
+    Server: /api/webhooks/razorpay verifies signature → updates order status
+
+─── AUTH.JS (NextAuth v5) SETUP ─────────────────────────────────────────────────
+
+  lib/auth.ts:
+
+  import NextAuth from "next-auth"
+  import Google from "next-auth/providers/google"
+  import Credentials from "next-auth/providers/credentials"
+  import { PrismaAdapter } from "@auth/prisma-adapter"
+  import { db } from "@/lib/db"
+
+  export const { handlers, signIn, signOut, auth } = NextAuth({
+    adapter: PrismaAdapter(db),
+    providers: [
+      Google({
+        clientId: process.env.GOOGLE_CLIENT_ID!,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      }),
+      Credentials({ ... })
+    ],
+    callbacks: {
+      session({ session, user }) {
+        session.user.id = user.id
+        session.user.role = user.role
+        return session
+      }
+    }
+  })
+
+  middleware.ts:
+
+  export { auth as middleware } from "@/lib/auth"
+  export const config = {
+    matcher: ["/account/:path*", "/orders/:path*", "/api/wishlist", "/api/cart"]
+  }
+
+
+================================================================================
+  FINAL OUTPUT — IMPLEMENTATION ROADMAP
+================================================================================
+
+─── WEEK 1: FOUNDATION ─────────────────────────────────────────────────────────
+
+  Day 1:
+    [ ] Rebrand TrendDrop → TRYBY SPORTS across all files
+    [ ] Install Barlow Condensed font
+    [ ] Update color tokens (red primary, sport palette)
+    [ ] Update navbar: logo, links, announcement messages
+    [ ] Update layout metadata
+
+  Day 2:
+    [ ] Set up PostgreSQL (Neon)
+    [ ] Install Prisma, write schema (Phase H above)
+    [ ] Run initial migration
+    [ ] Set up Auth.js with Google provider
+    [ ] Add middleware for protected routes
+
+  Day 3-4:
+    [ ] Rebuild mock.ts → real sports product data (15-20 products)
+    [ ] Add variant support to product type
+    [ ] Add size selector to PDP
+    [ ] Add sport category tags to all products
+
+  Day 5:
+    [ ] Build /auth/login page
+    [ ] Build /auth/register page
+    [ ] Build /auth/forgot-password page
+    [ ] Wire Google OAuth
+
+─── WEEK 2: CORE API ────────────────────────────────────────────────────────────
+
+  Day 6-7:
+    [ ] API: GET /api/products (with filter, sort, paginate)
+    [ ] API: GET /api/products/[slug]
+    [ ] API: GET /api/categories
+    [ ] Connect PLP + PDP to real API (remove mock dependency)
+
+  Day 8-9:
+    [ ] API: cart (server-side cart for logged-in users)
+    [ ] Merge localStorage cart on login
+    [ ] API: wishlist CRUD
+    [ ] Connect wishlist to account
+
+  Day 10:
+    [ ] API: POST /api/checkout/create-payment
+    [ ] Razorpay checkout modal integration
+    [ ] API: webhooks/razorpay — confirm payment
+    [ ] Order creation on payment success
+
+─── WEEK 3: ACCOUNT + ADMIN ─────────────────────────────────────────────────────
+
+  Day 11-12:
+    [ ] /account layout + sidebar
+    [ ] /account (overview)
+    [ ] /account/orders
+    [ ] /account/orders/[id]
+
+  Day 13:
+    [ ] /account/wishlist
+    [ ] /account/addresses (CRUD)
+    [ ] /account/profile (with Cloudinary avatar)
+
+  Day 14-15:
+    [ ] Admin: /admin/analytics — real charts from DB
+    [ ] Admin: /admin/inventory — real stock management
+    [ ] Admin: /admin/coupons — full CRUD
+    [ ] Admin: wire product/order form submissions to API
+
+─── WEEK 4: HOMEPAGE 2.0 + POLISH ──────────────────────────────────────────────
+
+  Day 16-17:
+    [ ] Homepage 2.0 rebuild (all 13 sections per Phase D)
+    [ ] Install Barlow Condensed, update hero headline
+    [ ] Add "Shop by Sport" category section
+    [ ] Add Instagram feed section (mock or real API)
+
+  Day 18-19:
+    [ ] Framer Motion upgrades across all pages
+    [ ] Order success page redesign
+    [ ] Search: add sport tag + size filtering
+    [ ] PLP: add quick-view drawer
+
+  Day 20:
+    [ ] Admin: complete remaining 6 pages (returns, support, reviews, etc.)
+    [ ] Error boundaries on all pages
+    [ ] Loading skeletons audit
+
+─── WEEK 5: DEPLOYMENT ──────────────────────────────────────────────────────────
+
+  Day 21-22:
+    [ ] Vercel project setup (store + admin)
+    [ ] Environment variables configured
+    [ ] Cloudinary upload presets
+    [ ] Razorpay webhook setup
+
+  Day 23:
+    [ ] Run prisma migrate deploy on production DB
+    [ ] Seed production with real products
+    [ ] Smoke test all flows end-to-end
+
+  Day 24:
+    [ ] Performance audit (Lighthouse)
+    [ ] Mobile testing on real devices
+    [ ] Fix any critical regressions
+
+  Day 25:
+    [ ] LAUNCH 🚀
+
+─── CODING PLAN — FILE CREATION ORDER ───────────────────────────────────────────
+
+  PHASE 1 — REBRAND (touch existing files):
+    store/store/cart.ts                    rename key "tryby-sports-cart"
+    store/app/layout.tsx                   update metadata
+    store/components/layout/navbar.tsx     TRYBY SPORTS branding + sport links
+    store/components/layout/footer.tsx     update links + brand
+    store/app/globals.css                  swap blue tokens for red sport palette
+
+  PHASE 2 — NEW PAGES (create from scratch):
+    store/app/auth/login/page.tsx
+    store/app/auth/register/page.tsx
+    store/app/auth/forgot-password/page.tsx
+    store/app/auth/reset-password/page.tsx
+    store/app/auth/verify/page.tsx
+    store/app/account/layout.tsx
+    store/app/account/page.tsx
+    store/app/account/orders/page.tsx
+    store/app/account/orders/[id]/page.tsx
+    store/app/account/wishlist/page.tsx
+    store/app/account/addresses/page.tsx
+    store/app/account/profile/page.tsx
+
+  PHASE 3 — API ROUTES:
+    store/app/api/products/route.ts
+    store/app/api/products/[slug]/route.ts
+    store/app/api/cart/route.ts
+    store/app/api/wishlist/route.ts
+    store/app/api/orders/route.ts
+    store/app/api/checkout/create-payment/route.ts
+    store/app/api/webhooks/razorpay/route.ts
+    store/lib/auth.ts
+    store/lib/db.ts
+    store/lib/razorpay.ts
+    store/lib/cloudinary.ts
+    store/middleware.ts
+    store/prisma/schema.prisma
+
+  PHASE 4 — ADMIN COMPLETION:
+    admin/app/admin/analytics/page.tsx
+    admin/app/admin/inventory/page.tsx
+    admin/app/admin/coupons/page.tsx
+    admin/app/admin/reviews/page.tsx
+    admin/app/admin/returns/page.tsx
+    admin/app/admin/support/page.tsx
+    admin/app/admin/suppliers/page.tsx
+    admin/app/admin/profit/page.tsx
+    admin/app/admin/marketing/page.tsx
+    admin/app/admin/settings/page.tsx
+
+================================================================================
+  SUMMARY
+================================================================================
+
+  Total estimated dev time:    ~25 working days (5 weeks, 1 developer)
+  Current completion:          ~20%
+  Target completion:           100% production-ready
+
+  Highest priority items:
+  1. Prisma schema + DB setup  (nothing works without this)
+  2. Auth.js                   (broken nav links, no user system)
+  3. Razorpay                  (payment UI exists, not wired)
+  4. Rebrand TrendDrop → TRYBY (every user sees wrong brand name)
+  5. Size/variant system       (sports products require this)
+
+================================================================================

@@ -1,0 +1,1192 @@
+================================================================================
+  TRYBY SPORTS — JERSEY PRODUCT CARD
+  Ultimate UI Specification
+  Version: 1.0 · Date: 2026-06-03
+================================================================================
+
+RESEARCH REFERENCES STUDIED:
+  Nike.com       — Full-bleed image, hover quick-add, wishlist top-right,
+                   clean price + member price duality, size swatch row
+  Adidas.com     — Overlapping badge stacking, color dot selectors,
+                   "Quick View" drawer on hover, sustainability tags
+  Fanatics.com   — Team badge prominence, official licensing banner,
+                   personalization CTA (add name/number), discount % pill
+  Kitbag.com     — Jersey hero with kit view toggle (front/back/detail),
+                   player name selector on card, league logo watermark,
+                   "Ships in 24h" urgency inline with price
+
+
+================================================================================
+  PART 1 — CARD ANATOMY
+================================================================================
+
+  The card has three layers:
+    Layer A — Image Zone        (top, portrait image + all overlays)
+    Layer B — Content Zone      (bottom, product details)
+    Layer C — Interaction Zone  (hover-revealed actions)
+
+  Card shell:
+    Background:    #0F0F0F (--color-surface)
+    Border:        1px solid #1C1C1C (--color-border)
+    Border-radius: 16px (--radius-xl)
+    Width:         260px carousel | 100% grid
+    Aspect-ratio of full card: natural height (image 4/5 + content auto)
+    overflow: hidden
+    position: relative
+    transition: border-color 200ms ease,
+                box-shadow 200ms ease,
+                transform 200ms ease
+
+  HOVER STATE (card-level):
+    border-color:  rgba(255, 59, 48, 0.25)
+    box-shadow:    0 0 0 1px rgba(255,59,48,0.20),
+                   0 8px 32px rgba(0,0,0,0.70),
+                   0 0 20px rgba(255,59,48,0.15)
+    transform:     translateY(-3px)
+
+
+================================================================================
+  PART 2 — LAYER A: IMAGE ZONE
+================================================================================
+
+  Container:
+    Aspect-ratio:  4/5 (portrait — optimized for jersey/apparel)
+    Background:    #141414 (--color-surface-raised)
+    border-radius: 16px 16px 0 0
+    overflow:      hidden
+    position:      relative
+
+  ── 2.1 JERSEY IMAGE ─────────────────────────────────────────────────────────
+
+    Display:    object-fit cover, full area
+    Alignment:  object-position: center top (shows collar + chest number clearly)
+    Alt text:   "[Team Name] [Season] Official Jersey — Front View"
+
+    HOVER:
+      transform: scale(1.05)
+      transition: transform 500ms cubic-bezier(0.25, 0.46, 0.45, 0.94)
+
+    VIEW TOGGLE (Front / Back):
+      On hover or tap: subtle crossfade between front and back image
+      Delay: 300ms after hover begins (prevents flash on quick pass-through)
+      Crossfade duration: 400ms ease
+      Both images stacked, back image opacity: 0 by default → 1 on trigger
+      Note: only activate if back image is supplied; degrade gracefully
+
+  ── 2.2 BADGES — Top Left Stack ─────────────────────────────────────────────
+
+    Position:  absolute, top: 12px, left: 12px
+    Layout:    flex column, gap: 4px
+    z-index:   20
+
+    Rules:
+      Show maximum 2 badges at once (priority order below)
+      Never stack more than 2 — it kills visual hierarchy
+
+    PRIORITY ORDER (show highest priority first):
+      1. SALE badge      — shown when discount ≥ 10%
+      2. LIMITED badge   — shown when stock ≤ 8 units
+      3. TRENDING badge  — shown when in trending list
+      4. NEW badge       — shown within 14 days of creation
+      5. OFFICIAL badge  — always shown on licensed jerseys (can pair with any above)
+
+    SALE BADGE:
+      Background: #FF3B30 (--color-red-500)
+      Text:       "–30% OFF" · Barlow Condensed 700 · 11px · UPPERCASE · white
+      Padding:    3px 8px
+      Radius:     4px (--radius-sm)
+      Min-width:  auto (text-fit)
+
+    LIMITED BADGE:
+      Background: rgba(255, 184, 0, 0.90) (gold tint)
+      Text:       "LIMITED" · same font · color: #000
+      Padding:    3px 8px
+      Radius:     4px
+      Pulse animation: opacity 1→0.7→1, 2s infinite ease-in-out
+
+    TRENDING BADGE:
+      Background: rgba(255, 59, 48, 0.90)
+      Text:       "🔥 TRENDING" · same font · white
+
+    NEW BADGE:
+      Background: rgba(0, 230, 118, 0.90) (--color-success)
+      Text:       "NEW" · same font · color: #000
+
+    OFFICIAL BADGE (Licensed Jerseys):
+      Background: rgba(255, 184, 0, 0.92) (--color-gold-500)
+      Text:       "✓ OFFICIAL" · same font · color: #000
+      Icon:       Shield-check 10px before text
+
+    ACCESSIBILITY:
+      Each badge: role="img" aria-label="[badge meaning]"
+      e.g. aria-label="30% discount" / "Limited stock" / "New arrival"
+
+  ── 2.3 TEAM BADGE — Top Right (Image Zone) ─────────────────────────────────
+
+    Position:  absolute, top: 12px, right: 56px
+               (leaves room for wishlist button at far right)
+    z-index:   20
+
+    Container:
+      Size:          36px × 36px
+      Background:    rgba(8, 8, 8, 0.75)
+      backdrop-filter: blur(8px)
+      border:        1px solid rgba(255, 255, 255, 0.10)
+      border-radius: 50%
+      padding:       4px
+      overflow:      hidden
+
+    Image inside:
+      Width: 100%, height: 100%
+      object-fit: contain
+      (Team crest/logo — circular crop)
+
+    Fallback (no crest image):
+      Background:    sport color (e.g. cricket green #4CAF50)
+      Text:          2-letter team abbrev · JetBrains Mono 700 · 12px · white · centered
+
+    TOOLTIP on hover/focus:
+      "[Team Name] · [League/Tournament]"
+      Style: glass-floating, radius-md, padding 4px 10px, Inter 12px white
+      Position: below badge, left-aligned
+
+  ── 2.4 WISHLIST BUTTON — Top Right ─────────────────────────────────────────
+
+    Position:  absolute, top: 12px, right: 12px
+    z-index:   20
+
+    Shape:     40px × 40px circle
+    Background: rgba(8, 8, 8, 0.72) glass
+               (backdrop-filter: blur(8px))
+    Border:    1px solid rgba(255, 255, 255, 0.08)
+
+    Icon:      Heart (Lucide), 18px
+      INACTIVE: color #A0A0A0 (stroke, not fill)
+      ACTIVE:   color #FF3B30 (fill + stroke match)
+
+    HOVER (inactive):
+      Background: rgba(255, 59, 48, 0.15)
+      Border-color: rgba(255, 59, 48, 0.30)
+      Icon stroke: #FF3B30
+
+    HOVER (active):
+      Background: rgba(255, 59, 48, 0.20)
+
+    TOGGLE ANIMATION:
+      On activate:   scale(1.0) → scale(1.35) → scale(1.0), 300ms spring
+                     (stiffness: 400, damping: 15)
+      Particle burst: 6 tiny red dots radiate outward, fade out 400ms
+                      (CSS-only: pseudo-elements or clip-path)
+
+    aria-label:  "Add [Product Name] to wishlist" (inactive)
+                 "Remove [Product Name] from wishlist" (active)
+    aria-pressed: true / false
+
+  ── 2.5 DISCOUNT CALLOUT — On Image, Bottom Right ───────────────────────────
+
+    Shown only when discount ≥ 15% (significant enough to show twice)
+
+    Position:  absolute, bottom: 56px, right: 12px
+               (sits just above the Quick Add bar)
+    z-index:   15
+
+    Shape:     Circle, 48px × 48px
+    Background: linear-gradient(135deg, #FF3B30 0%, #CC2F26 100%)
+    Box-shadow: 0 0 12px rgba(255, 59, 48, 0.45)
+
+    Text (two lines, centered):
+      Line 1: "–30%"  · JetBrains Mono 700 · 13px · white
+      Line 2: "OFF"   · Barlow Condensed 600 · 10px · white · UPPERCASE
+
+    Border:    2px solid rgba(255, 255, 255, 0.15)
+    Border-radius: 50%
+
+    HOVER: scale(1.08), 150ms ease
+
+    NOTE: Do NOT show if SALE badge is already visible in top-left.
+          Use one or the other, not both.
+
+  ── 2.6 QUICK VIEW TRIGGER — Bottom Image ───────────────────────────────────
+
+    Position:  absolute, bottom: 0, left: 0, right: 0
+    z-index:   18
+
+    DEFAULT STATE: opacity: 0, translateY(6px)
+    HOVER STATE:   opacity: 1, translateY(0)
+                   Transition: 200ms ease-out (delay 50ms after card hover)
+
+    Container:
+      Height:      38px
+      Background:  rgba(14, 14, 14, 0.90)
+                   backdrop-filter: blur(12px)
+      Border-top:  1px solid rgba(255, 255, 255, 0.06)
+
+    Layout:        flex row, center + space-between, padding: 0 14px
+    Left:          Eye icon (Lucide, 15px, #A0A0A0) + "Quick View" (Inter 500 12px #A0A0A0)
+    Right:         → chevron (12px, #606060)
+
+    HOVER on bar itself:
+      Background: rgba(20, 20, 20, 0.95)
+      Left text + icon → white
+      Right chevron → #A0A0A0
+      Transition: 150ms ease
+
+    ON CLICK: Opens Quick View drawer/modal (see Part 6)
+
+    MOBILE: Quick View trigger replaced by a tap on the image itself.
+            No hover state on mobile — tap image to open Quick View.
+
+
+================================================================================
+  PART 3 — LAYER B: CONTENT ZONE
+================================================================================
+
+  Container:
+    Padding:      14px 14px 16px 14px
+    Background:   transparent (inherits card #0F0F0F)
+    Position:     relative
+
+  ── 3.1 SPORT + LEAGUE EYEBROW ───────────────────────────────────────────────
+
+    Layout:  flex row, gap: 8px, align-items: center
+    Margin-bottom: 6px
+
+    SPORT TAG:
+      Text:          e.g. "🏏 CRICKET" · Barlow Condensed 600 · 11px · UPPERCASE · tracking: 0.08em
+      Color:         var(--color-sport-cricket) = #4CAF50
+                     var(--color-sport-football) = #2196F3
+                     (sport color from design system)
+      No background (inline text only — clean)
+
+    SEPARATOR DOT:
+      "·" · 11px · #3A3A3A
+
+    LEAGUE TAG:
+      Text:          e.g. "IPL 2026" · Inter 500 · 11px · #606060
+
+    PERSONALIZATION CTA (optional — jerseys only):
+      Far right of row (margin-left: auto)
+      Text: "+ Add Name" · Inter 500 · 11px · #FF3B30
+      Visible only if product supports name/number customization
+      HOVER: underline
+
+  ── 3.2 PRODUCT NAME ─────────────────────────────────────────────────────────
+
+    Text:          Inter 500 · 14px · #FFFFFF · line-height: 1.4
+    Display:       -webkit-box · -webkit-line-clamp: 2 · overflow: hidden
+    Margin:        4px 0 8px 0
+
+    Example: "Mumbai Indians Home Jersey 2026 — Official Edition"
+
+    HOVER (card hover):  color: #FFFFFF (stays white, no change needed)
+
+  ── 3.3 RATING ROW ───────────────────────────────────────────────────────────
+
+    Layout:        flex row, gap: 6px, align-items: center
+    Margin-bottom: 10px
+
+    STARS:
+      5 star icons (Lucide Star filled/half), 13px each
+      FILLED: color #FFB800 (--color-gold-500)
+      EMPTY:  color #2A2A2A
+      HALF:   left-half filled (SVG clip-path on half star)
+      Display to 1 decimal (e.g. 4.3 shows 4 filled + 1 half)
+
+    RATING NUMBER:
+      "4.8" · JetBrains Mono 500 · 12px · #FFFFFF
+
+    REVIEW COUNT:
+      "(2,341)" · Inter 400 · 11px · #606060
+
+    VERIFIED DOT (if >100 reviews):
+      Small green dot (6px, bg #00E676) + "Verified" · Inter 400 · 10px · #00E676
+      Left-margin: 4px from count
+
+    NO RATINGS STATE:
+      Replace entire row with: "Be the first to review" · Inter 400 · 11px · #606060
+
+  ── 3.4 SIZES AVAILABLE ROW ──────────────────────────────────────────────────
+
+    Purpose:    Reduces PDP visits. Buyer sees fit instantly.
+    Layout:     flex row, gap: 4px, flex-wrap: nowrap, overflow: hidden
+    Margin-bottom: 10px
+
+    LABEL (leading):
+      "Sizes:" · Inter 400 · 11px · #606060
+
+    SIZE CHIPS:
+      Each chip:     min-width: 32px, height: 24px, padding: 0 6px
+      Background:    transparent
+      Border:        1px solid #282828
+      Border-radius: 4px (--radius-sm)
+      Text:          Inter 500 · 11px · #A0A0A0 · UPPERCASE
+      Examples:      XS | S | M | L | XL | XXL
+
+      IN STOCK chip:
+        Border:  1px solid #282828
+        Text:    #A0A0A0
+
+      OUT OF STOCK chip:
+        Border:  1px solid #1C1C1C
+        Text:    #3A3A3A
+        Diagonal strikethrough line (CSS: linear-gradient overlay)
+
+      HOVER on IN STOCK chip:
+        Border: 1px solid rgba(255,59,48,0.40)
+        Text:   #FFFFFF
+        Transition: 120ms ease
+
+    OVERFLOW PILL:
+      If > 5 sizes: show 4 chips + "+2 more" pill
+      "+2 more" pill: bg #1A1A1A · border #282828 · text #606060 · 11px Inter 400
+
+    ACCESSIBILITY:
+      fieldset + legend "Available sizes for [product name]"
+      Each chip: role="button" aria-label="Size [S] available" / "Size [XL] out of stock"
+
+  ── 3.5 PRICE ROW ────────────────────────────────────────────────────────────
+
+    Layout:     flex row, align-items: center, gap: 8px, flex-wrap: wrap
+    Margin-bottom: 12px
+
+    CURRENT PRICE:
+      Text:      "₹1,299" · JetBrains Mono 700 · 20px · #FFFFFF
+      (Mono font makes prices feel precise and trustworthy — from Kitbag/Nike)
+
+    ORIGINAL PRICE (only when discounted):
+      Text:      "₹1,999" · JetBrains Mono 400 · 14px · #606060 · text-decoration: line-through
+
+    DISCOUNT PILL (only when discounted):
+      Text:      "–35%" · Inter 600 · 11px · white
+      Background: rgba(255, 59, 48, 0.18)
+      Border:    1px solid rgba(255, 59, 48, 0.30)
+      Padding:   2px 7px · radius-full
+
+    SAVINGS LABEL (below price row, optional — shows for discounts ≥ 20%):
+      "You save ₹700" · Inter 400 · 11px · #00E676 (green)
+      Margin-top: 2px
+
+    FREE DELIVERY INLINE TAG (optional — shows if product qualifies):
+      Right side of price row, pushed by margin-left: auto
+      "Free Delivery" · Inter 500 · 11px · #00E676
+      Small truck icon 11px before text
+
+  ── 3.6 SOCIAL PROOF TICKER ──────────────────────────────────────────────────
+
+    Shown on: Trending + Best Seller cards (not all cards — only where earned)
+    Layout:   flex row, gap: 6px, align-items: center
+    Margin-bottom: 0 (last item before CTA row)
+
+    SOLD TICKER:
+      Icon:  Flame (Lucide 12px, #FF9800)
+      Text:  "1,247 sold today" · Inter 500 · 11px · #FF9800
+
+    LOW STOCK WARNING (shown when stock ≤ 5, overrides sold ticker):
+      Icon:  AlertCircle (Lucide 12px, #FFB800)
+      Text:  "Only 3 left" · Inter 600 · 11px · #FFB800
+      Pulse: opacity 1→0.6→1, 1.5s infinite
+
+    STOCK BAR (below the ticker text, only on Trending cards):
+      Height:        3px
+      Width:         100% of content zone
+      Background:    #1C1C1C
+      Fill:          linear-gradient(90deg, #FF3B30 0%, #FFB800 100%)
+      Fill-width:    percentage of stock remaining (e.g. 30% = "3 of 10 left")
+      Border-radius: 2px
+      Margin-top:    4px
+
+  ── 3.7 ADD TO CART BUTTON ───────────────────────────────────────────────────
+
+    Position:   bottom of content zone, full-width
+    Height:     44px
+    Background: linear-gradient(135deg, #FF3B30 0%, #CC2F26 100%)
+    Text:       "ADD TO CART" · Barlow Condensed 700 · 14px · white · UPPERCASE · tracking: 0.06em
+    Border:     none
+    Radius:     8px (--radius-md)
+    Box-shadow: 0 2px 8px rgba(255, 59, 48, 0.40)
+
+    ICON:
+      ShoppingBag (Lucide) 16px · white · margin-right: 8px
+
+    HOVER:
+      Background: linear-gradient(135deg, #E5352B 0%, #B82822 100%)
+      box-shadow: 0 4px 16px rgba(255, 59, 48, 0.55)
+      transform:  translateY(-1px)
+      transition: all 150ms ease
+
+    PRESS / ACTIVE:
+      transform: scale(0.98) translateY(0)
+      box-shadow: none
+      transition: all 80ms ease
+
+    LOADING STATE (after click, while API call resolves):
+      Text replaced with spinner (3 dots pulsing or ring spinner)
+      opacity: 0.85
+      cursor: not-allowed
+      pointer-events: none
+
+    SUCCESS STATE (cart add confirmed):
+      Background: #00E676 (green)
+      Text: "✓ ADDED!" · same font
+      Duration: 1.8s then reverts to default
+      Animation: scale 1→1.04→1, 200ms
+
+    SIZE NOT SELECTED STATE (if product has sizes):
+      Background: #282828 (dimmed)
+      Text: "SELECT A SIZE" · same font style
+      Cursor: pointer (still clickable → triggers size selector)
+      Box-shadow: none
+
+      ON CLICK (when no size selected):
+        Size chips above pulse with ring highlight 2×, 400ms
+
+    OUT OF STOCK STATE:
+      Background: #1A1A1A
+      Text: "OUT OF STOCK" · same font · #606060
+      Cursor: not-allowed
+      Box-shadow: none
+
+      Below button: "Notify me when available →" link
+        Inter 500 · 12px · #2563EB (blue) · underline on hover
+
+    ACCESSIBILITY:
+      aria-label: "Add [Product Name], size [S], to cart"
+      aria-disabled: true when OOS
+      aria-busy: true during loading
+
+    TOUCH:
+      min-touch-target: 44px (already satisfied by height)
+      No double-tap requirement
+
+
+================================================================================
+  PART 4 — CARD VARIANTS
+================================================================================
+
+  ── 4.1 STANDARD CARD (Grid / Carousel) ──────────────────────────────────────
+
+    Everything in Parts 2 & 3 as described above.
+    This is the default. Used in: Trending, Best Sellers, Search Results.
+
+  ── 4.2 FEATURED JERSEY CARD ─────────────────────────────────────────────────
+
+    Used in: Featured Jerseys section (Section 4.4 in homepage spec)
+    Width:   240px carousel | fixed width
+    Aspect:  3/4 (taller — jersey-specific ratio from Fanatics/Kitbag)
+
+    DIFFERENCES vs Standard Card:
+      • Team badge size increased to 44px
+      • Team name rendered in content zone as primary text (replaces product name)
+        — Barlow Condensed 700 · 20px · UPPERCASE · white
+      • League/Tournament below team name
+        — Inter 400 · 12px · #A0A0A0
+      • "OFFICIAL" gold badge always visible (top-left, first in stack)
+      • No size chips shown (size selection deferred to PDP for jerseys with customization)
+      • Price row: smaller — JetBrains Mono 600 · 16px
+      • CTA: "Shop Kit" instead of "Add to Cart" (goes to PDP)
+      • Full-height image with gradient overlay bottom (transparent → #141414 80%)
+        — Content zone sits ON image (no white/grey split)
+
+  ── 4.3 BEST SELLER CARD ─────────────────────────────────────────────────────
+
+    Based on Standard Card with one addition:
+
+    RIBBON (top-left diagonal, ABOVE image):
+      Text:       "#1 BEST SELLER"
+      Background: linear-gradient(135deg, #FFD000 0%, #FF9800 100%)
+      Text color: #000 · Barlow Condensed 700 · 10px · UPPERCASE
+      Width:      120px (extends beyond card corner)
+      Transform:  rotate(-45deg), positioned at top-left corner
+      Box-shadow: 0 2px 8px rgba(255,184,0,0.35)
+
+    NOTE: Ribbon replaces the badge stack for best seller cards.
+          If product also has a sale, show ribbon (best seller wins hierarchy).
+
+  ── 4.4 COMPACT CARD (Mobile 2-col grid) ─────────────────────────────────────
+
+    Width:   calc(50vw - 20px) on mobile (two per row with 16px gap + 12px edge)
+    Aspect-ratio of image: 3/4 (shorter than desktop 4/5)
+
+    DIFFERENCES vs Standard Card:
+      • Sport/league eyebrow: hidden (save space)
+      • Discount callout circle on image: hidden
+      • Quick View bar: hidden (replaced by tap-to-view on image)
+      • Personalization CTA: hidden
+      • Sizes row: shows only 4 chips max, no "+N more" expansion
+      • Price row: JetBrains Mono 700 · 16px (slightly smaller)
+      • Add to Cart: height 40px, text "ADD" (shorter)
+      • Margin-bottom on content zone: 12px
+      • Rating row: 3 stars visible + number only (no review count on smallest)
+
+  ── 4.5 SKELETON CARD (Loading State) ────────────────────────────────────────
+
+    All placeholders use shimmer animation:
+    @keyframes shimmer {
+      0%   { background-position: -400px 0 }
+      100% { background-position: 400px 0 }
+    }
+    Background: linear-gradient(90deg, #141414 25%, #1C1C1C 50%, #141414 75%)
+    background-size: 800px 100%
+    animation: shimmer 1.4s infinite linear
+
+    BLOCKS:
+      Image area:    full 4/5 aspect rectangle, radius 16px 16px 0 0
+      Sport tag:     60px × 11px, radius 4px, margin 14px 0 6px 14px
+      Product name:  180px × 14px, radius 4px, margin 0 0 4px 14px
+                   + 120px × 14px (second line)
+      Rating row:    100px × 12px
+      Sizes row:     140px × 24px
+      Price:         80px × 20px
+      Button:        full-width × 44px, radius 8px, margin-top 12px
+
+
+================================================================================
+  PART 5 — QUICK VIEW MODAL SPECIFICATION
+================================================================================
+
+  Triggered by: "Quick View" bar click (desktop) | image tap (mobile)
+
+  OVERLAY:
+    Background: rgba(0, 0, 0, 0.80)
+    Backdrop-filter: blur(4px)
+    Position: fixed, full viewport
+    z-index: 200
+    Click outside → close
+
+  MODAL PANEL:
+    Width:         max-width: 900px (desktop) | 100% (mobile)
+    Max-height:    90vh
+    Background:    #141414
+    Border:        1px solid #282828
+    Border-radius: 20px (desktop) | 28px 28px 0 0 (mobile — bottom sheet)
+    Box-shadow:    0 0 0 1px rgba(255,255,255,0.06), 0 24px 80px rgba(0,0,0,0.95)
+
+    DESKTOP LAYOUT (two-column, 55/45 split):
+      Left (55%):  Image gallery
+      Right (45%): Product details + actions
+
+    MOBILE LAYOUT:
+      Bottom sheet slide-up
+      Full-width, image on top (3/4 ratio), content below (scrollable)
+
+  LEFT PANEL — IMAGE GALLERY:
+    Main image: full-height, object-fit: cover, radius-lg left corners
+    Below: thumbnail strip (5 thumbs, 60×60px each, gap 8px)
+      Active thumb: border 2px solid #FF3B30
+      Hover thumb: border 2px solid rgba(255,59,48,0.40)
+    View toggle: "Front / Back" pill tabs above main image
+      Active tab: bg #FF3B30 · text white
+      Inactive: bg #1A1A1A · text #A0A0A0
+
+  RIGHT PANEL — PRODUCT DETAILS:
+    Close button: top-right X icon, 36px, icon-button style
+    Padding: 28px
+
+    Sport + League eyebrow (same as card)
+    Team Badge (40px) + Team Name (Barlow Condensed 700 22px) inline row
+    Product name: Inter 500 · 16px · white · 3-line clamp
+    Rating row (full — stars + number + count + verified)
+    Personalization box (if applicable):
+      "Customize Your Jersey" — text field "Player Name" + number input
+      bg #1A1A1A, border #282828, radius 8px, padding 12px
+    Size selector:
+      Label: "Select Size" Inter 600 14px white
+      Chips: same style as content zone, but 36px height (larger touch target)
+      Size guide link: "Size Guide →" Inter 400 12px #FF3B30 below chips
+    Price row: larger — JetBrains Mono 700 · 24px
+    Savings label + free delivery tag
+    Stock ticker (if trending/low stock)
+    Add to Cart button: full-width, lg height (52px)
+    Wishlist row below button:
+      Heart icon + "Save to Wishlist" · Inter 400 · 13px · #A0A0A0
+      HOVER: color #FF3B30, heart fills
+    Trust strip:
+      "✓ Official Licensed · 🚚 Ships in 24h · 🔄 7-Day Return"
+      Inter 400 · 11px · #606060, flex row with separators
+    "View Full Details →" link at bottom (Inter 500 13px #2563EB)
+      → navigates to PDP and closes modal
+
+  ANIMATION:
+    DESKTOP:
+      Enter: scale(0.94) opacity(0) → scale(1) opacity(1), 250ms cubic-bezier(0.34,1.56,0.64,1)
+      Exit:  scale(0.96) opacity(0), 180ms ease-in
+    MOBILE:
+      Enter: translateY(100%) → translateY(0), 320ms cubic-bezier(0.32,0.72,0,1)
+      Exit:  translateY(100%), 250ms ease-in
+
+  ACCESSIBILITY:
+    role="dialog" aria-modal="true" aria-label="Quick view: [Product Name]"
+    Focus trap: focus cycles within modal
+    First focus: Close button (or first interactive element)
+    Escape key: closes modal
+    Overlay click: closes modal
+
+
+================================================================================
+  PART 6 — DESKTOP LAYOUT SPECIFICATIONS
+================================================================================
+
+  ── 6.1 GRID LAYOUT ──────────────────────────────────────────────────────────
+
+  Container: max-width 1280px, padding-x 48px, centered
+
+  TRENDING / NEW ARRIVALS GRID:
+    Columns:   4 (desktop 1024px+) | 3 (tablet 768–1023px) | 2 (mobile <768px)
+    Gap:       16px both axes
+    Card:      100% width of column
+
+  FEATURED JERSEY CAROUSEL:
+    Overflow:  hidden (outer) | overflow-x: auto, scroll-snap-type: x mandatory (inner)
+    Cards:     240px fixed width, scroll-snap-align: start
+    Gap:       16px
+    Show:      5 on 1440px+, 4 on 1280px, 3 on 1024px, 2.4 on tablet, 2.2 on mobile
+    Nav arrows: appear on hover (left/right, 44px circles, glass-floating style)
+    Scrollbar:  hidden (scrollbar-width: none)
+
+  BEST SELLERS CAROUSEL:
+    Same as featured jersey carousel mechanic
+    Cards: standard width (260px)
+
+  ── 6.2 CARD SIZING ──────────────────────────────────────────────────────────
+
+  Desktop grid (4-col, 1280px container, 48px side padding, 16px gaps):
+    Column width = (1280 - 96 - 48) / 4 = 285px approx
+    Card image height (4/5 ratio): ~356px
+    Content zone: ~160px
+    Total card height: ~516px
+
+  Carousel card:
+    Width: 260px fixed
+    Image height (4/5): 325px
+    Content zone: 160px
+    Total: ~485px
+
+  Compact mobile card (2-col, 375px viewport):
+    Width: (375 - 24 - 16 - 12) / 2 = ~161px
+    Image height (3/4): ~214px
+    Content zone: ~140px
+    Total: ~354px
+
+  ── 6.3 HOVER INTERACTION SEQUENCE ──────────────────────────────────────────
+
+  t=0ms:    mouse enters card
+  t=0ms:    card border-color transitions to red-tint
+  t=0ms:    card lifts (translateY: -3px)
+  t=0ms:    card box-shadow activates (glow-card-hover)
+  t=100ms:  image scale begins (0ms delay if fast hover, 100ms debounce)
+  t=200ms:  Quick View bar slides up (from image bottom)
+  t=300ms:  image crossfades to back view (if back image exists)
+  t=0ms:    wishlist button hover state applies
+
+  On mouse leave (any point):
+    All transitions reverse using the same duration
+    Image scale reverses: 400ms ease
+    Card lift reverses: 200ms ease
+    Quick View bar: fade out 150ms
+
+
+================================================================================
+  PART 7 — MOBILE LAYOUT SPECIFICATIONS
+================================================================================
+
+  ── 7.1 TOUCH INTERACTIONS ───────────────────────────────────────────────────
+
+  TAP on image:
+    Opens Quick View (bottom sheet)
+
+  TAP on wishlist button:
+    Immediate toggle (no hover state)
+    Haptic feedback: light impact (if supported via Vibration API — optional)
+
+  TAP on size chip:
+    Selects size
+    Selected chip: border #FF3B30, text white, bg rgba(255,59,48,0.08)
+
+  TAP on "Add to Cart":
+    If size not selected: size chips animate (scale pulse x2)
+    If size selected: normal add-to-cart flow
+
+  LONG PRESS on product image (optional enhancement):
+    After 500ms: opens Quick View (alternative to tap)
+    Visual feedback: image dims slightly at 300ms
+
+  ── 7.2 SWIPE IN CAROUSELS ───────────────────────────────────────────────────
+
+  scroll-snap-type: x mandatory
+  scroll-snap-align: start (each card snaps to left edge)
+  -webkit-overflow-scrolling: touch
+  Scrollbar: hidden on mobile
+  Overscroll-behavior-x: contain
+
+  PEEK EFFECT:
+    Last visible card shows ~40% of next card edge (creates scroll affordance)
+    Achieved by: right padding on container = card-width × 0.4
+
+  ── 7.3 BOTTOM SHEET (Quick View) ────────────────────────────────────────────
+
+  Handle bar:  32px × 4px, bg #282828, radius-full, centered, margin-top 12px
+  Max-height:  92vh
+  Overflow-y:  auto (content scrolls inside sheet)
+  Overscroll-behavior: contain
+
+  Swipe down:   closes sheet (swipe distance > 80px OR velocity > 0.5)
+  Drag handle:  always visible at top of sheet
+  Overlay tap:  closes sheet
+
+
+================================================================================
+  PART 8 — ANIMATION SPECIFICATIONS
+================================================================================
+
+  ── 8.1 CARD ENTRANCE (Scroll-triggered) ─────────────────────────────────────
+
+  Trigger: IntersectionObserver, threshold: 0.12, once: true
+
+  Default (grid cards):
+    initial: { opacity: 0, y: 20 }
+    animate: { opacity: 1, y: 0 }
+    transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }
+
+  Stagger (when 4+ cards enter together):
+    delayChildren: 0
+    staggerChildren: 0.06 (per card, so 4 cards = 0, 60ms, 120ms, 180ms)
+
+  ── 8.2 ADD TO CART INTERACTION ──────────────────────────────────────────────
+
+  Button press (normal path):
+    0ms:     scale(0.97), shadow disappears
+    80ms:    scale(1.0), loading spinner appears
+    ~400ms:  success → bg green, text "✓ ADDED!"
+    2200ms:  revert to default
+
+  Cart badge update (simultaneous):
+    Badge: scale(0.5) → scale(1.25) → scale(1.0), spring 300ms
+    (Implemented in navbar cart badge component)
+
+  "Fly to cart" animation (optional premium enhancement):
+    A mini copy of the product image "flies" from card position
+    to cart badge position via absolute positioned clone
+    Duration: 600ms, cubic-bezier arc path
+    Only on desktop, not mobile
+
+  ── 8.3 WISHLIST TOGGLE ──────────────────────────────────────────────────────
+
+  Add:
+    Heart: scale(1.0) → scale(1.4) → scale(1.0), spring (stiffness:350, damping:12)
+    Color: #A0A0A0 → #FF3B30 crossfade 200ms
+    Particles: 6 dots, radiate 16px outward, opacity 1→0, 300ms
+
+  Remove:
+    Heart: scale(1.0) → scale(0.8) → scale(1.0), 200ms ease
+    Color: #FF3B30 → #A0A0A0 crossfade 200ms
+
+  ── 8.4 SIZE CHIP SELECTION ──────────────────────────────────────────────────
+
+  Select:
+    Border-color: #282828 → #FF3B30, 120ms ease
+    Background: transparent → rgba(255,59,48,0.08), 120ms ease
+    Text: #A0A0A0 → #FFFFFF, 120ms ease
+    Scale: 1.0 → 1.05 → 1.0, 200ms spring (subtle)
+
+  Deselect:
+    All reverse, 100ms ease
+
+  ── 8.5 QUICK VIEW HOVER BAR ─────────────────────────────────────────────────
+
+  Appear:
+    opacity: 0 → 1, translateY(6px) → translateY(0)
+    duration: 200ms ease-out, delay: 60ms (prevents flash on fast cursor pass)
+
+  Disappear:
+    opacity: 1 → 0, translateY(0) → translateY(4px)
+    duration: 150ms ease-in, no delay
+
+  ── 8.6 REDUCED MOTION ───────────────────────────────────────────────────────
+
+  @media (prefers-reduced-motion: reduce):
+    All Framer Motion: duration: 0.01
+    No scale transforms on cards
+    No float animations
+    Shimmer reduced to static #141414
+    Cart fly-to-cart animation: disabled
+    Wishlist particles: disabled
+    Count-up: display final value immediately
+
+
+================================================================================
+  PART 9 — ACCESSIBILITY FULL SPECIFICATION
+================================================================================
+
+  ── 9.1 SEMANTIC STRUCTURE ───────────────────────────────────────────────────
+
+  Each card:
+    <article> element (self-contained product item)
+    aria-label="[Product Name], ₹1,299, 4.8 stars, sizes S M L available"
+
+  Image:
+    <img alt="[Team Name] [Product Name] — Front View" />
+    Back image (when loaded): alt="[Product Name] — Back View" aria-hidden on default
+
+  Product name:
+    <h3> within the article (h2 for section headline above grid)
+
+  Price:
+    aria-label="Price: ₹1,299, was ₹1,999, 35% off"
+
+  Stars:
+    aria-label="Rating: 4.8 out of 5 stars, 2,341 reviews"
+    Visual stars: aria-hidden="true" (stars are decorative)
+
+  ── 9.2 KEYBOARD NAVIGATION ──────────────────────────────────────────────────
+
+  Tab order within card:
+    1. Wishlist button
+    2. Product image / Quick View trigger
+    3. Size chips (left to right, arrow keys navigate between chips)
+    4. Add to Cart button
+
+  Grid tab order:
+    Left to right, top to bottom
+    After last card in row: moves to first card of next row
+
+  Carousel tab order:
+    Tab moves card to card (regardless of scroll position)
+    Arrow keys scroll carousel
+
+  ── 9.3 FOCUS STYLES ─────────────────────────────────────────────────────────
+
+  Default: outline: 2px solid #FF3B30, outline-offset: 3px
+  Rounded elements (buttons, chips): outline follows border-radius via
+    border-radius on outline (newer browsers) or box-shadow fallback:
+    box-shadow: 0 0 0 3px rgba(255, 59, 48, 0.50)
+
+  ── 9.4 COLOR CONTRAST ───────────────────────────────────────────────────────
+
+  White (#FFF) on card bg (#0F0F0F):        19:1 ✓ (AAA)
+  #A0A0A0 on #0F0F0F:                       5.2:1 ✓ (AA)
+  Red (#FF3B30) on #0F0F0F:                 4.5:1 ✓ (AA)
+  Gold (#FFB800) on #0F0F0F:               8.0:1 ✓ (AAA)
+  #606060 on #0F0F0F:                       3.5:1 — use for captions only (large text)
+  White on red button (--color-red-500):    4.6:1 ✓ (AA)
+  Black on gold badge:                     16:1 ✓ (AAA)
+
+  ── 9.5 SCREEN READER ────────────────────────────────────────────────────────
+
+  Badges: role="img" with descriptive aria-label
+  Wishlist: aria-pressed, aria-label with product name
+  Add to Cart: aria-label includes product name + selected size
+  Quick View: aria-haspopup="dialog"
+  Loading state: aria-busy="true" on button
+  Success state: role="status" aria-live="polite" announces "Added to cart"
+
+  Out of stock:
+    "Notify me" link: aria-label="Notify me when [Product Name] is back in stock"
+
+
+================================================================================
+  PART 10 — COMPLETE CARD WIREFRAMES (ASCII)
+================================================================================
+
+  ────────────────────────────────────────────
+  DESKTOP STANDARD CARD (260px wide)
+  ────────────────────────────────────────────
+
+  ┌──────────────────────────────────────────┐
+  │ ┌────────────────────────────────────┐   │  ← Card border #1C1C1C, radius 16px
+  │ │  [SALE –30%]          [⚽] [♡]    │   │  ← Image zone (4/5 ratio)
+  │ │                                    │   │
+  │ │                                    │   │
+  │ │          JERSEY PHOTO              │   │
+  │ │        (object-fit cover)          │   │
+  │ │       Front view default           │   │
+  │ │                                    │   │
+  │ │                            [–30%]  │   │  ← Discount circle (bottom-right image)
+  │ │                            circle  │   │
+  │ │ ╔══════════════════════════════╗   │   │  ← Quick View bar (hover-only)
+  │ │ ║  👁 Quick View            → ║   │   │
+  │ │ ╚══════════════════════════════╝   │   │
+  │ └────────────────────────────────────┘   │
+  │                                          │
+  │  🏏 CRICKET  ·  IPL 2026     + Add Name  │  ← Eyebrow row
+  │  Mumbai Indians Home Jersey 2026         │  ← Product name (2-line clamp)
+  │  Official Edition                        │
+  │  ★★★★½  4.8  (2,341) · ✓ Verified      │  ← Rating row
+  │                                          │
+  │  Sizes: [XS] [S] [M] [L] [XL] +1 more   │  ← Size chips
+  │                                          │
+  │  ₹1,299  ~~₹1,999~~  [–35%]             │  ← Price row
+  │  You save ₹700            Free Delivery  │
+  │                                          │
+  │  🔥 1,247 sold today                     │  ← Social proof ticker
+  │  ▓▓▓▓▓▓▒▒▒▒ (30% stock remaining)       │  ← Stock bar
+  │                                          │
+  │  ┌──────────────────────────────────┐    │  ← Add to Cart button
+  │  │  🛍  ADD TO CART                 │    │
+  │  └──────────────────────────────────┘    │
+  └──────────────────────────────────────────┘
+
+  HOVER STATE:
+  ┌──────────────────────────────────────────┐  ← border glows red
+  │ ┌────────────────────────────────────┐   │  (translateY -3px)
+  │ │         [jersey zoomed 1.05×]      │   │  ← image scale
+  │ │                                    │   │
+  │ │ ╔══════════════════════════════╗   │   │  ← Quick View revealed
+  │ │ ║  👁 Quick View            → ║   │   │
+  │ │ ╚══════════════════════════════╝   │   │
+  │ └────────────────────────────────────┘   │
+  │  … content unchanged …                   │
+  └──────────────────────────────────────────┘
+
+  ────────────────────────────────────────────
+  FEATURED JERSEY CARD (240px, 3/4 ratio)
+  ────────────────────────────────────────────
+
+  ┌────────────────────────────┐
+  │ ┌────────────────────────┐ │
+  │ │  [✓ OFFICIAL]          │ │  ← Gold badge top-left
+  │ │                        │ │
+  │ │     JERSEY PHOTO       │ │  ← Full-bleed image
+  │ │     (3/4 ratio)        │ │
+  │ │                        │ │
+  │ │                        │ │
+  │ │ ┌────────────────────┐ │ │  ← Gradient overlay bottom
+  │ │ │ [⚽] MANCHESTER     │ │ │  ← Team badge + name
+  │ │ │      CITY           │ │ │
+  │ │ │ Premier League 2026 │ │ │  ← League
+  │ │ │ ₹2,499              │ │ │  ← Price (small)
+  │ │ │ [  Shop Kit →  ]    │ │ │  ← CTA
+  │ │ └────────────────────┘ │ │
+  │ └────────────────────────┘ │
+  └────────────────────────────┘
+
+  ────────────────────────────────────────────
+  COMPACT MOBILE CARD (~161px wide)
+  ────────────────────────────────────────────
+
+  ┌──────────────────────┐
+  │ ┌──────────────────┐ │
+  │ │ [NEW]      [♡]  │ │  ← Reduced badge + wishlist
+  │ │                  │ │
+  │ │  JERSEY PHOTO    │ │  ← Image (3/4 ratio)
+  │ │                  │ │
+  │ │                  │ │
+  │ └──────────────────┘ │
+  │                      │
+  │ Product Name         │  ← 2-line clamp, 13px
+  │ Two lines max here   │
+  │ ★★★★★  4.8           │  ← Condensed rating
+  │ [S] [M] [L] [XL]    │  ← Size chips (smaller)
+  │ ₹1,299 ~~₹1,999~~   │  ← Price row (smaller)
+  │ 🔥 1.2k sold        │
+  │ ┌──────────────────┐ │
+  │ │    ADD           │ │  ← Short CTA text
+  │ └──────────────────┘ │
+  └──────────────────────┘
+
+  ────────────────────────────────────────────
+  QUICK VIEW MODAL — DESKTOP (900px)
+  ────────────────────────────────────────────
+
+  ╔════════════════════════════════════════════════════════════════╗
+  ║                                               [X close]        ║
+  ║  ┌──────────────────────────────┐  ┌────────────────────────┐ ║
+  ║  │   [Front] [Back] toggle      │  │ 🏏 CRICKET · IPL 2026  │ ║
+  ║  │                              │  │ [⚽ 44px] MUMBAI        │ ║
+  ║  │                              │  │ INDIANS                 │ ║
+  ║  │   MAIN JERSEY IMAGE          │  │ Official Home Jersey    │ ║
+  ║  │   (55% width, tall)          │  │ ★★★★½  4.8 (2,341)     │ ║
+  ║  │                              │  │                         │ ║
+  ║  │                              │  │ [Customize] name + no.  │ ║
+  ║  │                              │  │                         │ ║
+  ║  │                              │  │ Select Size:            │ ║
+  ║  │                              │  │ [XS][S][M][L][XL][XXL] │ ║
+  ║  │                              │  │ Size Guide →            │ ║
+  ║  │                              │  │                         │ ║
+  ║  │                              │  │ ₹1,299  ~~₹1,999~~     │ ║
+  ║  │                              │  │ [–35%]  You save ₹700  │ ║
+  ║  │                              │  │ 🔥 1,247 sold today     │ ║
+  ║  │                              │  │                         │ ║
+  ║  │ [img1][img2][img3][img4][img5]│  │ [  🛍  ADD TO CART  ]  │ ║
+  ║  └──────────────────────────────┘  │ ♡ Save to Wishlist      │ ║
+  ║                                    │ ✓ Official · 🚚 24h     │ ║
+  ║                                    │ View Full Details →      │ ║
+  ║                                    └────────────────────────┘ ║
+  ╚════════════════════════════════════════════════════════════════╝
+
+  ────────────────────────────────────────────
+  QUICK VIEW — MOBILE BOTTOM SHEET
+  ────────────────────────────────────────────
+
+  ┌─────────────────────────────────────┐
+  │                                     │  ← Page content (dimmed)
+  │                                     │
+  ╔═════════════════════════════════════╗  ← Sheet slides up
+  ║         ————  (drag handle)         ║
+  ║  ┌─────────────────────────────┐    ║
+  ║  │ [Front/Back] JERSEY IMAGE   │    ║
+  ║  │ (3/4 ratio, full width)     │    ║
+  ║  └─────────────────────────────┘    ║
+  ║  🏏 CRICKET · IPL 2026              ║
+  ║  MUMBAI INDIANS HOME JERSEY 2026    ║
+  ║  ★★★★½  4.8  (2,341 reviews)        ║
+  ║                                     ║
+  ║  Select Size:                       ║
+  ║  [XS] [S] [M] [L] [XL] [XXL]       ║
+  ║  Size Guide →                       ║
+  ║                                     ║
+  ║  ₹1,299  ~~₹1,999~~  [–35%]        ║
+  ║  You save ₹700     Free Delivery    ║
+  ║  🔥 1,247 sold today                ║
+  ║                                     ║
+  ║  ┌─────────────────────────────┐   ║
+  ║  │  🛍  ADD TO CART            │   ║
+  ║  └─────────────────────────────┘   ║
+  ║  ♡ Save to Wishlist                 ║
+  ║  ✓ Official · 🚚 Ships in 24h      ║
+  ║  View Full Details →                ║
+  ╚═════════════════════════════════════╝
+
+
+================================================================================
+  PART 11 — COMPONENT TOKEN REFERENCE
+================================================================================
+
+  All values map to design system tokens from TRYBY_SPORTS_HOMEPAGE_SPEC.txt
+
+  CARD CONTAINER:
+    --card-bg:              #0F0F0F
+    --card-border:          1px solid #1C1C1C
+    --card-radius:          16px
+    --card-shadow:          0 0 0 1px rgba(255,255,255,0.04), 0 4px 24px rgba(0,0,0,0.60)
+    --card-shadow-hover:    0 0 0 1px rgba(255,59,48,0.20), 0 8px 32px rgba(0,0,0,0.70), 0 0 20px rgba(255,59,48,0.15)
+    --card-transform-hover: translateY(-3px)
+
+  IMAGE ZONE:
+    --img-bg:               #141414
+    --img-scale-hover:      1.05
+    --img-transition:       transform 500ms cubic-bezier(0.25,0.46,0.45,0.94)
+
+  BADGES:
+    --badge-sale-bg:        #FF3B30
+    --badge-new-bg:         rgba(0,230,118,0.90)
+    --badge-official-bg:    rgba(255,184,0,0.92)
+    --badge-limited-bg:     rgba(255,184,0,0.90)
+    --badge-font:           Barlow Condensed 700 11px UPPERCASE
+    --badge-radius:         4px
+    --badge-padding:        3px 8px
+
+  WISHLIST:
+    --wishlist-size:        40px
+    --wishlist-bg:          rgba(8,8,8,0.72)
+    --wishlist-border:      1px solid rgba(255,255,255,0.08)
+    --wishlist-active-color: #FF3B30
+    --wishlist-inactive-color: #A0A0A0
+
+  TEAM BADGE:
+    --team-badge-size:      36px (standard) | 44px (featured card)
+    --team-badge-bg:        rgba(8,8,8,0.75)
+    --team-badge-radius:    50%
+
+  QUICK VIEW BAR:
+    --qv-height:            38px
+    --qv-bg:                rgba(14,14,14,0.90)
+    --qv-border-top:        1px solid rgba(255,255,255,0.06)
+    --qv-blur:              blur(12px)
+
+  PRICE:
+    --price-font:           JetBrains Mono 700 20px
+    --price-original-font:  JetBrains Mono 400 14px
+    --price-original-color: #606060
+    --price-discount-bg:    rgba(255,59,48,0.18)
+    --price-discount-border: 1px solid rgba(255,59,48,0.30)
+    --savings-color:        #00E676
+
+  SIZE CHIPS:
+    --size-height:          24px
+    --size-min-width:       32px
+    --size-padding:         0 6px
+    --size-border:          1px solid #282828
+    --size-radius:          4px
+    --size-active-border:   1px solid #FF3B30
+    --size-active-bg:       rgba(255,59,48,0.08)
+    --size-oos-color:       #3A3A3A
+
+  ADD TO CART:
+    --atc-height:           44px
+    --atc-bg:               linear-gradient(135deg, #FF3B30 0%, #CC2F26 100%)
+    --atc-font:             Barlow Condensed 700 14px UPPERCASE
+    --atc-shadow:           0 2px 8px rgba(255,59,48,0.40)
+    --atc-success-bg:       #00E676
+    --atc-oos-bg:           #1A1A1A
+    --atc-oos-color:        #606060
+
+  STOCK TICKER:
+    --ticker-color:         #FF9800
+    --stock-warning-color:  #FFB800
+    --stock-bar-bg:         #1C1C1C
+    --stock-bar-fill:       linear-gradient(90deg, #FF3B30, #FFB800)
+    --stock-bar-height:     3px
+
+  RATING:
+    --star-filled:          #FFB800
+    --star-empty:           #2A2A2A
+    --verified-color:       #00E676
+
+
+================================================================================
+  PART 12 — DECISION LOG (WHY THESE CHOICES)
+================================================================================
+
+  1. 4/5 ASPECT RATIO (image zone)
+     Nike, Adidas, Fanatics all use portrait ratios for apparel.
+     4/5 shows collar, chest print, and hem — the 3 zones buyers evaluate.
+     Wider (1/1) cuts off bottom; taller (2/3) wastes space. 4/5 is optimal.
+
+  2. TEAM BADGE ON IMAGE (not content zone)
+     Kitbag and Fanatics place crests on the product photo overlay.
+     It mirrors how a physical jersey looks — crest on chest.
+     Moves from generic card to jersey-specific identity immediately.
+
+  3. QUICK VIEW ON HOVER (not click)
+     Nike and Adidas use hover-reveal. Reduces PDP bounce rate.
+     On mobile, tap-to-view replaces hover (no hover on touch devices).
+     Fanatics uses a dedicated Quick View button — we use the full image
+     area as target for better touchability.
+
+  4. SIZE CHIPS IN CARD (not just PDP)
+     Reduces the most common friction point: "does this come in my size?"
+     Eliminates PDP visit just to discover OOS. Fanatics pioneered this.
+     Out-of-stock chips with strikethrough borrowed from Adidas.
+
+  5. MONOSPACE FONT FOR PRICE
+     JetBrains Mono for prices gives a "precision" feel — like a sports
+     scoreboard or a financial ticker. Differentiated from Inter body text.
+     Creates visual hierarchy without needing bold alone.
+
+  6. VIEW TOGGLE (Front/Back)
+     Kitbag's signature feature. Jersey buyers want to see the back
+     (number, player name area). Crossfade on hover is elegant — no
+     button to click, just dwell.
+
+  7. WISHLIST PARTICLE BURST
+     High-delight micro-interaction. Borrowed from Twitter's like button.
+     Reinforces save action. Skipped on reduced-motion preference.
+
+  8. CARD LIFT ON HOVER (translateY -3px)
+     3px chosen carefully — 2px feels imperceptible, 4px feels cheap.
+     Combined with glow shadow creates a "premium lift" used by Linear,
+     Stripe, and Raycast (brand references for this project).
+
+  9. DISCOUNT CIRCLE ON IMAGE vs BADGE IN STACK
+     Circle on image mimics a "price sticker" — tactile, physical.
+     Only shown for ≥15% discount so it feels earned, not generic.
+     Fanatics and Kitbag use this pattern on sale items.
+
+  10. SOLD TICKER + STOCK BAR (Trending only)
+      Not on every card — only where earned. Overuse of scarcity signals
+      destroys trust. Applied only to cards in Trending/Best Seller context
+      where the data is real. Stock bar gives visual percentage urgency.
+
+================================================================================
+  END OF SPECIFICATION
+================================================================================

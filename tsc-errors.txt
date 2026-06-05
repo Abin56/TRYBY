@@ -1,0 +1,91 @@
+﻿app/account/orders/[id]/page.tsx(132,79): error TS2345: Argument of type 'Decimal' is not assignable to parameter of type 'string | number'.
+app/account/orders/[id]/page.tsx(143,88): error TS2345: Argument of type 'Decimal' is not assignable to parameter of type 'string | number'.
+app/account/orders/[id]/page.tsx(146,197): error TS2345: Argument of type 'Decimal' is not assignable to parameter of type 'string | number'.
+app/account/orders/[id]/page.tsx(151,71): error TS2345: Argument of type 'Decimal' is not assignable to parameter of type 'string | number'.
+app/account/orders/[id]/page.tsx(155,49): error TS2345: Argument of type 'Decimal' is not assignable to parameter of type 'string | number'.
+app/admin/_components/sidebar.tsx(120,62): error TS2339: Property 'exact' does not exist on type '{ href: string; icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; label: string; exact: boolean; } | { ...; }'.
+app/admin/categories/page.tsx(38,47): error TS1308: 'await' expressions are only allowed within async functions and at the top levels of modules.
+app/admin/content/announcements/page.tsx(36,42): error TS1308: 'await' expressions are only allowed within async functions and at the top levels of modules.
+app/admin/content/page.tsx(248,24): error TS2339: Property 'imageUrl' does not exist on type 'Category'.
+app/admin/content/page.tsx(249,35): error TS2339: Property 'imageUrl' does not exist on type 'Category'.
+app/api/admin/announcements/[id]/route.ts(28,3): error TS2554: Expected 2 arguments, but got 1.
+app/api/admin/announcements/[id]/route.ts(39,3): error TS2554: Expected 2 arguments, but got 1.
+app/api/admin/content/[key]/route.ts(17,19): error TS2554: Expected 2-3 arguments, but got 1.
+app/api/admin/content/[key]/route.ts(72,3): error TS2554: Expected 2 arguments, but got 1.
+app/api/admin/content/[key]/route.ts(73,3): error TS2554: Expected 2 arguments, but got 1.
+app/api/admin/content/[key]/route.ts(102,3): error TS2554: Expected 2 arguments, but got 1.
+app/api/admin/content/[key]/route.ts(103,3): error TS2554: Expected 2 arguments, but got 1.
+app/api/admin/content/blocks/[id]/route.ts(13,16): error TS2554: Expected 2-3 arguments, but got 1.
+app/api/admin/content/blocks/[id]/route.ts(40,5): error TS2322: Type '{ publishedAt?: Date | undefined; status?: "DRAFT" | "PUBLISHED" | undefined; title?: string | undefined; isActive?: boolean | undefined; sortOrder?: number | undefined; data?: Record<...> | undefined; }' is not assignable to type '(Without<ContentBlockUpdateInput, ContentBlockUncheckedUpdateInput> & ContentBlockUncheckedUpdateInput) | (Without<...> & ContentBlockUpdateInput)'.
+  Type '{ publishedAt?: Date | undefined; status?: "DRAFT" | "PUBLISHED" | undefined; title?: string | undefined; isActive?: boolean | undefined; sortOrder?: number | undefined; data?: Record<...> | undefined; }' is not assignable to type 'Without<ContentBlockUncheckedUpdateInput, ContentBlockUpdateInput> & ContentBlockUpdateInput'.
+    Type '{ publishedAt?: Date | undefined; status?: "DRAFT" | "PUBLISHED" | undefined; title?: string | undefined; isActive?: boolean | undefined; sortOrder?: number | undefined; data?: Record<...> | undefined; }' is not assignable to type 'ContentBlockUpdateInput'.
+      Types of property 'data' are incompatible.
+        Type 'Record<string | number | symbol, unknown> | undefined' is not assignable to type 'JsonNull | InputJsonValue | undefined'.
+          Type 'Record<string | number | symbol, unknown>' is not assignable to type 'JsonNull | InputJsonValue | undefined'.
+            Type 'Record<string | number | symbol, unknown>' is missing the following properties from type 'readonly (InputJsonValue | null)[]': length, concat, join, slice, and 26 more.
+app/api/admin/content/blocks/route.ts(15,16): error TS2554: Expected 2-3 arguments, but got 1.
+app/api/admin/content/blocks/route.ts(44,5): error TS2322: Type '{ status: "DRAFT" | "PUBLISHED"; publishedAt: Date | null; type: "HERO_BANNER" | "TRUST_BAR" | "CATEGORY_GRID" | "TRENDING_PRODUCTS" | "PROMO_BANNER" | "FOOTER_COLUMN" | "STATIC_PAGE"; ... 4 more ...; title?: string | undefined; }' is not assignable to type '(Without<ContentBlockCreateInput, ContentBlockUncheckedCreateInput> & ContentBlockUncheckedCreateInput) | (Without<...> & ContentBlockCreateInput)'.
+  Type '{ status: "DRAFT" | "PUBLISHED"; publishedAt: Date | null; type: "HERO_BANNER" | "TRUST_BAR" | "CATEGORY_GRID" | "TRENDING_PRODUCTS" | "PROMO_BANNER" | "FOOTER_COLUMN" | "STATIC_PAGE"; ... 4 more ...; title?: string | undefined; }' is not assignable to type 'Without<ContentBlockUncheckedCreateInput, ContentBlockCreateInput> & ContentBlockCreateInput'.
+    Type '{ status: "DRAFT" | "PUBLISHED"; publishedAt: Date | null; type: "HERO_BANNER" | "TRUST_BAR" | "CATEGORY_GRID" | "TRENDING_PRODUCTS" | "PROMO_BANNER" | "FOOTER_COLUMN" | "STATIC_PAGE"; ... 4 more ...; title?: string | undefined; }' is not assignable to type 'ContentBlockCreateInput'.
+      Types of property 'data' are incompatible.
+        Type 'Record<string | number | symbol, unknown>' is not assignable to type 'JsonNull | InputJsonValue'.
+          Type 'Record<string | number | symbol, unknown>' is missing the following properties from type 'readonly (InputJsonValue | null)[]': length, concat, join, slice, and 26 more.
+app/api/admin/content/route.ts(15,11): error TS2554: Expected 2-3 arguments, but got 1.
+app/api/admin/content/route.ts(47,52): error TS2322: Type '{ type: "HERO_BANNER" | "TRUST_BAR" | "CATEGORY_GRID" | "TRENDING_PRODUCTS" | "PROMO_BANNER" | "FOOTER_COLUMN" | "STATIC_PAGE"; key: string; isActive: boolean; sortOrder: number; data: Record<...>; title?: string | undefined; }' is not assignable to type '(Without<ContentBlockCreateInput, ContentBlockUncheckedCreateInput> & ContentBlockUncheckedCreateInput) | (Without<...> & ContentBlockCreateInput)'.
+  Type '{ type: "HERO_BANNER" | "TRUST_BAR" | "CATEGORY_GRID" | "TRENDING_PRODUCTS" | "PROMO_BANNER" | "FOOTER_COLUMN" | "STATIC_PAGE"; key: string; isActive: boolean; sortOrder: number; data: Record<...>; title?: string | undefined; }' is not assignable to type 'Without<ContentBlockUncheckedCreateInput, ContentBlockCreateInput> & ContentBlockCreateInput'.
+    Type '{ type: "HERO_BANNER" | "TRUST_BAR" | "CATEGORY_GRID" | "TRENDING_PRODUCTS" | "PROMO_BANNER" | "FOOTER_COLUMN" | "STATIC_PAGE"; key: string; isActive: boolean; sortOrder: number; data: Record<...>; title?: string | undefined; }' is not assignable to type 'ContentBlockCreateInput'.
+      Types of property 'data' are incompatible.
+        Type 'Record<string | number | symbol, unknown>' is not assignable to type 'JsonNull | InputJsonValue'.
+          Type 'Record<string | number | symbol, unknown>' is missing the following properties from type 'readonly (InputJsonValue | null)[]': length, concat, join, slice, and 26 more.
+app/api/admin/seo/route.ts(18,16): error TS2554: Expected 2-3 arguments, but got 1.
+app/api/supplier/activity/route.ts(20,12): error TS2339: Property 'supplierActivityLog' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+app/api/supplier/activity/route.ts(26,12): error TS2339: Property 'supplierActivityLog' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+app/api/supplier/payouts/route.ts(75,16): error TS2339: Property 'supplierActivityLog' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+app/api/supplier/products/route.ts(84,16): error TS2339: Property 'supplierActivityLog' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+app/api/supplier/profile/route.ts(39,16): error TS2339: Property 'supplierActivityLog' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+app/checkout/page.tsx(262,63): error TS2339: Property 'span2' does not exist on type '{ readonly label: "First Name *"; readonly id: "firstName"; readonly value: string; readonly set: Dispatch<SetStateAction<string>>; } | { readonly label: "Last Name *"; readonly id: "lastName"; readonly value: string; readonly set: Dispatch<...>; } | { ...; } | { ...; } | { ...; }'.
+app/checkout/page.tsx(262,70): error TS2339: Property 'type' does not exist on type '{ readonly label: "First Name *"; readonly id: "firstName"; readonly value: string; readonly set: Dispatch<SetStateAction<string>>; } | { readonly label: "Last Name *"; readonly id: "lastName"; readonly value: string; readonly set: Dispatch<...>; } | { ...; } | { ...; } | { ...; }'.
+app/products/[slug]/page.tsx(227,19): error TS2322: Type '{ x: number[]; transition: { duration: number; ease: string; }; } | {}' is not assignable to type 'boolean | TargetAndTransition | VariantLabels | LegacyAnimationControls | undefined'.
+  Type '{ x: number[]; transition: { duration: number; ease: string; }; }' is not assignable to type 'boolean | TargetAndTransition | VariantLabels | LegacyAnimationControls | undefined'.
+    Type '{ x: number[]; transition: { duration: number; ease: string; }; }' is not assignable to type 'TargetAndTransition'.
+      Type '{ x: number[]; transition: { duration: number; ease: string; }; }' is not assignable to type '{ transition?: Transition<any> | undefined; transitionEnd?: ResolvedValues$1 | undefined; }'.
+        Types of property 'transition' are incompatible.
+          Type '{ duration: number; ease: string; }' is not assignable to type 'Transition<any> | undefined'.
+            Type '{ duration: number; ease: string; }' is not assignable to type 'TransitionWithValueOverrides<any>'.
+              Type '{ duration: number; ease: string; }' is not assignable to type 'ValueAnimationTransition<any>'.
+                Types of property 'ease' are incompatible.
+                  Type 'string' is not assignable to type 'Easing | Easing[] | undefined'.
+app/products/[slug]/page.tsx(261,17): error TS2322: Type '{ x: number[]; transition: { duration: number; ease: string; }; } | {}' is not assignable to type 'boolean | TargetAndTransition | VariantLabels | LegacyAnimationControls | undefined'.
+  Type '{ x: number[]; transition: { duration: number; ease: string; }; }' is not assignable to type 'boolean | TargetAndTransition | VariantLabels | LegacyAnimationControls | undefined'.
+    Type '{ x: number[]; transition: { duration: number; ease: string; }; }' is not assignable to type 'TargetAndTransition'.
+      Type '{ x: number[]; transition: { duration: number; ease: string; }; }' is not assignable to type '{ transition?: Transition<any> | undefined; transitionEnd?: ResolvedValues$1 | undefined; }'.
+        Types of property 'transition' are incompatible.
+          Type '{ duration: number; ease: string; }' is not assignable to type 'Transition<any> | undefined'.
+            Type '{ duration: number; ease: string; }' is not assignable to type 'TransitionWithValueOverrides<any>'.
+              Type '{ duration: number; ease: string; }' is not assignable to type 'ValueAnimationTransition<any>'.
+                Types of property 'ease' are incompatible.
+                  Type 'string' is not assignable to type 'Easing | Easing[] | undefined'.
+app/products/[slug]/page.tsx(328,13): error TS2322: Type '{ x: number[]; transition: { duration: number; ease: string; }; } | {}' is not assignable to type 'boolean | TargetAndTransition | VariantLabels | LegacyAnimationControls | undefined'.
+  Type '{ x: number[]; transition: { duration: number; ease: string; }; }' is not assignable to type 'boolean | TargetAndTransition | VariantLabels | LegacyAnimationControls | undefined'.
+    Type '{ x: number[]; transition: { duration: number; ease: string; }; }' is not assignable to type 'TargetAndTransition'.
+      Type '{ x: number[]; transition: { duration: number; ease: string; }; }' is not assignable to type '{ transition?: Transition<any> | undefined; transitionEnd?: ResolvedValues$1 | undefined; }'.
+        Types of property 'transition' are incompatible.
+          Type '{ duration: number; ease: string; }' is not assignable to type 'Transition<any> | undefined'.
+            Type '{ duration: number; ease: string; }' is not assignable to type 'TransitionWithValueOverrides<any>'.
+              Type '{ duration: number; ease: string; }' is not assignable to type 'ValueAnimationTransition<any>'.
+                Types of property 'ease' are incompatible.
+                  Type 'string' is not assignable to type 'Easing | Easing[] | undefined'.
+app/products/[slug]/page.tsx(352,13): error TS2322: Type '{ x: number[]; transition: { duration: number; ease: string; }; } | {}' is not assignable to type 'boolean | TargetAndTransition | VariantLabels | LegacyAnimationControls | undefined'.
+  Type '{ x: number[]; transition: { duration: number; ease: string; }; }' is not assignable to type 'boolean | TargetAndTransition | VariantLabels | LegacyAnimationControls | undefined'.
+    Type '{ x: number[]; transition: { duration: number; ease: string; }; }' is not assignable to type 'TargetAndTransition'.
+      Type '{ x: number[]; transition: { duration: number; ease: string; }; }' is not assignable to type '{ transition?: Transition<any> | undefined; transitionEnd?: ResolvedValues$1 | undefined; }'.
+        Types of property 'transition' are incompatible.
+          Type '{ duration: number; ease: string; }' is not assignable to type 'Transition<any> | undefined'.
+            Type '{ duration: number; ease: string; }' is not assignable to type 'TransitionWithValueOverrides<any>'.
+              Type '{ duration: number; ease: string; }' is not assignable to type 'ValueAnimationTransition<any>'.
+                Types of property 'ease' are incompatible.
+                  Type 'string' is not assignable to type 'Easing | Easing[] | undefined'.
+lib/audit.ts(31,9): error TS2322: Type 'Record<string, unknown> | undefined' is not assignable to type 'InputJsonValue | NullableJsonNullValueInput | undefined'.
+  Type 'Record<string, unknown>' is not assignable to type 'InputJsonValue | NullableJsonNullValueInput | undefined'.
+    Type 'Record<string, unknown>' is missing the following properties from type 'readonly (InputJsonValue | null)[]': length, concat, join, slice, and 26 more.
+next.config.ts(7,3): error TS2353: Object literal may only specify known properties, and 'eslint' does not exist in type 'NextConfig'.

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<browserconfig>
+  <msapplication>
+    <tile>
+      <square70x70logo src="/brand/tryby-icon-64.png"/>
+      <square150x150logo src="/brand/tryby-icon-128.png"/>
+      <square310x310logo src="/brand/tryby-icon-256.png"/>
+      <wide310x150logo src="/brand/tryby-logo.png"/>
+      <TileColor>#0D0D0D</TileColor>
+    </tile>
+    <notification>
+      <polling-uri src="/notifications/tile.xml"/>
+      <frequency>30</frequency>
+      <cycle>1</cycle>
+    </notification>
+  </msapplication>
+</browserconfig>

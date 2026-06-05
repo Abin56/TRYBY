@@ -1,0 +1,534 @@
+@import "tailwindcss";
+
+/* ============================================================
+   TRYBY SPORTS — DESIGN TOKENS
+   Apple + Nike + Gymshark + Stripe aesthetic
+   ============================================================ */
+
+@theme inline {
+  /* ---------- Colors: Background & Surface ---------- */
+  --color-bg:              #FFFFFF;
+  --color-surface:         #FAFAFA;
+  --color-surface-raised:  #F5F5F7;
+  --color-surface-overlay: #F0F0F2;
+
+  /* ---------- Colors: Border ---------- */
+  --color-border:          #E5E7EB;
+  --color-border-subtle:   #F3F4F6;
+  --color-border-emphasis: #D1D5DB;
+
+  /* ---------- Colors: Primary — Performance Red ---------- */
+  --color-primary:         #FF3B30;
+  --color-primary-hover:   #E5352B;
+  --color-primary-active:  #CC2F25;
+  --color-primary-subtle:  rgba(255,59,48,0.08);
+  --color-primary-glow:    rgba(255,59,48,0.25);
+
+  /* ---------- Colors: Secondary — Electric Cyan ---------- */
+  --color-secondary:       #00C6FF;
+  --color-secondary-hover: #00A8D6;
+
+  /* ---------- Colors: Brand Gold ---------- */
+  --color-gold:            #FFB800;
+  --color-gold-subtle:     rgba(255,184,0,0.12);
+
+  /* ---------- Colors: Text ---------- */
+  --color-text:            #111827;
+  --color-text-secondary:  #374151;
+  --color-text-tertiary:   #6B7280;
+  --color-text-disabled:   #9CA3AF;
+  --color-text-inverse:    #FFFFFF;
+
+  /* ---------- Colors: Semantic ---------- */
+  --color-success:         #00E676;
+  --color-success-subtle:  rgba(0,230,118,0.08);
+  --color-warning:         #FFB800;
+  --color-warning-subtle:  rgba(255,184,0,0.08);
+  --color-error:           #FF3B30;
+  --color-error-subtle:    rgba(255,59,48,0.08);
+  --color-star:            #FFB800;
+
+  /* ---------- Sport Tag Colors ---------- */
+  --color-cricket:         #4CAF50;
+  --color-cricket-subtle:  rgba(76,175,80,0.12);
+  --color-football:        #2196F3;
+  --color-football-subtle: rgba(33,150,243,0.12);
+  --color-gym:             #FF3B30;
+  --color-gym-subtle:      rgba(255,59,48,0.12);
+  --color-running:         #FF9800;
+  --color-running-subtle:  rgba(255,152,0,0.12);
+  --color-recovery:        #9C27B0;
+  --color-recovery-subtle: rgba(156,39,176,0.12);
+
+  /* ---------- Typography ---------- */
+  /* --font-sans and --font-barlow are injected as CSS vars by next/font/google in layout.tsx */
+  --font-sans:     var(--font-sans, 'Inter', system-ui, -apple-system, sans-serif);
+  --font-display:  var(--font-barlow, 'Barlow Condensed', 'Inter', system-ui, sans-serif);
+  --font-mono:     'JetBrains Mono', 'Fira Code', monospace;
+
+  /* ---------- Border Radius ---------- */
+  --radius-none: 0;
+  --radius-sm:   4px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
+  --radius-2xl:  24px;
+  --radius-full: 9999px;
+
+  /* ---------- Shadows (white premium elevation) ---------- */
+  --shadow-sm:       0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md:       0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lg:       0 8px 24px rgba(0,0,0,0.10);
+  --shadow-xl:       0 16px 48px rgba(0,0,0,0.12);
+  --shadow-2xl:      0 24px 64px rgba(0,0,0,0.14);
+  --shadow-glow:     0 0 40px rgba(255,59,48,0.18);
+  --shadow-glow-sm:  0 0 16px rgba(255,59,48,0.12);
+  --shadow-card:     0 1px 0 rgba(255,255,255,0.8) inset, 0 4px 16px rgba(0,0,0,0.06);
+  --shadow-elevated: 0 0 0 1px rgba(0,0,0,0.06), 0 8px 32px rgba(0,0,0,0.10);
+}
+
+/* ============================================================
+   PANEL THEME — Admin & Supplier dashboards
+   Applied via data-theme="dark" | data-theme="light" on the
+   layout wrapper. All panel components read these CSS vars.
+   ============================================================ */
+
+[data-theme="dark"] {
+  --pt-bg:           #0D0D0D;
+  --pt-bg-alt:       #0F0F0F;
+  --pt-surface:      #1A1A1A;
+  --pt-surface-2:    #222222;
+  --pt-border:       rgba(255,255,255,0.07);
+  --pt-border-2:     rgba(255,255,255,0.10);
+  --pt-text:         #FFFFFF;
+  --pt-text-2:       rgba(255,255,255,0.70);
+  --pt-text-3:       rgba(255,255,255,0.40);
+  --pt-text-4:       rgba(255,255,255,0.25);
+  --pt-accent:       #F5C518;
+  --pt-accent-fg:    #0D0D0D;
+  --pt-hover:        rgba(255,255,255,0.06);
+  --pt-scrollbar:    rgba(255,255,255,0.10);
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  --pt-bg:           #F4F5F7;
+  --pt-bg-alt:       #ECEEF2;
+  --pt-surface:      #FFFFFF;
+  --pt-surface-2:    #F8F9FB;
+  --pt-border:       rgba(0,0,0,0.08);
+  --pt-border-2:     rgba(0,0,0,0.12);
+  --pt-text:         #0D0D0D;
+  --pt-text-2:       rgba(0,0,0,0.70);
+  --pt-text-3:       rgba(0,0,0,0.45);
+  --pt-text-4:       rgba(0,0,0,0.28);
+  --pt-accent:       #D4A800;
+  --pt-accent-fg:    #FFFFFF;
+  --pt-hover:        rgba(0,0,0,0.05);
+  --pt-scrollbar:    rgba(0,0,0,0.12);
+  color-scheme: light;
+}
+
+/* ── Light theme overrides ────────────────────────────────────────────────────
+   Strategy: override Tailwind utility classes + override the most common
+   inline-style color values used across admin/supplier pages.
+   This avoids touching 129 component files.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+/* Scrollbar */
+[data-theme="light"] ::-webkit-scrollbar-track { background: #ECEEF2; }
+[data-theme="light"] ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 9999px; }
+
+/* ── Tailwind text-white/* overrides ───────────────────────────────────────── */
+[data-theme="light"] .text-white         { color: #0D0D0D !important; }
+[data-theme="light"] .text-white\/80     { color: rgba(0,0,0,0.80) !important; }
+[data-theme="light"] .text-white\/70     { color: rgba(0,0,0,0.70) !important; }
+[data-theme="light"] .text-white\/60     { color: rgba(0,0,0,0.60) !important; }
+[data-theme="light"] .text-white\/50     { color: rgba(0,0,0,0.50) !important; }
+[data-theme="light"] .text-white\/45     { color: rgba(0,0,0,0.45) !important; }
+[data-theme="light"] .text-white\/40     { color: rgba(0,0,0,0.40) !important; }
+[data-theme="light"] .text-white\/35     { color: rgba(0,0,0,0.35) !important; }
+[data-theme="light"] .text-white\/30     { color: rgba(0,0,0,0.30) !important; }
+[data-theme="light"] .text-white\/25     { color: rgba(0,0,0,0.25) !important; }
+[data-theme="light"] .text-white\/20     { color: rgba(0,0,0,0.20) !important; }
+[data-theme="light"] .text-white\/15     { color: rgba(0,0,0,0.15) !important; }
+[data-theme="light"] .text-white\/10     { color: rgba(0,0,0,0.10) !important; }
+
+/* ── Tailwind bg-white/* overrides ─────────────────────────────────────────── */
+[data-theme="light"] .bg-white\/06       { background-color: rgba(0,0,0,0.05) !important; }
+[data-theme="light"] .bg-white\/08       { background-color: rgba(0,0,0,0.06) !important; }
+[data-theme="light"] .bg-white\/10       { background-color: rgba(0,0,0,0.08) !important; }
+[data-theme="light"] .hover\:bg-white\/06:hover { background-color: rgba(0,0,0,0.05) !important; }
+[data-theme="light"] .hover\:bg-white\/08:hover { background-color: rgba(0,0,0,0.06) !important; }
+[data-theme="light"] .hover\:text-white:hover   { color: #0D0D0D !important; }
+
+/* ── Tailwind divide/border-white/* overrides ──────────────────────────────── */
+[data-theme="light"] .divide-white\/04 > * + * { border-color: rgba(0,0,0,0.07) !important; }
+[data-theme="light"] .border-white\/06         { border-color: rgba(0,0,0,0.08) !important; }
+[data-theme="light"] .border-white\/10         { border-color: rgba(0,0,0,0.10) !important; }
+
+/* ── Sidebar & layout shell backgrounds ────────────────────────────────────── */
+/* These target inline style="#0D0D0D" / "#1A1A1A" / "#0F0F0F" via forced
+   recontextualisation — we override the component-level background using
+   a stronger cascade on the wrapper elements */
+
+[data-theme="light"] aside,
+[data-theme="light"] [data-panel-sidebar] {
+  background: #1E2028 !important;    /* keep sidebar dark in light mode — intentional contrast */
+  border-color: rgba(0,0,0,0.12) !important;
+}
+
+/* Main content area */
+[data-theme="light"] main {
+  background: #F4F5F7 !important;
+}
+
+/* ── Card/surface elements ─────────────────────────────────────────────────── */
+/* Target the most common rounded-2xl card pattern */
+[data-theme="light"] .rounded-2xl {
+  --card-bg: #FFFFFF;
+}
+
+/* Force all inline background:#1A1A1A cards to white */
+[data-theme="light"] [style*="background: \"#1A1A1A\""],
+[data-theme="light"] [style*="background: '#1A1A1A'"],
+[data-theme="light"] [style*='background: "#1A1A1A"'],
+[data-theme="light"] [style*="background:#1A1A1A"] {
+  background: #FFFFFF !important;
+  border-color: rgba(0,0,0,0.08) !important;
+}
+
+[data-theme="light"] [style*="background: \"#0D0D0D\""],
+[data-theme="light"] [style*='background: "#0D0D0D"'],
+[data-theme="light"] [style*="background:#0D0D0D"] {
+  background: #F4F5F7 !important;
+}
+
+[data-theme="light"] [style*="background: \"#0F0F0F\""],
+[data-theme="light"] [style*='background: "#0F0F0F"'],
+[data-theme="light"] [style*="background:#0F0F0F"] {
+  background: #ECEEF2 !important;
+}
+
+[data-theme="light"] [style*="background: \"#111111\""],
+[data-theme="light"] [style*='background: "#111111"'],
+[data-theme="light"] [style*="background: \"#141414\""],
+[data-theme="light"] [style*="background: \"#1C1C1C\""],
+[data-theme="light"] [style*="background: \"#222222\""],
+[data-theme="light"] [style*="background: \"#2A2A2A\""] {
+  background: #F8F9FB !important;
+}
+
+/* Border overrides */
+[data-theme="light"] [style*="borderColor: \"rgba(255,255,255,0.07)\""],
+[data-theme="light"] [style*="borderColor: \"rgba(255,255,255,0.06)\""],
+[data-theme="light"] [style*="borderColor: \"rgba(255,255,255,0.08)\""],
+[data-theme="light"] [style*="borderColor: \"rgba(255,255,255,0.10)\""],
+[data-theme="light"] [style*="borderColor: \"rgba(255,255,255,0.04)\""],
+[data-theme="light"] [style*="borderColor: \"rgba(255,255,255,0.05)\""] {
+  border-color: rgba(0,0,0,0.08) !important;
+}
+
+/* border-t / border-b inline */
+[data-theme="light"] [style*="border: \"1px solid rgba(255,255,255"],
+[data-theme="light"] [style*='border: "1px solid rgba(255,255,255'] {
+  border-color: rgba(0,0,0,0.08) !important;
+}
+
+/* ── Text color inline style overrides ─────────────────────────────────────── */
+[data-theme="light"] [style*="color: \"rgba(255,255,255,0.80)\""],
+[data-theme="light"] [style*="color: \"rgba(255,255,255,0.85)\""] { color: rgba(0,0,0,0.85) !important; }
+[data-theme="light"] [style*="color: \"rgba(255,255,255,0.70)\""] { color: rgba(0,0,0,0.70) !important; }
+[data-theme="light"] [style*="color: \"rgba(255,255,255,0.60)\""] { color: rgba(0,0,0,0.60) !important; }
+[data-theme="light"] [style*="color: \"rgba(255,255,255,0.50)\""] { color: rgba(0,0,0,0.50) !important; }
+[data-theme="light"] [style*="color: \"rgba(255,255,255,0.45)\""] { color: rgba(0,0,0,0.45) !important; }
+[data-theme="light"] [style*="color: \"rgba(255,255,255,0.40)\""] { color: rgba(0,0,0,0.40) !important; }
+[data-theme="light"] [style*="color: \"rgba(255,255,255,0.35)\""] { color: rgba(0,0,0,0.35) !important; }
+[data-theme="light"] [style*="color: \"rgba(255,255,255,0.30)\""] { color: rgba(0,0,0,0.30) !important; }
+[data-theme="light"] [style*="color: \"rgba(255,255,255,0.25)\""] { color: rgba(0,0,0,0.25) !important; }
+[data-theme="light"] [style*="color: \"rgba(255,255,255,0.22)\""] { color: rgba(0,0,0,0.22) !important; }
+[data-theme="light"] [style*="color: \"rgba(255,255,255,0.20)\""] { color: rgba(0,0,0,0.20) !important; }
+[data-theme="light"] [style*="color: \"rgba(255,255,255,0.15)\""] { color: rgba(0,0,0,0.15) !important; }
+[data-theme="light"] [style*="color: \"#FFFFFF\""]                { color: #0D0D0D !important; }
+[data-theme="light"] [style*="color: \"white\""]                  { color: #0D0D0D !important; }
+
+/* ── Surface/card inline background overrides ──────────────────────────────── */
+[data-theme="light"] [style*="background: \"rgba(255,255,255,0.02)\""],
+[data-theme="light"] [style*="background: \"rgba(255,255,255,0.03)\""],
+[data-theme="light"] [style*="background: \"rgba(255,255,255,0.04)\""],
+[data-theme="light"] [style*="background: \"rgba(255,255,255,0.05)\""],
+[data-theme="light"] [style*="background: \"rgba(255,255,255,0.06)\""],
+[data-theme="light"] [style*="background: \"rgba(255,255,255,0.08)\""],
+[data-theme="light"] [style*="background: \"rgba(255,255,255,0.10)\""] {
+  background: rgba(0,0,0,0.04) !important;
+}
+
+/* ── Input fields ───────────────────────────────────────────────────────────── */
+[data-theme="light"] input,
+[data-theme="light"] textarea,
+[data-theme="light"] select {
+  background: #FFFFFF !important;
+  color: #0D0D0D !important;
+  border-color: rgba(0,0,0,0.15) !important;
+}
+[data-theme="light"] input::placeholder,
+[data-theme="light"] textarea::placeholder { color: rgba(0,0,0,0.30) !important; }
+
+/* ── Table rows ─────────────────────────────────────────────────────────────── */
+[data-theme="light"] .hover\:bg-white\/02:hover { background-color: rgba(0,0,0,0.02) !important; }
+[data-theme="light"] tr { color: inherit; }
+
+/* ── Accent gold stays gold ─────────────────────────────────────────────────── */
+[data-theme="light"] .text-\[\#F5C518\]  { color: #D4A800 !important; }
+[data-theme="light"] .bg-\[\#F5C518\]    { background-color: #F5C518 !important; }
+[data-theme="light"] .border-\[\#F5C518\]{ border-color: #F5C518 !important; }
+
+/* ── Semantic colors stay vibrant ───────────────────────────────────────────── */
+[data-theme="light"] .text-\[\#4ADE80\]  { color: #16A34A !important; }
+[data-theme="light"] .text-\[\#F87171\]  { color: #DC2626 !important; }
+[data-theme="light"] .text-\[\#60A5FA\]  { color: #2563EB !important; }
+[data-theme="light"] .text-\[\#A78BFA\]  { color: #7C3AED !important; }
+[data-theme="light"] .text-\[\#F5C518\]  { color: #D4A800 !important; }
+
+/* ── Scrollbar-hide stays hidden ────────────────────────────────────────────── */
+[data-theme="light"] .scrollbar-hide::-webkit-scrollbar { display: none; }
+
+/* ============================================================
+   BASE STYLES
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background-color: #FFFFFF;
+  color: #111827;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+}
+
+::selection {
+  background-color: rgba(255, 59, 48, 0.12);
+  color: #111827;
+}
+
+:focus-visible {
+  outline: 2px solid #FF3B30;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ============================================================
+   TYPOGRAPHY UTILITIES
+   ============================================================ */
+
+.font-display { font-family: var(--font-display); }
+
+.hero-headline {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  line-height: 0.92;
+}
+
+.section-headline {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.05;
+}
+
+.sport-label {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+
+::-webkit-scrollbar        { width: 6px; height: 6px; }
+::-webkit-scrollbar-track  { background: #F5F5F7; }
+::-webkit-scrollbar-thumb  { background: #D1D5DB; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
+
+/* ============================================================
+   GRADIENT UTILITIES
+   ============================================================ */
+
+.gradient-text-sport {
+  background: linear-gradient(135deg, #FF3B30 0%, #FFB800 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-dark {
+  background: linear-gradient(135deg, #111827 0%, #374151 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* kept for backward compat */
+.gradient-text {
+  background: linear-gradient(135deg, #FF3B30 0%, #FFB800 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ============================================================
+   MARQUEE ANIMATION (CSS-only)
+   ============================================================ */
+
+@keyframes marquee-left {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+@keyframes marquee-right {
+  from { transform: translateX(-50%); }
+  to   { transform: translateX(0); }
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee-left 35s linear infinite;
+}
+.marquee-track-reverse {
+  display: flex;
+  width: max-content;
+  animation: marquee-right 40s linear infinite;
+}
+.marquee-container:hover .marquee-track,
+.marquee-container:hover .marquee-track-reverse {
+  animation-play-state: paused;
+}
+
+/* ============================================================
+   SHIMMER BUTTON
+   ============================================================ */
+
+@keyframes shimmer {
+  0%   { transform: translateX(-100%) skewX(-12deg); }
+  100% { transform: translateX(200%)  skewX(-12deg); }
+}
+.shimmer-btn { position: relative; overflow: hidden; }
+.shimmer-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.25) 50%, transparent 100%);
+  transform: translateX(-100%) skewX(-12deg);
+}
+.shimmer-btn:hover::after {
+  animation: shimmer 0.7s ease forwards;
+}
+
+/* ============================================================
+   GLOW PULSE
+   ============================================================ */
+
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.4; }
+  50%       { opacity: 0.9; }
+}
+.glow-pulse { animation: glow-pulse 4s ease-in-out infinite; }
+
+/* ============================================================
+   FLOAT
+   ============================================================ */
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-10px); }
+}
+.float { animation: float 3s ease-in-out infinite; }
+
+/* ============================================================
+   HERO GRID DOTS
+   ============================================================ */
+
+.hero-grid {
+  background-image:
+    radial-gradient(circle, #E5E7EB 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* ============================================================
+   CARD HOVER LIFT
+   ============================================================ */
+
+.card-lift {
+  transition: transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s cubic-bezier(0.16,1,0.3,1);
+}
+.card-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 48px rgba(0,0,0,0.12);
+}
+
+/* ============================================================
+   SPORT CATEGORY CARD
+   ============================================================ */
+
+.sport-card-img {
+  transition: transform 0.5s cubic-bezier(0.16,1,0.3,1);
+}
+.sport-card:hover .sport-card-img {
+  transform: scale(1.06);
+}
+
+/* ============================================================
+   STREAK / TRENDING FIRE BADGE
+   ============================================================ */
+
+@keyframes fire-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,59,48,0); }
+  50%       { box-shadow: 0 0 0 6px rgba(255,59,48,0.15); }
+}
+.fire-badge { animation: fire-pulse 2s ease-in-out infinite; }
+
+/* ============================================================
+   STOCK BAR
+   ============================================================ */
+
+.stock-bar-fill {
+  background: linear-gradient(90deg, #FF3B30 0%, #FF6B30 100%);
+  border-radius: 9999px;
+  transition: width 0.6s ease;
+}
+
+/* ============================================================
+   NUMBER ROLL (score counter)
+   ============================================================ */
+
+@keyframes count-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.count-enter { animation: count-up 0.4s ease forwards; }
+
+/* ============================================================
+   SCROLLBAR HIDE (mobile horizontal scroll tracks)
+   ============================================================ */
+
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 200" width="900" height="200">
+  <!--
+    TRYBY Shield — Size Reference Sheet
+    All sizes: 512 · 256 · 128 · 64 · 32 · 16
+    Yellow on black (primary brand expression)
+  -->
+  <rect width="900" height="200" fill="#111111"/>
+
+  <!-- 128px -->
+  <g transform="translate(10,36)">
+    <rect width="128" height="128" rx="8" fill="#0D0D0D"/>
+    <path fill-rule="evenodd" clip-rule="evenodd"
+      d="M64 2.2 L112 4.5 L122 11.7 L122 83.5 L64 130 L6 83.5 L6 11.7 L16 4.5 Z
+         M13 27.8 H115 V44 H13 Z
+         M50 44 H78 V88 H50 Z
+         M13 88 H44.5 V104 H13 Z
+         M83.5 88 H115 V104 H83.5 Z"
+      fill="#F5C518"/>
+    <text x="64" y="148" text-anchor="middle" fill="#666" font-family="monospace" font-size="11">128px</text>
+  </g>
+
+  <!-- 64px -->
+  <g transform="translate(158,54)">
+    <rect width="64" height="64" rx="4" fill="#0D0D0D"/>
+    <path fill-rule="evenodd" clip-rule="evenodd"
+      d="M32 1.1 L56 2.25 L61 5.85 L61 41.75 L32 65 L3 41.75 L3 5.85 L8 2.25 Z
+         M6.5 13.9 H57.5 V22 H6.5 Z
+         M25 22 H39 V44 H25 Z
+         M6.5 44 H22.25 V52 H6.5 Z
+         M41.75 44 H57.5 V52 H41.75 Z"
+      fill="#F5C518"/>
+    <text x="32" y="78" text-anchor="middle" fill="#666" font-family="monospace" font-size="11">64px</text>
+  </g>
+
+  <!-- 32px -->
+  <g transform="translate(242,68)">
+    <rect width="32" height="32" rx="2" fill="#0D0D0D"/>
+    <path fill-rule="evenodd" clip-rule="evenodd"
+      d="M16 0.55 L28 1.1 L30.5 2.9 L30.5 20.9 L16 32.5 L1.5 20.9 L1.5 2.9 L4 1.1 Z
+         M3.25 6.95 H28.75 V11 H3.25 Z
+         M12.5 11 H19.5 V22 H12.5 Z
+         M3.25 22 H11.1 V26 H3.25 Z
+         M20.9 22 H28.75 V26 H20.9 Z"
+      fill="#F5C518"/>
+    <text x="16" y="44" text-anchor="middle" fill="#666" font-family="monospace" font-size="11">32px</text>
+  </g>
+
+  <!-- 16px -->
+  <g transform="translate(294,76)">
+    <rect width="16" height="16" rx="1" fill="#0D0D0D"/>
+    <path fill-rule="evenodd" clip-rule="evenodd"
+      d="M8 0.28 L14 0.55 L15.25 1.45 L15.25 10.45 L8 16.25 L0.75 10.45 L0.75 1.45 L2 0.55 Z
+         M1.6 3.5 H14.4 V5.5 H1.6 Z
+         M6.25 5.5 H9.75 V11 H6.25 Z
+         M1.6 11 H5.55 V13 H1.6 Z
+         M10.45 11 H14.4 V13 H10.45 Z"
+      fill="#F5C518"/>
+    <text x="8" y="28" text-anchor="middle" fill="#666" font-family="monospace" font-size="11">16px</text>
+  </g>
+
+  <!-- Labels -->
+  <text x="74" y="18" text-anchor="middle" fill="#444" font-family="monospace" font-size="10">Yellow on Black (Primary)</text>
+
+  <!-- Color swatches reference -->
+  <g transform="translate(360, 20)">
+    <text x="0" y="14" fill="#888" font-family="monospace" font-size="10">COLOR SYSTEM</text>
+    <rect x="0"   y="22" width="40" height="20" rx="3" fill="#F5C518"/>
+    <text x="0"   y="56" fill="#666" font-family="monospace" font-size="9">#F5C518</text>
+    <rect x="50"  y="22" width="40" height="20" rx="3" fill="#0D0D0D" stroke="#333" stroke-width="1"/>
+    <text x="50"  y="56" fill="#666" font-family="monospace" font-size="9">#0D0D0D</text>
+    <rect x="100" y="22" width="40" height="20" rx="3" fill="#FFFFFF"/>
+    <text x="100" y="56" fill="#666" font-family="monospace" font-size="9">#FFFFFF</text>
+    <rect x="150" y="22" width="40" height="20" rx="3" fill="#1A1A2E" stroke="#333" stroke-width="1"/>
+    <text x="150" y="56" fill="#666" font-family="monospace" font-size="9">#1A1A2E</text>
+
+    <text x="0" y="80" fill="#888" font-family="monospace" font-size="10">USAGE</text>
+    <text x="0" y="95"  fill="#555" font-family="monospace" font-size="9">Yellow on Black  →  Primary / Default</text>
+    <text x="0" y="108" fill="#555" font-family="monospace" font-size="9">Black on White   →  Print / Light BG</text>
+    <text x="0" y="121" fill="#555" font-family="monospace" font-size="9">White on Black   →  Embossed / Dark BG</text>
+    <text x="0" y="134" fill="#555" font-family="monospace" font-size="9">Transparent      →  Jersey / Watermark</text>
+
+    <text x="0" y="158" fill="#888" font-family="monospace" font-size="10">FILES</text>
+    <text x="0" y="171" fill="#555" font-family="monospace" font-size="9">/brand/tryby-shield-yellow-on-black.svg</text>
+    <text x="0" y="184" fill="#555" font-family="monospace" font-size="9">/brand/tryby-shield-black-on-white.svg</text>
+  </g>
+</svg>

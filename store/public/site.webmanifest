@@ -1,0 +1,80 @@
+{
+  "name": "TRYBY Sports",
+  "short_name": "TRYBY",
+  "description": "India's premium sports jerseys & gear — cricket, football, gym. Fast pan-India delivery.",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0D0D0D",
+  "theme_color": "#0D0D0D",
+  "lang": "en-IN",
+  "dir": "ltr",
+  "categories": ["shopping", "sports"],
+  "icons": [
+    {
+      "src": "/brand/tryby-icon-64.png",
+      "sizes": "64x64",
+      "type": "image/png"
+    },
+    {
+      "src": "/brand/tryby-icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "/brand/tryby-icon-256.png",
+      "sizes": "256x256",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/brand/tryby-icon-1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/hero-desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "TRYBY Sports Homepage"
+    },
+    {
+      "src": "/hero-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "TRYBY Sports on Mobile"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Shop Now",
+      "short_name": "Shop",
+      "description": "Browse all products",
+      "url": "/products?source=pwa-shortcut",
+      "icons": [{ "src": "/brand/tryby-icon-128.png", "sizes": "128x128" }]
+    },
+    {
+      "name": "My Orders",
+      "short_name": "Orders",
+      "description": "Track your orders",
+      "url": "/account/orders?source=pwa-shortcut",
+      "icons": [{ "src": "/brand/tryby-icon-128.png", "sizes": "128x128" }]
+    }
+  ]
+}

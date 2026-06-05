@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 116" width="512" height="595">
+  <!-- Variant 4: Yellow shield, T is truly transparent (works on any background) -->
+  <path fill-rule="evenodd" clip-rule="evenodd"
+    d="M50 2 L88 4 L96 10 L96 72 L50 112 L4 72 L4 10 L12 4 Z
+       M10 24 H90 V38 H10 Z
+       M40 38 H60 V76 H40 Z
+       M10 76 H36 V90 H10 Z
+       M64 76 H90 V90 H64 Z"
+    fill="#F5C518"/>
+</svg>

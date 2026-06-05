@@ -1,0 +1,3053 @@
+// TRYBY SPORTS — Prisma Schema
+// Database: PostgreSQL
+// ORM: Prisma 5.x
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────
+
+enum Sport {
+  CRICKET
+  FOOTBALL
+  GYM
+  RUNNING
+  RACKET
+  COMBAT
+  OTHER
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+  RETURN_REQUESTED
+  RETURNED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  PENDING
+  AUTHORIZED
+  CAPTURED
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+enum ShipmentStatus {
+  PENDING // created, not yet dispatched
+  PACKED // physically packed, ready to hand off
+  PICKED_UP // courier picked up
+  IN_TRANSIT // moving through courier network
+  OUT_FOR_DELIVERY // on last-mile vehicle
+  DELIVERED // confirmed delivered
+  FAILED_DELIVERY // attempted, customer not available
+  RETURNED // sent back to warehouse
+  LOST // lost in transit
+}
+
+enum CourierProvider {
+  SHIPROCKET
+  DELHIVERY
+  DTDC
+  INDIA_POST
+  BLUEDART
+  XPRESSBEES
+  ECOM_EXPRESS
+  OTHER
+}
+
+enum PaymentMethod {
+  RAZORPAY_CARD
+  RAZORPAY_UPI
+  RAZORPAY_NETBANKING
+  RAZORPAY_WALLET
+  COD
+}
+
+enum AddressType {
+  SHIPPING
+  BILLING
+}
+
+enum UserRole {
+  CUSTOMER
+  SUPPLIER
+  ADMIN
+}
+
+enum SupplierStatus {
+  PENDING
+  APPROVED
+  SUSPENDED
+}
+
+enum PayoutStatus {
+  PENDING
+  APPROVED
+  PROCESSING
+  PROCESSED
+  REJECTED
+  FAILED
+}
+
+enum SupplierDocType {
+  GST_CERTIFICATE
+  PAN_CARD
+  BANK_STATEMENT
+  ADDRESS_PROOF
+  IDENTITY_PROOF
+  AGREEMENT
+  OTHER
+}
+
+// ── Financial / Settlement enums ──────────────────────────────────────────
+
+enum LedgerEntryType {
+  ORDER_EARNING // gross sale credited after delivery
+  COMMISSION_DEDUCTION // platform fee debited
+  SHIPPING_DEDUCTION // shipping cost debited (if applicable)
+  GST_DEDUCTION // GST on commission debited
+  REFUND_DEDUCTION // customer refund — reduces supplier balance
+  RETURN_DEDUCTION // return processed — reduces supplier balance
+  PAYOUT_DEBIT // payout transferred to supplier bank
+  MANUAL_CREDIT // admin-issued bonus/adjustment credit
+  MANUAL_DEBIT // admin-issued penalty/adjustment debit
+  HOLDING_CREDIT // moves amount from pending to available after hold
+  DISPUTE_CREDIT // dispute resolved in supplier's favour
+  DISPUTE_DEBIT // dispute resolved against supplier
+}
+
+enum SettlementStatus {
+  HOLDING // within 7-day hold period after delivery
+  AVAILABLE // hold lifted — ready to be paid out
+  PAYOUT_REQUESTED // supplier has requested withdrawal
+  PROCESSING // payout in progress
+  PAID // bank transfer confirmed
+  DISPUTED // supplier raised a dispute
+  CANCELLED // order cancelled / returned before release
+}
+
+enum DisputeStatus {
+  OPEN
+  UNDER_REVIEW
+  ACTION_REQUIRED     // merchant must submit evidence
+  RESOLVED_FOR_SUPPLIER
+  RESOLVED_FOR_PLATFORM
+  PARTIAL_ADJUSTMENT
+  CLOSED
+}
+
+enum SupplierTier {
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+}
+
+enum TicketStatus {
+  OPEN
+  PENDING_REPLY
+  IN_PROGRESS
+  ESCALATED
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TicketCategory {
+  PAYOUT
+  PRODUCT
+  ORDER
+  ACCOUNT
+  COMMISSION
+  TECHNICAL
+  OTHER
+}
+
+enum CommissionScope {
+  GLOBAL
+  SUPPLIER
+  CATEGORY
+}
+
+enum SlaStatus {
+  ON_TIME
+  AT_RISK
+  BREACHED
+  NOT_APPLICABLE
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  HIDDEN // admin-hidden: not deleted, just suppressed
+}
+
+enum CouponType {
+  PERCENTAGE
+  FLAT
+  FREE_SHIPPING
+}
+
+enum BadgeType {
+  TRENDING
+  NEW
+  SALE
+  OFFICIAL
+  BEST_SELLER
+  LIMITED
+}
+
+enum InstagramPostStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum ContentBlockType {
+  HERO_BANNER
+  TRUST_BAR
+  CATEGORY_GRID
+  TRENDING_PRODUCTS
+  PROMO_BANNER
+  FOOTER_COLUMN
+  STATIC_PAGE
+}
+
+enum PublishStatus {
+  DRAFT
+  PUBLISHED
+  SCHEDULED
+}
+
+enum ReturnStatus {
+  REQUESTED
+  APPROVED
+  PICKUP_SCHEDULED
+  RECEIVED
+  REFUNDED
+  REJECTED
+}
+
+enum ReturnReason {
+  DAMAGED
+  WRONG_ITEM
+  NOT_AS_DESCRIBED
+  CHANGED_MIND
+  DEFECTIVE
+  SIZE_ISSUE
+  OTHER
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  ADMIN
+  OPERATIONS_MANAGER
+  CONTENT_MANAGER
+  PRODUCT_MANAGER
+  ORDER_MANAGER
+  FINANCE_MANAGER
+  SUPPORT_AGENT
+  SUPPLIER_MANAGER
+  MARKETING_MANAGER
+}
+
+enum AuditAction {
+  // Auth
+  LOGIN
+  LOGOUT
+  PASSWORD_RESET
+  ADMIN_CREATED
+  ADMIN_UPDATED
+  ADMIN_DISABLED
+  ADMIN_ENABLED
+  // Security events
+  LOGIN_FAILED
+  ACCOUNT_LOCKED
+  ACCOUNT_UNLOCKED
+  RATE_LIMIT_HIT
+  SUSPICIOUS_ACTIVITY
+  // Products
+  PRODUCT_CREATED
+  PRODUCT_UPDATED
+  PRODUCT_DELETED
+  PRODUCT_ARCHIVED
+  PRODUCT_RESTORED
+  PRODUCT_DUPLICATED
+  // Inventory
+  STOCK_UPDATED
+  BULK_STOCK_UPDATED
+  BULK_PRICE_UPDATED
+  BULK_STATUS_UPDATED
+  // Orders
+  ORDER_STATUS_CHANGED
+  ORDER_REFUNDED
+  // Returns
+  RETURN_APPROVED
+  RETURN_REJECTED
+  RETURN_REFUNDED
+  // Content / CMS
+  CONTENT_PUBLISHED
+  CONTENT_UPDATED
+  CONTENT_DELETED
+  // Settings
+  SETTINGS_UPDATED
+  // Suppliers
+  SUPPLIER_APPROVED
+  SUPPLIER_SUSPENDED
+  PAYOUT_PROCESSED
+  // Coupons
+  COUPON_CREATED
+  COUPON_UPDATED
+  COUPON_DELETED
+  // Shipping
+  SHIPMENT_CREATED
+  SHIPMENT_UPDATED
+  SHIPMENT_CANCELLED
+  COURIER_EVENT // webhook event from any courier
+  SHIPPING_INTEGRATION_UPDATED
+  // System / Infrastructure
+  MAINTENANCE_ENABLED
+  MAINTENANCE_DISABLED
+  FEATURE_FLAG_UPDATED
+  SYSTEM_SETTINGS_UPDATED
+  JOB_TRIGGERED
+  EXPORT_GENERATED
+  VARIANT_UPDATED
+  // Admin / Session management
+  SESSION_REVOKED
+  FORCE_LOGOUT
+  PERMISSION_CHANGED
+  PASSWORD_CHANGED
+  ADMIN_INVITED
+  ADMIN_RESTORED
+  // Payments (webhook-driven)
+  PAYMENT_CAPTURED
+  PAYMENT_FAILED
+  REFUND_PROCESSED
+  REFUND_FAILED
+  // Disputes
+  DISPUTE_CREATED
+  DISPUTE_UPDATED
+  DISPUTE_WON
+  DISPUTE_LOST
+  DISPUTE_CLOSED
+  // Settlements
+  SETTLEMENT_PROCESSED
+  // Generic
+  OTHER
+}
+
+enum AssetType {
+  PRODUCT_IMAGE
+  HERO_IMAGE
+  BANNER_IMAGE
+  CATEGORY_IMAGE
+  BRAND_LOGO
+  MISC
+}
+
+// ─────────────────────────────────────────────
+// AUTH — Auth.js v5 required tables
+// ─────────────────────────────────────────────
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ─────────────────────────────────────────────
+// USER
+// ─────────────────────────────────────────────
+
+model User {
+  id                String    @id @default(cuid())
+  name              String?
+  email             String?   @unique
+  emailVerified     DateTime?
+  image             String?
+  phone             String?   @unique
+  phoneVerified     Boolean   @default(false)
+  role              UserRole  @default(CUSTOMER)
+  isActive          Boolean   @default(true)
+  // Security / lockout
+  loginFailures     Int       @default(0)
+  lockedUntil       DateTime?
+  lastFailedLoginAt DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  // Auth.js relations
+  accounts Account[]
+  sessions Session[]
+
+  // App relations
+  addresses             Address[]
+  orders                Order[]
+  reviews               Review[]
+  wishlistItems         WishlistItem[]
+  cartItems             CartItem[]
+  newsletterSub         NewsletterSubscriber?
+  supplierProfile       Supplier?
+  notifications         Notification[]
+  adminProfile          AdminProfile?
+  returnRequests        ReturnRequest[]
+  loyaltyPoints         LoyaltyPoint[]
+  referralsMade         Referral[]              @relation("ReferralsMade")
+  referralReceived      Referral?               @relation("ReferralReceived")
+  segment               CustomerSegment?
+  notificationPrefs     NotificationPreference?
+  riskProfile           CustomerRiskProfile?    @relation(fields: [customerRiskProfileId], references: [id])
+  mobileDevices         MobileDevice[]
+  mobileTokens          MobileApiToken[]
+  customerRiskProfileId String?
+
+  @@index([email])
+  @@index([phone])
+  @@index([role])
+}
+
+// ─────────────────────────────────────────────
+// ADMIN PROFILE — fine-grained admin roles
+// ─────────────────────────────────────────────
+
+model AdminProfile {
+  id           String    @id @default(cuid())
+  userId       String    @unique
+  adminRole    AdminRole @default(CONTENT_MANAGER)
+  permissions  String[] // granular: ["products:write", "orders:read", ...]
+  isDisabled   Boolean   @default(false)
+  disabledAt   DateTime?
+  disabledBy   String? // userId of admin who disabled
+  lastLoginAt  DateTime?
+  invitedBy    String? // userId of admin who created this account
+  passwordHash String? // bcrypt hash — set on invite, updated on reset
+  mustResetPwd Boolean   @default(true) // force password change on first login
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  auditLogs AuditLog[]
+
+  @@index([adminRole])
+  @@index([isDisabled])
+}
+
+// ─────────────────────────────────────────────
+// AUDIT LOG — immutable event trail
+// ─────────────────────────────────────────────
+
+model AuditLog {
+  id           String      @id @default(cuid())
+  adminId      String // AdminProfile.id
+  action       AuditAction
+  resourceType String? // "product" | "order" | "return" | "admin" | ...
+  resourceId   String? // ID of the affected resource
+  resourceName String? // Human-readable label (product name, order #, etc.)
+  oldValue     Json? // Snapshot before change
+  newValue     Json? // Snapshot after change
+  ipAddress    String?
+  userAgent    String?
+  metadata     Json? // Any extra context
+  createdAt    DateTime    @default(now())
+
+  admin AdminProfile @relation(fields: [adminId], references: [id])
+
+  @@index([adminId])
+  @@index([action])
+  @@index([resourceType, resourceId])
+  @@index([createdAt])
+}
+
+// ─────────────────────────────────────────────
+// ADDRESS
+// ─────────────────────────────────────────────
+
+model Address {
+  id        String      @id @default(cuid())
+  userId    String
+  type      AddressType @default(SHIPPING)
+  isDefault Boolean     @default(false)
+  fullName  String
+  phone     String
+  line1     String
+  line2     String?
+  city      String
+  state     String
+  pincode   String
+  country   String      @default("IN")
+  landmark  String?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shippingOrders Order[] @relation("ShippingAddress")
+  billingOrders  Order[] @relation("BillingAddress")
+
+  @@index([userId])
+  @@index([pincode])
+}
+
+// ─────────────────────────────────────────────
+// SUPPLIER
+// ─────────────────────────────────────────────
+
+model Supplier {
+  id                String         @id @default(cuid())
+  userId            String         @unique
+  companyName       String
+  slug              String?        @unique // public storefront slug, e.g. "acme-sports"
+  gstin             String?        @unique
+  panNumber         String?
+  bankAccountNo     String?
+  bankIfsc          String?
+  bankAccountName   String?
+  websiteUrl        String?
+  businessAddress   String?
+  logoUrl           String? // supplier brand logo
+  bannerUrl         String? // storefront banner
+  bio               String?        @db.Text // short supplier description for public page
+  status            SupplierStatus @default(PENDING)
+  commissionRate    Decimal        @default(0.15) @db.Decimal(5, 4)
+  totalSales        Decimal        @default(0) @db.Decimal(12, 2)
+  pendingPayout     Decimal        @default(0) @db.Decimal(12, 2)
+  lastPayoutAt      DateTime?
+  onboardedAt       DateTime?
+  // Agreement
+  agreementUrl      String?
+  agreementSignedAt DateTime?
+  // Document verification
+  docsVerified      Boolean        @default(false)
+  docsVerifiedAt    DateTime?
+  docsVerifiedBy    String? // AdminProfile.id
+  // Rejection/suspension reason
+  suspendReason     String?
+  // Tier / Ranking
+  tier              SupplierTier   @default(BRONZE)
+  tierUpdatedAt     DateTime?
+  // Composite scores (0–100)
+  performanceScore  Decimal        @default(0) @db.Decimal(5, 2)
+  fulfillmentScore  Decimal        @default(0) @db.Decimal(5, 2) // dispatch speed + SLA compliance
+  qualityScore      Decimal        @default(0) @db.Decimal(5, 2) // ratings + return rate
+  trustScore        Decimal        @default(0) @db.Decimal(5, 2) // docs verified + tenure + no violations
+  slaScore          Decimal        @default(0) @db.Decimal(5, 2) // SLA compliance rate
+  // Raw metrics (updated by cron / order events)
+  fulfillmentRate   Decimal        @default(0) @db.Decimal(5, 4)
+  returnRate        Decimal        @default(0) @db.Decimal(5, 4)
+  cancellationRate  Decimal        @default(0) @db.Decimal(5, 4)
+  avgAcceptanceHrs  Decimal        @default(0) @db.Decimal(6, 2) // avg hours to accept order
+  avgShippingHrs    Decimal        @default(0) @db.Decimal(6, 2) // avg hours from acceptance to dispatch
+  avgDeliveryDays   Decimal        @default(0) @db.Decimal(5, 2) // avg days from dispatch to delivery
+  avgRating         Decimal        @default(0) @db.Decimal(3, 2)
+  totalOrders       Int            @default(0)
+  // ── Wallet / financial balances ──────────────────────────────────────────
+  availableBalance  Decimal        @default(0) @db.Decimal(12, 2) // released, ready to pay out
+  pendingBalance    Decimal        @default(0) @db.Decimal(12, 2) // in 7-day hold after delivery
+  processingBalance Decimal        @default(0) @db.Decimal(12, 2) // payout in-flight
+  lifetimeEarnings  Decimal        @default(0) @db.Decimal(14, 2) // all-time gross earnings credited
+  totalDeductions   Decimal        @default(0) @db.Decimal(14, 2) // all-time commissions + refunds
+  totalPaidOut      Decimal        @default(0) @db.Decimal(14, 2) // all-time bank transfers
+  // ── GST ──────────────────────────────────────────────────────────────────
+  gstRate           Decimal        @default(0.18) @db.Decimal(5, 4) // GST on commission (default 18%)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  user              User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  products          Product[]
+  payouts           Payout[]
+  activityLogs      SupplierActivityLog[]
+  documents         SupplierDocument[]
+  notifications     Notification[]        @relation("SupplierNotifications")
+  slaRecords        SupplierSLA[]
+  tickets           SupplierTicket[]
+  agreementVersions SupplierAgreement[]
+  purchaseOrders    PurchaseOrder[]
+  ledgerEntries     SupplierLedger[]
+  settlements       SupplierSettlement[]
+  disputes          SettlementDispute[]
+  skuMaps           SupplierSkuMap[]
+  stockSyncLogs     StockSyncLog[]
+  syncProfile       SupplierSyncProfile?
+  priceSyncLogs     PriceSyncLog[]
+
+  @@index([status])
+  @@index([tier])
+  @@index([performanceScore])
+  @@index([trustScore])
+  @@index([slug])
+  @@index([availableBalance])
+}
+
+// ─────────────────────────────────────────────
+// PRODUCT CATALOG
+// ─────────────────────────────────────────────
+
+model Category {
+  id              String   @id @default(cuid())
+  name            String   @unique
+  slug            String   @unique
+  sport           Sport?
+  description     String?
+  imageUrl        String?
+  isActive        Boolean  @default(true)
+  sortOrder       Int      @default(0)
+  parentId        String?
+  metaTitle       String?
+  metaDescription String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryTree")
+  products Product[]
+
+  @@index([slug])
+  @@index([sport])
+  @@index([parentId])
+}
+
+model Product {
+  id                 String    @id @default(cuid())
+  supplierId         String?
+  categoryId         String
+  name               String
+  slug               String    @unique
+  description        String    @db.Text
+  sport              Sport
+  isActive           Boolean   @default(true)
+  isArchived         Boolean   @default(false)
+  archivedAt         DateTime?
+  archivedById       String?
+  isFeatured         Boolean   @default(false)
+  isOfficialLicensed Boolean   @default(false)
+  teamName           String?
+  leagueName         String?
+  teamBadgeUrl       String?
+  totalSoldCount     Int       @default(0)
+  weeklySoldCount    Int       @default(0)
+  showOnHomepage     Boolean   @default(false)
+  homepageSortOrder  Int       @default(0)
+  avgRating          Decimal   @default(0) @db.Decimal(3, 2)
+  reviewCount        Int       @default(0)
+  shippingCost       Decimal   @default(0) @db.Decimal(8, 2)
+  packagingCost      Decimal   @default(0) @db.Decimal(8, 2)
+  metaTitle          String?
+  metaDescription    String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  supplier           Supplier?           @relation(fields: [supplierId], references: [id])
+  category           Category            @relation(fields: [categoryId], references: [id])
+  variants           ProductVariant[]
+  images             ProductImage[]
+  badges             ProductBadge[]
+  reviews            Review[]
+  wishlistItems      WishlistItem[]
+  cartItems          CartItem[]
+  orderItems         OrderItem[]
+  bundleItems        BundleItem[]
+  returnItems        ReturnItem[]
+  inventoryLogs      InventoryLog[]
+  warehouseStocks    WarehouseStock[]
+  purchaseOrderItems PurchaseOrderItem[]
+  transferItems      StockTransferItem[]
+
+  @@index([slug])
+  @@index([sport])
+  @@index([categoryId])
+  @@index([supplierId])
+  @@index([isActive, isFeatured])
+  @@index([isArchived])
+  @@index([totalSoldCount])
+  @@index([createdAt])
+}
+
+model ProductVariant {
+  id        String   @id @default(cuid())
+  productId String
+  sku       String   @unique
+  size      String?
+  color     String?
+  price     Decimal  @db.Decimal(10, 2)
+  mrp       Decimal  @db.Decimal(10, 2)
+  costPrice Decimal? @db.Decimal(10, 2) // Purchase cost — used for profit calculation
+  stock     Int      @default(0)
+  weight    Decimal? @db.Decimal(8, 3)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product            Product                      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  cartItems          CartItem[]
+  orderItems         OrderItem[]
+  images             ProductImage[]
+  inventoryLogs      InventoryLog[]
+  warehouseStocks    WarehouseStock[]
+  purchaseOrderItems PurchaseOrderItem[]
+  transferItems      StockTransferItem[]
+  fulfillmentAllocs  OrderFulfillmentAllocation[]
+  supplierSkuMap     SupplierSkuMap?
+
+  @@index([productId])
+  @@index([sku])
+  @@index([stock])
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  productId String
+  variantId String? // null = shown for all variants; set = shown only for that variant
+  url       String
+  altText   String?
+  isPrimary Boolean  @default(false)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  product Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+
+  @@index([productId])
+  @@index([variantId])
+}
+
+model ProductBadge {
+  id        String    @id @default(cuid())
+  productId String
+  type      BadgeType
+  label     String?
+  expiresAt DateTime?
+  createdAt DateTime  @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, type])
+  @@index([productId])
+}
+
+model BundleItem {
+  id        String  @id @default(cuid())
+  productId String
+  bundleId  String
+  quantity  Int     @default(1)
+  discount  Decimal @default(0) @db.Decimal(5, 4)
+
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([productId])
+  @@index([bundleId])
+}
+
+// ─────────────────────────────────────────────
+// INVENTORY LOG — stock change audit trail
+// ─────────────────────────────────────────────
+
+enum StockChangeReason {
+  MANUAL_ADJUSTMENT
+  BULK_UPDATE
+  ORDER_FULFILLED
+  ORDER_CANCELLED
+  RETURN_RECEIVED
+  CSV_IMPORT
+  INITIAL_STOCK
+  PURCHASE_ORDER_RECEIVED // stock arrived from a supplier PO
+  WAREHOUSE_TRANSFER // moved between warehouses
+  DAMAGE_WRITE_OFF // damaged goods written off
+  THEFT_SHRINKAGE // theft / shrinkage
+}
+
+enum PurchaseOrderStatus {
+  DRAFT // being composed
+  SENT // sent to supplier
+  ACKNOWLEDGED // supplier confirmed
+  PARTIALLY_RECEIVED
+  RECEIVED // all items received
+  CANCELLED
+}
+
+model InventoryLog {
+  id          String            @id @default(cuid())
+  productId   String
+  variantId   String
+  warehouseId String? // null = global / default stock
+  adminId     String? // null = system-generated (order, return)
+  reason      StockChangeReason
+  stockBefore Int
+  stockAfter  Int
+  delta       Int // stockAfter - stockBefore (can be negative)
+  note        String?
+  createdAt   DateTime          @default(now())
+
+  product   Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  warehouse Warehouse?     @relation(fields: [warehouseId], references: [id])
+
+  @@index([productId])
+  @@index([variantId])
+  @@index([warehouseId])
+  @@index([adminId])
+  @@index([createdAt])
+  @@index([reason])
+}
+
+enum StockTransferStatus {
+  PENDING // created, not yet dispatched
+  IN_TRANSIT // goods left source warehouse
+  RECEIVED // destination confirmed receipt
+  CANCELLED
+}
+
+enum PickingStatus {
+  PENDING
+  IN_PROGRESS
+  PICKED
+  PACKED
+  DISPATCHED
+  CANCELLED
+}
+
+// ─────────────────────────────────────────────
+// WAREHOUSE
+// ─────────────────────────────────────────────
+
+model Warehouse {
+  id          String   @id @default(cuid())
+  name        String
+  code        String   @unique // short code, e.g. "MUM-01"
+  addressLine String?
+  city        String?
+  state       String?
+  pincode     String?
+  phone       String?
+  isActive    Boolean  @default(true)
+  isDefault   Boolean  @default(false)
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  stocks            WarehouseStock[]
+  inventoryLogs     InventoryLog[]
+  purchaseOrders    PurchaseOrder[]
+  transfersFrom     StockTransfer[]              @relation("TransferSource")
+  transfersTo       StockTransfer[]              @relation("TransferDestination")
+  fulfillmentAllocs OrderFulfillmentAllocation[]
+
+  @@index([isActive])
+  @@index([isDefault])
+}
+
+model WarehouseStock {
+  id           String   @id @default(cuid())
+  warehouseId  String
+  variantId    String
+  productId    String
+  stock        Int      @default(0)
+  reservedQty  Int      @default(0) // held for pending orders
+  reorderPoint Int      @default(5) // trigger low-stock alert below this
+  updatedAt    DateTime @updatedAt
+
+  warehouse Warehouse      @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  product   Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([warehouseId, variantId])
+  @@index([warehouseId])
+  @@index([variantId])
+  @@index([productId])
+  @@index([stock])
+}
+
+// ─────────────────────────────────────────────
+// PURCHASE ORDERS
+// ─────────────────────────────────────────────
+
+model PurchaseOrder {
+  id          String              @id @default(cuid())
+  poNumber    String              @unique // e.g. "PO-2026-0001"
+  supplierId  String?
+  warehouseId String?
+  status      PurchaseOrderStatus @default(DRAFT)
+  expectedAt  DateTime?
+  receivedAt  DateTime?
+  notes       String?             @db.Text
+  totalCost   Decimal             @default(0) @db.Decimal(12, 2)
+  createdById String? // AdminProfile.id
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  supplier  Supplier?           @relation(fields: [supplierId], references: [id])
+  warehouse Warehouse?          @relation(fields: [warehouseId], references: [id])
+  items     PurchaseOrderItem[]
+
+  @@index([supplierId])
+  @@index([warehouseId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model PurchaseOrderItem {
+  id              String  @id @default(cuid())
+  purchaseOrderId String
+  variantId       String
+  productId       String
+  productName     String
+  variantSku      String
+  size            String?
+  color           String?
+  orderedQty      Int
+  receivedQty     Int     @default(0)
+  unitCost        Decimal @db.Decimal(10, 2)
+  totalCost       Decimal @db.Decimal(10, 2)
+  notes           String?
+
+  purchaseOrder PurchaseOrder  @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  variant       ProductVariant @relation(fields: [variantId], references: [id])
+  product       Product        @relation(fields: [productId], references: [id])
+
+  @@index([purchaseOrderId])
+  @@index([variantId])
+  @@index([productId])
+}
+
+// ─────────────────────────────────────────────
+// STOCK TRANSFERS
+// ─────────────────────────────────────────────
+
+model StockTransfer {
+  id              String              @id @default(cuid())
+  transferNumber  String              @unique // e.g. "TRF-2026-0001"
+  fromWarehouseId String
+  toWarehouseId   String
+  status          StockTransferStatus @default(PENDING)
+  reason          String?             @db.Text
+  internalNote    String?             @db.Text
+  createdById     String? // AdminProfile.id
+  dispatchedAt    DateTime?
+  receivedAt      DateTime?
+  cancelledAt     DateTime?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  fromWarehouse Warehouse           @relation("TransferSource", fields: [fromWarehouseId], references: [id])
+  toWarehouse   Warehouse           @relation("TransferDestination", fields: [toWarehouseId], references: [id])
+  items         StockTransferItem[]
+
+  @@index([fromWarehouseId])
+  @@index([toWarehouseId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model StockTransferItem {
+  id              String  @id @default(cuid())
+  stockTransferId String
+  variantId       String
+  productId       String
+  productName     String
+  variantSku      String
+  size            String?
+  color           String?
+  requestedQty    Int
+  transferredQty  Int     @default(0) // actually moved (may be less if partial)
+
+  stockTransfer StockTransfer  @relation(fields: [stockTransferId], references: [id], onDelete: Cascade)
+  variant       ProductVariant @relation(fields: [variantId], references: [id])
+  product       Product        @relation(fields: [productId], references: [id])
+
+  @@index([stockTransferId])
+  @@index([variantId])
+  @@index([productId])
+}
+
+// ─────────────────────────────────────────────
+// ORDER FULFILLMENT ALLOCATION
+// Reserves warehouse stock for a specific order.
+// Created on order confirmation; released on dispatch or cancellation.
+// ─────────────────────────────────────────────
+
+model OrderFulfillmentAllocation {
+  id           String        @id @default(cuid())
+  orderId      String
+  orderItemId  String? // null = whole-order allocation
+  variantId    String
+  warehouseId  String
+  reservedQty  Int
+  status       PickingStatus @default(PENDING)
+  pickedAt     DateTime?
+  packedAt     DateTime?
+  dispatchedAt DateTime?
+  cancelledAt  DateTime?
+  notes        String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  order     Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  variant   ProductVariant @relation(fields: [variantId], references: [id])
+  warehouse Warehouse      @relation(fields: [warehouseId], references: [id])
+
+  @@index([orderId])
+  @@index([variantId])
+  @@index([warehouseId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ─────────────────────────────────────────────
+// CART
+// ─────────────────────────────────────────────
+
+model CartItem {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  variantId String
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product        @relation(fields: [productId], references: [id])
+  variant ProductVariant @relation(fields: [variantId], references: [id])
+
+  @@unique([userId, variantId])
+  @@index([userId])
+}
+
+// ─────────────────────────────────────────────
+// WISHLIST
+// ─────────────────────────────────────────────
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([userId])
+}
+
+// ─────────────────────────────────────────────
+// COUPON
+// ─────────────────────────────────────────────
+
+model Coupon {
+  id            String     @id @default(cuid())
+  code          String     @unique
+  type          CouponType
+  value         Decimal    @db.Decimal(10, 2)
+  minOrderValue Decimal?   @db.Decimal(10, 2)
+  maxDiscount   Decimal?   @db.Decimal(10, 2)
+  usageLimit    Int?
+  usageCount    Int        @default(0)
+  perUserLimit  Int        @default(1)
+  isActive      Boolean    @default(true)
+  validFrom     DateTime   @default(now())
+  validUntil    DateTime?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  orders Order[]
+
+  @@index([code])
+  @@index([isActive, validFrom, validUntil])
+}
+
+// ─────────────────────────────────────────────
+// ORDER
+// ─────────────────────────────────────────────
+
+model Order {
+  id                String      @id @default(cuid())
+  orderNumber       String      @unique
+  userId            String
+  shippingAddressId String
+  billingAddressId  String?
+  couponId          String?
+  status            OrderStatus @default(PENDING)
+  subtotal          Decimal     @db.Decimal(10, 2)
+  shippingCharge    Decimal     @default(0) @db.Decimal(10, 2)
+  discount          Decimal     @default(0) @db.Decimal(10, 2)
+  total             Decimal     @db.Decimal(10, 2)
+  notes             String?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  user              User                         @relation(fields: [userId], references: [id])
+  shippingAddress   Address                      @relation("ShippingAddress", fields: [shippingAddressId], references: [id])
+  billingAddress    Address?                     @relation("BillingAddress", fields: [billingAddressId], references: [id])
+  coupon            Coupon?                      @relation(fields: [couponId], references: [id])
+  items             OrderItem[]
+  payment           Payment?
+  shipment          Shipment?
+  statusHistory     OrderStatusHistory[]
+  returnRequests    ReturnRequest[]
+  fulfillmentAllocs OrderFulfillmentAllocation[]
+  riskAssessment    OrderRiskAssessment?
+
+  @@index([userId])
+  @@index([status])
+  @@index([orderNumber])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id          String  @id @default(cuid())
+  orderId     String
+  productId   String
+  variantId   String
+  productName String
+  variantSku  String
+  size        String?
+  color       String?
+  quantity    Int
+  unitPrice   Decimal @db.Decimal(10, 2)
+  mrp         Decimal @db.Decimal(10, 2)
+  total       Decimal @db.Decimal(10, 2)
+  imageUrl    String?
+
+  order   Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product        @relation(fields: [productId], references: [id])
+  variant ProductVariant @relation(fields: [variantId], references: [id])
+  review  Review?
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+model OrderStatusHistory {
+  id        String      @id @default(cuid())
+  orderId   String
+  status    OrderStatus
+  note      String?
+  createdAt DateTime    @default(now())
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+}
+
+// ─────────────────────────────────────────────
+// PAYMENT (Razorpay)
+// ─────────────────────────────────────────────
+
+model Payment {
+  id                String        @id @default(cuid())
+  orderId           String        @unique
+  razorpayOrderId   String?       @unique
+  razorpayPaymentId String?       @unique
+  razorpaySignature String?
+  method            PaymentMethod
+  status            PaymentStatus @default(PENDING)
+  amount            Decimal       @db.Decimal(10, 2)
+  currency          String        @default("INR")
+  capturedAt        DateTime?
+  failureReason     String?
+  refundId          String?
+  refundedAmount    Decimal?      @db.Decimal(10, 2)
+  refundedAt        DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([razorpayOrderId])
+  @@index([razorpayPaymentId])
+  @@index([status])
+}
+
+// ─────────────────────────────────────────────
+// SHIPMENT
+// ─────────────────────────────────────────────
+
+model Shipment {
+  id      String         @id @default(cuid())
+  orderId String         @unique
+  status  ShipmentStatus @default(PENDING)
+
+  // Courier details
+  courier        CourierProvider?
+  carrierName    String? // free-text override / "other" courier
+  trackingNumber String?
+  trackingUrl    String?
+  waybillNumber  String?
+  awbCode        String? // Airway Bill (Shiprocket / Delhivery terminology)
+  manifestId     String?
+
+  // Dates in the fulfillment timeline
+  packedAt         DateTime?
+  pickedUpAt       DateTime?
+  dispatchedAt     DateTime? // marked shipped by admin
+  estimatedAt      DateTime? // expected delivery date
+  outForDeliveryAt DateTime?
+  deliveredAt      DateTime?
+  failedAt         DateTime? // first failed delivery attempt
+  returnedAt       DateTime?
+
+  // Parcel details
+  weightGrams Int?
+  lengthCm    Int?
+  widthCm     Int?
+  heightCm    Int?
+
+  // COD
+  codAmount      Decimal?  @db.Decimal(10, 2)
+  codCollected   Boolean   @default(false)
+  codCollectedAt DateTime?
+
+  // Internal
+  internalNote     String?
+  failureReason    String?
+  deliveryAttempts Int     @default(0)
+
+  // Courier API integration
+  courierShipmentId String? // Provider's internal shipment ID (e.g. Shiprocket order_id)
+  courierOrderId    String? // Provider's order identifier
+  labelUrl          String? // PDF label URL (from provider)
+  rtoInitiatedAt    DateTime? // Return-to-origin triggered
+  rtoDeliveredAt    DateTime? // RTO received at seller
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  order  Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  events ShipmentEvent[]
+
+  @@index([trackingNumber])
+  @@index([awbCode])
+  @@index([status])
+  @@index([courier])
+  @@index([dispatchedAt])
+  @@index([deliveredAt])
+}
+
+// ─────────────────────────────────────────────
+// SHIPMENT EVENTS — immutable tracking history
+// Populated by courier webhooks and manual updates
+// ─────────────────────────────────────────────
+
+model ShipmentEvent {
+  id          String   @id @default(cuid())
+  shipmentId  String
+  status      String // raw status string from provider
+  location    String? // city / hub name
+  description String? // provider description text
+  source      String   @default("manual") // "manual" | "shiprocket" | "delhivery" | "dtdc"
+  rawPayload  Json? // full webhook payload for debugging
+  eventAt     DateTime // when the event actually happened (provider timestamp)
+  createdAt   DateTime @default(now())
+
+  shipment Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+
+  @@index([shipmentId])
+  @@index([eventAt])
+  @@index([source])
+}
+
+// ─────────────────────────────────────────────
+// RETURNS & REFUNDS
+// ─────────────────────────────────────────────
+
+model ReturnRequest {
+  id            String       @id @default(cuid())
+  returnNumber  String       @unique // e.g. "RET-20250001"
+  orderId       String
+  userId        String
+  status        ReturnStatus @default(REQUESTED)
+  reason        ReturnReason
+  reasonNote    String?      @db.Text
+  adminNote     String?      @db.Text
+  refundAmount  Decimal      @db.Decimal(10, 2)
+  refundMethod  String       @default("ORIGINAL_PAYMENT") // ORIGINAL_PAYMENT | STORE_CREDIT
+  refundedAt    DateTime?
+  pickupAddress String?
+  pickupDate    DateTime?
+  imageUrls     String[] // Customer-submitted photos of damaged/wrong item
+  requestedAt   DateTime     @default(now())
+  resolvedAt    DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  order Order        @relation(fields: [orderId], references: [id])
+  user  User         @relation(fields: [userId], references: [id])
+  items ReturnItem[]
+
+  @@index([orderId])
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model ReturnItem {
+  id              String  @id @default(cuid())
+  returnRequestId String
+  productId       String
+  variantId       String?
+  orderItemId     String?
+  productName     String
+  variantSku      String?
+  size            String?
+  color           String?
+  quantity        Int     @default(1)
+  unitPrice       Decimal @db.Decimal(10, 2)
+  imageUrl        String?
+
+  returnRequest ReturnRequest @relation(fields: [returnRequestId], references: [id], onDelete: Cascade)
+  product       Product       @relation(fields: [productId], references: [id])
+
+  @@index([returnRequestId])
+  @@index([productId])
+}
+
+// ─────────────────────────────────────────────
+// REVIEW
+// ─────────────────────────────────────────────
+
+model Review {
+  id              String       @id @default(cuid())
+  userId          String
+  productId       String
+  orderItemId     String?      @unique
+  rating          Int
+  title           String?
+  body            String?      @db.Text
+  sport           Sport?
+  status          ReviewStatus @default(PENDING)
+  isVerified      Boolean      @default(false)
+  isFeatured      Boolean      @default(false)
+  helpfulCount    Int          @default(0)
+  notHelpfulCount Int          @default(0)
+  reportCount     Int          @default(0)
+  imageUrls       String[]
+  videoUrls       String[]
+  adminNote       String? // internal note from moderator
+  approvedAt      DateTime?
+  approvedBy      String? // AdminProfile.id
+  rejectedAt      DateTime?
+  rejectedBy      String? // AdminProfile.id
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product             @relation(fields: [productId], references: [id], onDelete: Cascade)
+  orderItem OrderItem?          @relation(fields: [orderItemId], references: [id])
+  votes     ReviewHelpfulVote[]
+
+  @@index([productId, status])
+  @@index([productId, isFeatured])
+  @@index([userId])
+  @@index([rating])
+  @@index([helpfulCount])
+  @@index([createdAt])
+}
+
+model ReviewHelpfulVote {
+  id        String   @id @default(cuid())
+  reviewId  String
+  userId    String
+  isHelpful Boolean // true = helpful, false = not helpful
+  createdAt DateTime @default(now())
+
+  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@unique([reviewId, userId])
+  @@index([reviewId])
+  @@index([userId])
+}
+
+// ─────────────────────────────────────────────
+// NEWSLETTER
+// ─────────────────────────────────────────────
+
+model NewsletterSubscriber {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  userId         String?   @unique
+  isActive       Boolean   @default(true)
+  subscribedAt   DateTime  @default(now())
+  unsubscribedAt DateTime?
+  source         String?
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([email])
+  @@index([isActive])
+}
+
+// ─────────────────────────────────────────────
+// SUPPLIER PAYOUT
+// ─────────────────────────────────────────────
+
+model Payout {
+  id           String       @id @default(cuid())
+  supplierId   String
+  amount       Decimal      @db.Decimal(10, 2)
+  periodStart  DateTime
+  periodEnd    DateTime
+  status       PayoutStatus @default(PENDING)
+  utrNumber    String?
+  processedAt  DateTime?
+  approvedAt   DateTime?
+  approvedBy   String? // AdminProfile.id
+  rejectedAt   DateTime?
+  rejectedBy   String? // AdminProfile.id
+  rejectReason String?
+  bankSnapshot Json? // snapshot of bank details at payout time
+  notes        String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  supplier Supplier @relation(fields: [supplierId], references: [id])
+
+  @@index([supplierId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ─────────────────────────────────────────────
+// SUPPLIER ACTIVITY LOG
+// ─────────────────────────────────────────────
+
+model SupplierActivityLog {
+  id         String   @id @default(cuid())
+  supplierId String
+  action     String // PRODUCT_CREATED | PAYOUT_REQUESTED | PROFILE_UPDATED | ...
+  detail     String
+  resourceId String? // productId / payoutId / etc.
+  createdAt  DateTime @default(now())
+
+  supplier Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+
+  @@index([supplierId])
+  @@index([createdAt])
+}
+
+// ─────────────────────────────────────────────
+// SUPPLIER LEDGER — immutable double-entry log
+// Every financial event produces one row.
+// Positive amount = credit to supplier.
+// Negative amount = debit from supplier.
+// ─────────────────────────────────────────────
+
+model SupplierLedger {
+  id              String          @id @default(cuid())
+  supplierId      String
+  type            LedgerEntryType
+  amount          Decimal         @db.Decimal(12, 2) // positive = credit, negative = debit
+  // Breakdown (all in INR, 2dp)
+  grossAmount     Decimal         @default(0) @db.Decimal(12, 2)
+  commissionAmt   Decimal         @default(0) @db.Decimal(12, 2)
+  gstOnCommission Decimal         @default(0) @db.Decimal(12, 2)
+  shippingDeduct  Decimal         @default(0) @db.Decimal(12, 2)
+  netAmount       Decimal         @default(0) @db.Decimal(12, 2)
+  // GST details
+  gstRate         Decimal         @default(0) @db.Decimal(5, 4)
+  hsn             String? // HSN/SAC code
+  // References
+  orderId         String?
+  orderNumber     String?
+  orderItemId     String?
+  payoutId        String?
+  returnRequestId String?
+  settlementId    String?
+  // Running balance snapshot (availableBalance after this entry)
+  balanceAfter    Decimal         @default(0) @db.Decimal(12, 2)
+  // Metadata
+  description     String
+  adminNote       String?
+  createdBy       String? // userId of admin for manual entries
+  createdAt       DateTime        @default(now())
+
+  supplier Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+
+  @@index([supplierId])
+  @@index([type])
+  @@index([orderId])
+  @@index([payoutId])
+  @@index([createdAt])
+}
+
+// ─────────────────────────────────────────────
+// SUPPLIER SETTLEMENT — per-order hold tracker
+// Created on DELIVERED, released after holdDays.
+// ─────────────────────────────────────────────
+
+model SupplierSettlement {
+  id              String           @id @default(cuid())
+  supplierId      String
+  orderId         String           @unique
+  orderNumber     String
+  status          SettlementStatus @default(HOLDING)
+  // Financials (INR)
+  grossAmount     Decimal          @db.Decimal(12, 2)
+  commissionAmt   Decimal          @db.Decimal(12, 2)
+  gstOnCommission Decimal          @db.Decimal(12, 2)
+  shippingDeduct  Decimal          @default(0) @db.Decimal(12, 2)
+  refundDeduct    Decimal          @default(0) @db.Decimal(12, 2)
+  netAmount       Decimal          @db.Decimal(12, 2) // what supplier actually gets
+  // Hold mechanics
+  holdDays        Int              @default(7)
+  holdUntil       DateTime // deliveredAt + holdDays
+  deliveredAt     DateTime
+  releasedAt      DateTime?
+  // Payout linkage
+  payoutId        String?
+  // Admin
+  releasedBy      String? // AdminProfile.id
+  notes           String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  supplier Supplier            @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  disputes SettlementDispute[]
+
+  @@index([supplierId])
+  @@index([status])
+  @@index([holdUntil])
+  @@index([orderId])
+  @@index([createdAt])
+}
+
+// ─────────────────────────────────────────────
+// SETTLEMENT DISPUTE
+// ─────────────────────────────────────────────
+
+model SettlementDispute {
+  id                String        @id @default(cuid())
+  supplierId        String
+  settlementId      String
+  status            DisputeStatus @default(OPEN)
+  reason            String
+  description       String        @db.Text
+  attachments       String[]
+  // Razorpay linkage — populated when dispute originates from a Razorpay webhook
+  razorpayDisputeId String?       @unique // dispute.id from Razorpay payload
+  razorpayPaymentId String?       // payment_id from Razorpay payload
+  disputeAmount     Decimal?      @db.Decimal(12, 2) // amount under dispute (INR)
+  // Resolution
+  adminNote         String?       @db.Text
+  adjustmentAmt     Decimal?      @db.Decimal(12, 2) // if PARTIAL_ADJUSTMENT
+  resolvedAt        DateTime?
+  resolvedBy        String? // AdminProfile.id
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  supplier   Supplier           @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  settlement SupplierSettlement @relation(fields: [settlementId], references: [id], onDelete: Cascade)
+
+  @@index([supplierId])
+  @@index([settlementId])
+  @@index([status])
+  @@index([razorpayDisputeId])
+  @@index([createdAt])
+}
+
+// ─────────────────────────────────────────────
+// SUPPLIER DOCUMENT
+// ─────────────────────────────────────────────
+
+model SupplierDocument {
+  id           String          @id @default(cuid())
+  supplierId   String
+  type         SupplierDocType
+  label        String? // human-readable filename/label
+  url          String // Cloudinary URL
+  publicId     String? // Cloudinary public_id
+  isVerified   Boolean         @default(false)
+  verifiedAt   DateTime?
+  verifiedBy   String? // AdminProfile.id
+  rejectReason String?
+  uploadedAt   DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  supplier Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+
+  @@index([supplierId])
+  @@index([type])
+  @@index([isVerified])
+}
+
+// ─────────────────────────────────────────────
+// SUPPLIER SLA — per-order fulfillment tracking
+// ─────────────────────────────────────────────
+
+model SupplierSLA {
+  id                String    @id @default(cuid())
+  supplierId        String
+  orderId           String    @unique
+  orderNumber       String
+  // SLA targets (hours)
+  acceptanceSlaHrs  Int       @default(4) // must accept within N hours
+  shippingSlaHrs    Int       @default(48) // must ship within N hours of acceptance
+  deliverySlaHrs    Int       @default(168) // must deliver within N hours of dispatch (7 days)
+  // Actuals (null until event happens)
+  acceptedAt        DateTime?
+  shippedAt         DateTime?
+  deliveredAt       DateTime?
+  cancelledAt       DateTime?
+  // Computed durations (minutes)
+  acceptanceMinutes Int?
+  shippingMinutes   Int?
+  deliveryMinutes   Int?
+  // SLA status per dimension
+  acceptanceStatus  SlaStatus @default(NOT_APPLICABLE)
+  shippingStatus    SlaStatus @default(NOT_APPLICABLE)
+  deliveryStatus    SlaStatus @default(NOT_APPLICABLE)
+  // Overall
+  overallStatus     SlaStatus @default(NOT_APPLICABLE)
+  orderCreatedAt    DateTime
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  supplier Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+
+  @@index([supplierId])
+  @@index([overallStatus])
+  @@index([orderCreatedAt])
+}
+
+// ─────────────────────────────────────────────
+// SUPPLIER AGREEMENT VERSIONS
+// ─────────────────────────────────────────────
+
+model SupplierAgreement {
+  id               String    @id @default(cuid())
+  supplierId       String
+  version          String // e.g. "v1.0", "v2.0"
+  title            String
+  documentUrl      String // Cloudinary / S3 URL of the agreement PDF
+  acceptedAt       DateTime?
+  acceptedByIp     String?
+  isCurrentVersion Boolean   @default(false)
+  publishedAt      DateTime  @default(now())
+  createdAt        DateTime  @default(now())
+
+  supplier Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+
+  @@index([supplierId])
+  @@index([version])
+  @@index([isCurrentVersion])
+}
+
+// ─────────────────────────────────────────────
+// SUPPLIER SUPPORT TICKETS
+// ─────────────────────────────────────────────
+
+model SupplierTicket {
+  id           String         @id @default(cuid())
+  ticketNumber String         @unique // e.g. "TKT-240001"
+  supplierId   String
+  category     TicketCategory
+  priority     TicketPriority @default(MEDIUM)
+  status       TicketStatus   @default(OPEN)
+  subject      String
+  body         String         @db.Text
+  attachments  String[] // Cloudinary URLs
+  resolvedAt   DateTime?
+  resolvedBy   String? // AdminProfile.id
+  escalatedAt  DateTime?
+  escalatedBy  String? // AdminProfile.id
+  closedAt     DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  supplier Supplier              @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  replies  SupplierTicketReply[]
+
+  @@index([supplierId])
+  @@index([status])
+  @@index([priority])
+  @@index([category])
+  @@index([createdAt])
+}
+
+model SupplierTicketReply {
+  id          String   @id @default(cuid())
+  ticketId    String
+  authorId    String // userId (supplier or admin)
+  isAdmin     Boolean  @default(false)
+  body        String   @db.Text
+  attachments String[]
+  createdAt   DateTime @default(now())
+
+  ticket SupplierTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@index([createdAt])
+}
+
+// ─────────────────────────────────────────────
+// COMMISSION RULES
+// Layered: category → supplier → global (most specific wins)
+// ─────────────────────────────────────────────
+
+model CommissionRule {
+  id         String          @id @default(cuid())
+  scope      CommissionScope
+  supplierId String? // set when scope = SUPPLIER
+  categoryId String? // set when scope = CATEGORY
+  rate       Decimal         @db.Decimal(5, 4) // 0.0000–1.0000
+  label      String? // admin-readable note
+  isActive   Boolean         @default(true)
+  validFrom  DateTime        @default(now())
+  validUntil DateTime?
+  createdBy  String? // AdminProfile.id
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  @@index([scope])
+  @@index([supplierId])
+  @@index([categoryId])
+  @@index([isActive, validFrom, validUntil])
+}
+
+// ─────────────────────────────────────────────
+// MARKETING AUTOMATION
+// ─────────────────────────────────────────────
+
+enum CampaignType {
+  EMAIL
+  WHATSAPP
+  COUPON
+  LOYALTY
+}
+
+enum CampaignStatus {
+  DRAFT
+  SCHEDULED
+  RUNNING
+  PAUSED
+  COMPLETED
+  CANCELLED
+}
+
+enum CampaignEventType {
+  CREATED
+  SCHEDULED
+  STARTED
+  PAUSED
+  RESUMED
+  COMPLETED
+  CANCELLED
+  SENT // individual message dispatched
+  OPENED
+  CLICKED
+  CONVERTED // placed an order with campaign coupon
+  BOUNCED
+  UNSUBSCRIBED
+}
+
+enum AbandonedCartStatus {
+  DETECTED
+  RECOVERY_SENT
+  RECOVERED
+  EXPIRED
+}
+
+model Campaign {
+  id          String         @id @default(cuid())
+  name        String
+  description String?        @db.Text
+  type        CampaignType
+  status      CampaignStatus @default(DRAFT)
+
+  // Targeting
+  targetSegments    String[] // SegmentTag values: ["VIP","HIGH_VALUE"]
+  targetAll         Boolean  @default(false)
+  estimatedAudience Int      @default(0)
+
+  // Content
+  subject  String? // email subject / whatsapp header
+  body     String? @db.Text
+  ctaText  String?
+  ctaUrl   String?
+  imageUrl String?
+
+  // Coupon Campaign fields
+  couponId   String? // linked Coupon record
+  couponCode String? // denormalized for quick read
+
+  // Loyalty Campaign fields
+  loyaltyPoints  Int? // bonus points to award
+  loyaltyMessage String?
+
+  // Scheduling
+  scheduledAt DateTime?
+  startedAt   DateTime?
+  completedAt DateTime?
+
+  // Metrics (updated as events come in)
+  sentCount        Int     @default(0)
+  openCount        Int     @default(0)
+  clickCount       Int     @default(0)
+  conversionCount  Int     @default(0)
+  revenueGenerated Decimal @default(0) @db.Decimal(12, 2)
+  couponUsedCount  Int     @default(0)
+
+  // Metadata
+  createdBy String? // AdminProfile.id
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  events CampaignEvent[]
+
+  @@index([status])
+  @@index([type])
+  @@index([scheduledAt])
+  @@index([createdAt])
+  @@index([createdBy])
+}
+
+model CampaignEvent {
+  id         String            @id @default(cuid())
+  campaignId String
+  type       CampaignEventType
+  userId     String? // which customer this event is for (null for admin actions)
+  orderId    String? // linked order if CONVERTED
+  couponCode String?
+  metadata   Json?
+  createdAt  DateTime          @default(now())
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId])
+  @@index([type])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model AbandonedCart {
+  id                 String              @id @default(cuid())
+  userId             String
+  userEmail          String
+  userName           String?
+  cartItems          Json // snapshot: [{productId, name, price, qty, image}]
+  cartValue          Decimal             @db.Decimal(10, 2)
+  itemCount          Int
+  status             AbandonedCartStatus @default(DETECTED)
+  recoveryMethod     String? // "email" | "whatsapp"
+  recoveryCampaignId String?
+  recoveredOrderId   String?
+  detectedAt         DateTime            @default(now())
+  recoverySentAt     DateTime?
+  recoveredAt        DateTime?
+  expiresAt          DateTime? // cart expired / irrelevant after X days
+
+  @@index([userId])
+  @@index([status])
+  @@index([detectedAt])
+  @@index([cartValue])
+}
+
+// ─────────────────────────────────────────────
+// INSTAGRAM / UGC
+// ─────────────────────────────────────────────
+
+model InstagramPost {
+  id          String              @id @default(cuid())
+  instagramId String              @unique
+  imageUrl    String
+  caption     String?             @db.Text
+  permalink   String
+  likeCount   Int                 @default(0)
+  status      InstagramPostStatus @default(ACTIVE)
+  postedAt    DateTime
+  createdAt   DateTime            @default(now())
+
+  @@index([status])
+  @@index([postedAt])
+}
+
+// ─────────────────────────────────────────────
+// NOTIFICATION ENGINE
+// ─────────────────────────────────────────────
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  WHATSAPP
+  PUSH
+  SMS
+}
+
+enum NotificationCategory {
+  ORDER
+  PAYMENT
+  SHIPPING
+  RETURN
+  LOYALTY
+  REFERRAL
+  PROMOTION
+  SYSTEM
+  WISHLIST
+  STOCK
+}
+
+enum NotificationPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum NotificationDeliveryStatus {
+  PENDING
+  SENT
+  DELIVERED
+  OPENED
+  CLICKED
+  FAILED
+  SKIPPED
+}
+
+model Notification {
+  id         String  @id @default(cuid())
+  userId     String
+  supplierId String?
+
+  category NotificationCategory @default(SYSTEM)
+  type     String // "order.created" | "loyalty.earned" | etc.
+  priority NotificationPriority @default(NORMAL)
+
+  title       String
+  body        String
+  imageUrl    String?
+  actionUrl   String? // "/account/orders/xyz"
+  actionLabel String? // "View Order"
+  data        Json?
+
+  isRead      Boolean             @default(false)
+  readAt      DateTime?
+  channel     NotificationChannel @default(IN_APP)
+  campaignId  String?
+  sentByAdmin Boolean             @default(false)
+  adminNote   String?
+
+  createdAt DateTime @default(now())
+
+  user       User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  supplier   Supplier?              @relation("SupplierNotifications", fields: [supplierId], references: [id], onDelete: SetNull)
+  deliveries NotificationDelivery[]
+
+  @@index([userId, isRead])
+  @@index([userId, category])
+  @@index([userId, createdAt])
+  @@index([supplierId, isRead])
+  @@index([type])
+  @@index([campaignId])
+  @@index([createdAt])
+}
+
+model NotificationDelivery {
+  id             String                     @id @default(cuid())
+  notificationId String
+  channel        NotificationChannel
+  status         NotificationDeliveryStatus @default(PENDING)
+  provider       String?
+  providerMsgId  String?
+  sentAt         DateTime?
+  deliveredAt    DateTime?
+  openedAt       DateTime?
+  clickedAt      DateTime?
+  failureReason  String?
+  createdAt      DateTime                   @default(now())
+  updatedAt      DateTime                   @updatedAt
+
+  notification Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+
+  @@index([notificationId])
+  @@index([channel, status])
+  @@index([providerMsgId])
+  @@index([createdAt])
+}
+
+model NotificationPreference {
+  id     String @id @default(cuid())
+  userId String @unique
+
+  inApp Boolean @default(true)
+
+  emailOrders     Boolean @default(true)
+  emailPayments   Boolean @default(true)
+  emailShipping   Boolean @default(true)
+  emailReturns    Boolean @default(true)
+  emailLoyalty    Boolean @default(true)
+  emailReferral   Boolean @default(true)
+  emailPromotions Boolean @default(true)
+  emailSystem     Boolean @default(true)
+  emailWishlist   Boolean @default(false)
+  emailStock      Boolean @default(true)
+
+  waOrders     Boolean @default(false)
+  waPayments   Boolean @default(false)
+  waShipping   Boolean @default(false)
+  waPromotions Boolean @default(false)
+
+  pushEnabled Boolean @default(false)
+  pushToken   String?
+
+  globalUnsubscribe Boolean   @default(false)
+  unsubscribedAt    DateTime?
+  unsubscribeReason String?
+
+  quietHoursEnabled Boolean @default(false)
+  quietHoursStart   Int     @default(22)
+  quietHoursEnd     Int     @default(8)
+
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ─────────────────────────────────────────────
+// SITE CONFIG / ANNOUNCEMENT BAR
+// ─────────────────────────────────────────────
+
+model AnnouncementMessage {
+  id         String    @id @default(cuid())
+  message    String
+  ctaText    String?
+  ctaUrl     String?
+  isActive   Boolean   @default(true)
+  sortOrder  Int       @default(0)
+  validFrom  DateTime  @default(now())
+  validUntil DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([isActive, sortOrder])
+}
+
+// ─────────────────────────────────────────────
+// CMS — CONTENT BLOCKS
+// Drives all homepage + storefront content.
+// Admin edits these; storefront reads them.
+// ─────────────────────────────────────────────
+
+model ContentBlock {
+  id           String           @id @default(cuid())
+  type         ContentBlockType
+  key          String           @unique // e.g. "homepage_hero", "trust_bar"
+  title        String? // Internal admin label
+  status       PublishStatus    @default(DRAFT)
+  isActive     Boolean          @default(true)
+  sortOrder    Int              @default(0)
+  publishedAt  DateTime? // Set when first published
+  scheduledFor DateTime? // Future publish datetime
+  data         Json // All content as typed JSON per block type
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@index([type, isActive, status])
+  @@index([key])
+  @@index([status, scheduledFor])
+}
+
+// ─────────────────────────────────────────────
+// MEDIA ASSETS — Cloudinary-backed image library
+// ─────────────────────────────────────────────
+
+model MediaAsset {
+  id           String    @id @default(cuid())
+  type         AssetType @default(MISC)
+  url          String // Full-size Cloudinary URL
+  publicId     String // Cloudinary public_id for URL transforms
+  filename     String?
+  folder       String?
+  altText      String?
+  width        Int?
+  height       Int?
+  bytes        Int?
+  format       String?
+  focalPointX  Float? // 0.0–1.0, drives object-position on storefront
+  focalPointY  Float?
+  uploadedById String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([type])
+  @@index([publicId])
+  @@index([folder])
+}
+
+// ─────────────────────────────────────────────
+// MOBILE — Device registry & API tokens
+// ─────────────────────────────────────────────
+
+enum MobilePlatform {
+  ANDROID
+  IOS
+  UNKNOWN
+}
+
+enum MobileTokenStatus {
+  ACTIVE
+  REVOKED
+  EXPIRED
+}
+
+model MobileDevice {
+  id           String            @id @default(cuid())
+  userId       String
+  platform     MobilePlatform    @default(UNKNOWN)
+  deviceId     String // Unique hardware/installation ID
+  deviceModel  String?
+  osVersion    String?
+  appVersion   String?
+  fcmToken     String? // Firebase Cloud Messaging token for push
+  apnsToken    String? // APNs token (iOS)
+  tokenStatus  MobileTokenStatus @default(ACTIVE)
+  lastSeenAt   DateTime          @default(now())
+  biometricKey String? // Public key for biometric auth challenge
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // One physical device can only be registered once per user
+  @@unique([userId, deviceId])
+  @@index([userId])
+  @@index([fcmToken])
+  @@index([tokenStatus])
+}
+
+model MobileApiToken {
+  id           String            @id @default(cuid())
+  userId       String
+  deviceId     String // References MobileDevice.deviceId
+  token        String            @unique // Opaque refresh token (hashed)
+  status       MobileTokenStatus @default(ACTIVE)
+  expiresAt    DateTime
+  lastUsedAt   DateTime?
+  revokedAt    DateTime?
+  revokeReason String?
+  createdAt    DateTime          @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@index([status, expiresAt])
+}
+
+// ─────────────────────────────────────────────
+// CRM — Customer Relationship Management
+// ─────────────────────────────────────────────
+
+enum CrmSegment {
+  NEW_CUSTOMER
+  REPEAT_BUYER
+  VIP
+  HIGH_VALUE
+  LOYAL
+  WHOLESALE
+  INACTIVE
+  CHURNED
+  REFUND_RISK
+  COD_RISK
+  AT_RISK
+}
+
+enum CrmTicketStatus {
+  OPEN
+  PENDING
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum CrmTicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum CrmTicketCategory {
+  ORDER
+  RETURN
+  PAYMENT
+  SHIPPING
+  PRODUCT
+  ACCOUNT
+  FRAUD
+  OTHER
+}
+
+enum CustomerActivityType {
+  ORDER_PLACED
+  ORDER_CANCELLED
+  RETURN_REQUESTED
+  REFUND_ISSUED
+  REVIEW_SUBMITTED
+  TICKET_OPENED
+  TICKET_RESOLVED
+  NOTE_ADDED
+  TAG_ADDED
+  TAG_REMOVED
+  COD_BLOCKED
+  COD_UNBLOCKED
+  BLACKLISTED
+  UNBLACKLISTED
+  NOTIFICATION_SENT
+  LOGIN
+  PROFILE_UPDATED
+}
+
+model CustomerTag {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  color       String   @default("#6B7280")
+  description String?
+  createdAt   DateTime @default(now())
+
+  assignments CustomerTagAssignment[]
+}
+
+model CustomerTagAssignment {
+  customerId String
+  tagId      String
+  assignedBy String
+  assignedAt DateTime @default(now())
+
+  tag CustomerTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([customerId, tagId])
+  @@index([customerId])
+  @@index([tagId])
+}
+
+model CustomerNote {
+  id        String   @id @default(cuid())
+  userId    String
+  adminId   String
+  note      String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([adminId])
+  @@index([createdAt])
+}
+
+model CustomerTicket {
+  id          String            @id @default(cuid())
+  userId      String
+  subject     String
+  category    CrmTicketCategory @default(OTHER)
+  priority    CrmTicketPriority @default(MEDIUM)
+  status      CrmTicketStatus   @default(OPEN)
+  description String            @db.Text
+  assignedTo  String?
+  orderId     String?
+  resolvedAt  DateTime?
+  closedAt    DateTime?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  replies CustomerTicketReply[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([assignedTo])
+  @@index([priority])
+  @@index([createdAt])
+}
+
+model CustomerTicketReply {
+  id        String   @id @default(cuid())
+  ticketId  String
+  authorId  String
+  isAdmin   Boolean  @default(false)
+  message   String   @db.Text
+  createdAt DateTime @default(now())
+
+  ticket CustomerTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+}
+
+model CustomerActivity {
+  id          String               @id @default(cuid())
+  userId      String
+  type        CustomerActivityType
+  metadata    Json?
+  performedBy String?
+  createdAt   DateTime             @default(now())
+
+  @@index([userId, createdAt])
+  @@index([type])
+  @@index([createdAt])
+}
+
+model CrmProfile {
+  id              String       @id @default(cuid())
+  userId          String       @unique
+  segments        CrmSegment[]
+  // Computed metrics
+  ltv             Decimal      @default(0) @db.Decimal(12, 2)
+  avgOrderValue   Decimal      @default(0) @db.Decimal(10, 2)
+  orderCount      Int          @default(0)
+  returnCount     Int          @default(0)
+  refundCount     Int          @default(0)
+  refundRate      Decimal      @default(0) @db.Decimal(5, 4)
+  codOrderCount   Int          @default(0)
+  codUsageRate    Decimal      @default(0) @db.Decimal(5, 4)
+  riskScore       Int          @default(0)
+  engagementScore Int          @default(0)
+  orderFrequency  Decimal      @default(0) @db.Decimal(6, 2) // orders per month
+  firstOrderAt    DateTime?
+  lastOrderAt     DateTime?
+  daysSinceOrder  Int          @default(0)
+  isBlocked       Boolean      @default(false)
+  blockedAt       DateTime?
+  blockedBy       String?
+  blockReason     String?
+  lastComputedAt  DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([segments])
+  @@index([ltv])
+  @@index([riskScore])
+  @@index([lastOrderAt])
+  @@index([isBlocked])
+}
+
+// ─────────────────────────────────────────────
+// SITE SETTINGS — Per-page SEO + global config
+// ─────────────────────────────────────────────
+
+model SiteSettings {
+  id              String   @id @default(cuid())
+  key             String   @unique // e.g. "seo_home", "seo_products", "store_config"
+  metaTitle       String?
+  metaDescription String?  @db.Text
+  ogTitle         String?
+  ogDescription   String?  @db.Text
+  ogImageUrl      String?
+  robotsContent   String?  @default("index,follow")
+  canonicalUrl    String?
+  extraData       Json? // Flexible — shipping cost, store name, etc.
+  updatedAt       DateTime @updatedAt
+
+  @@index([key])
+}
+
+// ─────────────────────────────────────────────
+// LOYALTY POINTS
+// ─────────────────────────────────────────────
+
+enum LoyaltyTxType {
+  EARN_ORDER // points earned on purchase
+  EARN_REVIEW // points earned for submitting a review
+  EARN_REFERRAL // points earned for referring a friend
+  EARN_SIGNUP // welcome bonus on registration
+  EARN_BIRTHDAY // birthday bonus
+  REDEEM // points redeemed at checkout
+  EXPIRE // points expired
+  ADMIN_ADJUST // manual admin correction
+  REFUND_REVERSAL // points reversed on order refund
+}
+
+model LoyaltyPoint {
+  id          String        @id @default(cuid())
+  userId      String
+  type        LoyaltyTxType
+  points      Int // positive = earn, negative = redeem/expire
+  balance     Int // running balance after this transaction
+  orderId     String? // linked order (earn or redeem)
+  reviewId    String? // linked review (earn_review)
+  referralId  String? // linked referral (earn_referral)
+  description String? // human-readable label
+  expiresAt   DateTime? // when earned points expire (if applicable)
+  createdAt   DateTime      @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([type])
+  @@index([orderId])
+  @@index([createdAt])
+}
+
+// ─────────────────────────────────────────────
+// REFERRAL PROGRAM
+// ─────────────────────────────────────────────
+
+enum ReferralStatus {
+  PENDING // referee signed up but hasn't ordered yet
+  COMPLETED // referee placed first qualifying order — rewards issued
+  EXPIRED // window passed without qualifying order
+  REWARDED // both sides rewarded
+}
+
+model Referral {
+  id                String         @id @default(cuid())
+  referrerId        String // User who shared the code
+  refereeId         String?        @unique // User who used the code (null until signup)
+  refereeEmail      String? // email of invited person before signup
+  code              String         @unique // the referral code shared (also on User)
+  status            ReferralStatus @default(PENDING)
+  referrerReward    Int            @default(100) // points awarded to referrer on completion
+  refereeReward     Int            @default(50) // points awarded to referee on first order
+  referrerCoupon    String? // coupon code generated for referrer
+  refereeCoupon     String? // coupon code generated for referee (signup bonus)
+  qualifyingOrderId String? // order that triggered COMPLETED status
+  completedAt       DateTime?
+  expiredAt         DateTime?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  referrer User  @relation("ReferralsMade", fields: [referrerId], references: [id])
+  referee  User? @relation("ReferralReceived", fields: [refereeId], references: [id])
+
+  @@index([referrerId])
+  @@index([refereeId])
+  @@index([code])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ─────────────────────────────────────────────
+// CUSTOMER SEGMENT (computed, updated by cron/event)
+// ─────────────────────────────────────────────
+
+enum SegmentTag {
+  NEW_CUSTOMER
+  RETURNING_CUSTOMER
+  VIP
+  HIGH_VALUE
+  AT_RISK // no purchase in 90 days
+  CHURNED // no purchase in 180 days
+  REFERRER
+  REVIEWER
+  LOYALTY_MEMBER
+}
+
+model CustomerSegment {
+  id            String       @id @default(cuid())
+  userId        String       @unique
+  tags          SegmentTag[]
+  totalOrders   Int          @default(0)
+  totalSpent    Decimal      @default(0) @db.Decimal(12, 2)
+  loyaltyPoints Int          @default(0) // current balance (denormalized for speed)
+  referralCode  String?      @unique // the user's personal referral code
+  referralCount Int          @default(0) // number of successful referrals
+  lastOrderAt   DateTime?
+  firstOrderAt  DateTime?
+  avgOrderValue Decimal      @default(0) @db.Decimal(10, 2)
+  ltv           Decimal      @default(0) @db.Decimal(12, 2) // lifetime value
+  clv           Decimal      @default(0) @db.Decimal(12, 2) // predicted customer lifetime value
+  updatedAt     DateTime     @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tags])
+  @@index([totalSpent])
+  @@index([loyaltyPoints])
+  @@index([lastOrderAt])
+}
+
+// ─────────────────────────────────────────────
+// SOCIAL PROOF EVENT — recent purchase ticker
+// ─────────────────────────────────────────────
+
+model SocialProofEvent {
+  id           String   @id @default(cuid())
+  productName  String
+  productSlug  String
+  productImage String?
+  city         String?
+  timeAgo      String // "2 minutes ago", computed at write time
+  isActive     Boolean  @default(true)
+  isReal       Boolean  @default(true) // false = seeded/demo data
+  createdAt    DateTime @default(now())
+
+  @@index([isActive])
+  @@index([createdAt])
+}
+
+// ─────────────────────────────────────────────
+// WEBHOOK EVENTS — Immutable incoming event log
+// ─────────────────────────────────────────────
+
+model WebhookEvent {
+  id             String    @id @default(cuid())
+  provider       String    @default("razorpay") // razorpay | future providers
+  eventId        String? // Razorpay event ID (x-razorpay-event-id header)
+  eventType      String // payment.captured | payment.failed | etc.
+  payload        Json // Raw webhook body stored verbatim
+  processed      Boolean   @default(false)
+  processedAt    DateTime?
+  error          String? // Processing error message if failed
+  idempotencyKey String?   @unique // eventId|eventType — prevents double-processing
+  createdAt      DateTime  @default(now())
+
+  @@index([provider, eventType])
+  @@index([processed])
+  @@index([createdAt])
+}
+
+// ─────────────────────────────────────────────
+// RAZORPAY SETTLEMENT RECONCILIATION
+// Populated when settlement.processed webhook fires.
+// Used to reconcile Razorpay payouts against internal ledger.
+// ─────────────────────────────────────────────
+
+model RazorpaySettlement {
+  id                  String    @id @default(cuid())
+  razorpaySettlementId String   @unique // settlement_id from Razorpay payload
+  utr                 String?   // UTR number from Razorpay
+  amount              Decimal   @db.Decimal(14, 2) // total settled (INR)
+  fees                Decimal   @default(0) @db.Decimal(12, 2)
+  tax                 Decimal   @default(0) @db.Decimal(12, 2)
+  settledAt           DateTime  // when Razorpay transferred funds
+  description         String?
+  // Reconciliation
+  internalTotal       Decimal?  @db.Decimal(14, 2) // sum of captured payments in window
+  mismatch            Boolean   @default(false)
+  mismatchNote        String?
+  reconciledAt        DateTime?
+  createdAt           DateTime  @default(now())
+
+  @@index([settledAt])
+  @@index([mismatch])
+  @@index([createdAt])
+}
+
+// ─────────────────────────────────────────────
+// RATE LIMITING — sliding window per IP + route
+// ─────────────────────────────────────────────
+
+model RateLimitEntry {
+  id          String    @id @default(cuid())
+  key         String // "ip:route" e.g. "1.2.3.4:/api/auth/register"
+  hits        Int       @default(1)
+  windowStart DateTime // start of the current sliding window
+  blockedAt   DateTime? // set when IP is explicitly blocked
+  expiresAt   DateTime // GC cursor — entries older than this are stale
+
+  @@unique([key])
+  @@index([key, windowStart])
+  @@index([expiresAt])
+}
+
+// ─────────────────────────────────────────────
+// SECURITY EVENTS — structured event log
+// ─────────────────────────────────────────────
+
+enum SecurityEventType {
+  RATE_LIMIT_HIT
+  ACCOUNT_LOCKED
+  ACCOUNT_UNLOCKED
+  LOGIN_FAILED
+  LOGIN_SUCCESS
+  SUSPICIOUS_REQUEST
+  PASSWORD_RESET_REQUEST
+  REGISTRATION
+}
+
+model SecurityEvent {
+  id        String            @id @default(cuid())
+  type      SecurityEventType
+  ip        String?
+  userAgent String?
+  email     String? // target email (hashed or plain for lookups)
+  userId    String?
+  route     String?
+  metadata  Json?
+  createdAt DateTime          @default(now())
+
+  @@index([type, createdAt])
+  @@index([ip, createdAt])
+  @@index([email, createdAt])
+  @@index([createdAt])
+}
+
+// ─────────────────────────────────────────────
+// LOGIN ATTEMPTS — per-user failed login counter
+// ─────────────────────────────────────────────
+
+model LoginAttempt {
+  id            String   @id @default(cuid())
+  email         String
+  ip            String?
+  success       Boolean
+  failureReason String?
+  userAgent     String?
+  createdAt     DateTime @default(now())
+
+  @@index([email, createdAt])
+  @@index([ip, createdAt])
+  @@index([success, createdAt])
+}
+
+// ─────────────────────────────────────────────
+// ADMIN SESSIONS — tracked sessions for force-logout
+// ─────────────────────────────────────────────
+
+model AdminSession {
+  id           String    @id @default(cuid())
+  adminId      String // AdminProfile.id
+  userId       String // User.id (denormalized for fast queries)
+  sessionToken String    @unique // JWT jti or opaque token
+  ip           String?
+  userAgent    String?
+  deviceInfo   String? // parsed from UA: "Chrome 124 / Windows"
+  lastSeenAt   DateTime  @default(now())
+  revokedAt    DateTime?
+  revokedBy    String? // admin userId who revoked
+  expiresAt    DateTime
+  createdAt    DateTime  @default(now())
+
+  @@index([adminId])
+  @@index([userId])
+  @@index([revokedAt])
+  @@index([expiresAt])
+}
+
+// ─────────────────────────────────────────────
+// FEATURE FLAGS
+// ─────────────────────────────────────────────
+
+model FeatureFlag {
+  id           String   @id @default(cuid())
+  key          String   @unique // e.g. "loyalty_enabled"
+  name         String // Human label
+  description  String?
+  enabled      Boolean  @default(false)
+  // Optional targeting — null = applies to all users
+  rolloutPct   Int      @default(100) // 0–100 percent rollout
+  allowedRoles String[] // empty = all roles
+  metadata     Json? // arbitrary config data
+  updatedBy    String? // admin user id
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([key])
+  @@index([enabled])
+}
+
+// ─────────────────────────────────────────────
+// MAINTENANCE MODE
+// ─────────────────────────────────────────────
+
+model MaintenanceWindow {
+  id           String    @id @default(cuid())
+  enabled      Boolean   @default(false)
+  title        String    @default("We'll be right back")
+  message      String    @default("TRYBY is undergoing scheduled maintenance. We'll be back shortly.")
+  estimatedEnd DateTime?
+  allowedIps   String[] // bypass whitelist
+  updatedBy    String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+// ─────────────────────────────────────────────
+// SYSTEM JOBS — lightweight background task log
+// ─────────────────────────────────────────────
+
+enum JobStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+model SystemJob {
+  id           String    @id @default(cuid())
+  type         String // "email_batch" | "export" | "reindex" | "cron_*"
+  name         String // Human label
+  status       JobStatus @default(PENDING)
+  triggeredBy  String? // userId or "system"
+  payload      Json? // input parameters
+  result       Json? // output / summary
+  error        String?
+  attempts     Int       @default(0)
+  maxAttempts  Int       @default(3)
+  startedAt    DateTime?
+  completedAt  DateTime?
+  scheduledFor DateTime? // null = run immediately
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([status, createdAt])
+  @@index([type, status])
+  @@index([scheduledFor])
+}
+
+// ─────────────────────────────────────────────
+// SUPPLIER SKU MAPPING
+// Maps a supplier's SKU to a TRYBY ProductVariant.
+// Future: supports API-based suppliers; for now used by CSV sync.
+// ─────────────────────────────────────────────
+
+model SupplierSkuMap {
+  id             String    @id @default(cuid())
+  supplierId     String // Supplier.id
+  supplierSku    String // SKU as it appears in supplier's feed
+  variantId      String // ProductVariant.id
+  bufferStock    Int       @default(0) // Safety buffer: TRYBY stock = supplier − buffer
+  manualOverride Boolean   @default(false) // If true, ignore supplier updates for this variant
+  ignoreUpdates  Boolean   @default(false) // Skip this SKU during sync runs
+  lastSyncedAt   DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  supplier Supplier       @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  variant  ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+
+  @@unique([supplierId, supplierSku]) // one supplier can't have two entries for same sku
+  @@unique([variantId]) // each TRYBY variant maps to at most one supplier sku
+  @@index([supplierId])
+  @@index([variantId])
+  @@index([supplierSku])
+}
+
+// ─────────────────────────────────────────────
+// STOCK SYNC LOG — immutable audit trail per sync run
+// ─────────────────────────────────────────────
+
+enum SyncStatus {
+  SUCCESS
+  SKIPPED // ignoreUpdates = true
+  NO_MAPPING // supplier SKU not found in SupplierSkuMap
+  FAILED // unexpected error
+  OVERRIDDEN // manualOverride = true, supplier update was suppressed
+}
+
+model StockSyncLog {
+  id            String     @id @default(cuid())
+  syncSessionId String // groups all rows from one sync run
+  supplierId    String
+  supplierSku   String
+  variantId     String? // null if no mapping found
+  stockBefore   Int?
+  stockAfter    Int?
+  supplierStock Int // what the feed reported
+  bufferApplied Int        @default(0)
+  status        SyncStatus
+  errorReason   String?
+  createdAt     DateTime   @default(now())
+
+  supplier Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+
+  @@index([syncSessionId])
+  @@index([supplierId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([variantId])
+}
+
+// ─────────────────────────────────────────────
+// SUPPLIER SYNC PROFILE — per-supplier automation config
+// ─────────────────────────────────────────────
+
+enum SyncFrequency {
+  MINUTES_15
+  MINUTES_30
+  HOURS_1
+  HOURS_6
+  DAILY
+}
+
+model SupplierSyncProfile {
+  id                  String        @id @default(cuid())
+  supplierId          String        @unique
+  syncEnabled         Boolean       @default(false)
+  syncFrequency       SyncFrequency @default(HOURS_1)
+  marginPercent       Decimal       @default(0.30) @db.Decimal(5, 4) // 30% default margin
+  minProfitAmount     Decimal       @default(0) @db.Decimal(10, 2)
+  autoHideOutOfStock  Boolean       @default(true)
+  autoAdjustPrice     Boolean       @default(false)
+  lastSyncAt          DateTime?
+  nextSyncAt          DateTime?
+  consecutiveFailures Int           @default(0)
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  supplier Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+
+  @@index([supplierId])
+  @@index([syncEnabled])
+  @@index([nextSyncAt])
+}
+
+// ─────────────────────────────────────────────
+// PRICE SYNC LOG — audit trail for price recalculations
+// ─────────────────────────────────────────────
+
+model PriceSyncLog {
+  id            String   @id @default(cuid())
+  syncSessionId String
+  supplierId    String
+  variantId     String
+  supplierSku   String
+  oldCostPrice  Decimal? @db.Decimal(10, 2)
+  newCostPrice  Decimal  @db.Decimal(10, 2)
+  oldSellPrice  Decimal? @db.Decimal(10, 2)
+  newSellPrice  Decimal  @db.Decimal(10, 2)
+  marginUsed    Decimal  @db.Decimal(5, 4)
+  minProfitUsed Decimal  @db.Decimal(10, 2)
+  createdAt     DateTime @default(now())
+
+  supplier Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+
+  @@index([syncSessionId])
+  @@index([supplierId])
+  @@index([variantId])
+  @@index([createdAt])
+}
+
+// ─────────────────────────────────────────────
+// FRAUD & RISK MANAGEMENT SYSTEM
+// ─────────────────────────────────────────────
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum BlacklistType {
+  EMAIL
+  PHONE
+  IP
+  ADDRESS
+}
+
+enum BlacklistStatus {
+  ACTIVE
+  LIFTED
+}
+
+enum FraudActionType {
+  FLAG_ORDER
+  BLOCK_COD
+  BLACKLIST_CUSTOMER
+  CANCEL_ORDER
+  REQUIRE_VERIFICATION
+  MANUAL_REVIEW
+  OVERRIDE_CLEAR
+  OVERRIDE_FLAG
+  BLACKLIST_ADD
+  BLACKLIST_REMOVE
+  COD_RULE_CHANGED
+  RISK_SCORE_UPDATED
+}
+
+// Customer risk profile — one per user, updated on each order/event
+model CustomerRiskProfile {
+  id                   String    @id @default(cuid())
+  userId               String    @unique
+  riskScore            Int       @default(0)
+  riskLevel            RiskLevel @default(LOW)
+  totalOrders          Int       @default(0)
+  totalReturns         Int       @default(0)
+  totalRefunds         Int       @default(0)
+  totalRefundAmount    Decimal   @default(0) @db.Decimal(10, 2)
+  totalCodOrders       Int       @default(0)
+  totalCodDelivered    Int       @default(0)
+  totalCodCancelled    Int       @default(0)
+  avgOrderValue        Decimal   @default(0) @db.Decimal(10, 2)
+  distinctIps          String[]
+  flaggedOrderCount    Int       @default(0)
+  isBlacklisted        Boolean   @default(false)
+  isCodBlocked         Boolean   @default(false)
+  multipleAccountScore Int       @default(0)
+  lastOrderAt          DateTime?
+  lastFlaggedAt        DateTime?
+  notes                String?
+  updatedAt            DateTime  @updatedAt
+  createdAt            DateTime  @default(now())
+  User                 User[]
+
+  @@index([riskLevel])
+  @@index([riskScore])
+  @@index([isBlacklisted])
+  @@index([isCodBlocked])
+}
+
+// Per-order risk assessment
+model OrderRiskAssessment {
+  id                String    @id @default(cuid())
+  orderId           String    @unique
+  riskScore         Int       @default(0)
+  riskLevel         RiskLevel @default(LOW)
+  flags             String[]
+  ipAddress         String?
+  sameIpOrderCount  Int       @default(0)
+  isHighValue       Boolean   @default(false)
+  suspiciousAddress Boolean   @default(false)
+  velocityFlag      Boolean   @default(false)
+  requiresReview    Boolean   @default(false)
+  reviewedBy        String?
+  reviewedAt        DateTime?
+  reviewNote        String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([riskLevel])
+  @@index([requiresReview])
+  @@index([createdAt])
+}
+
+// Blacklist entries — email / phone / IP / address
+model Blacklist {
+  id         String          @id @default(cuid())
+  type       BlacklistType
+  value      String
+  status     BlacklistStatus @default(ACTIVE)
+  reason     String?
+  addedBy    String?
+  liftedBy   String?
+  liftedAt   DateTime?
+  liftReason String?
+  hitCount   Int             @default(0)
+  lastHitAt  DateTime?
+  expiresAt  DateTime?
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  @@unique([type, value])
+  @@index([type, status])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// COD abuse tracking — aggregate per user
+model CodAbuseRecord {
+  id             String    @id @default(cuid())
+  userId         String    @unique
+  totalCodOrders Int       @default(0)
+  deliveredCount Int       @default(0)
+  cancelledCount Int       @default(0)
+  rtoCount       Int       @default(0)
+  successRate    Decimal   @default(100) @db.Decimal(5, 2)
+  isBlocked      Boolean   @default(false)
+  blockedAt      DateTime?
+  blockedBy      String?
+  blockReason    String?
+  updatedAt      DateTime  @updatedAt
+  createdAt      DateTime  @default(now())
+
+  @@index([isBlocked])
+  @@index([successRate])
+}
+
+// COD auto-block rules — admin configurable
+model CodBlockRule {
+  id             String   @id @default(cuid())
+  name           String
+  description    String?
+  enabled        Boolean  @default(true)
+  minOrders      Int      @default(3)
+  maxSuccessRate Decimal  @default(40) @db.Decimal(5, 2)
+  maxCancelCount Int      @default(5)
+  autoBlock      Boolean  @default(true)
+  createdBy      String?
+  updatedBy      String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([enabled])
+}
+
+// Refund abuse record — aggregate per user
+model RefundAbuseRecord {
+  id                String    @id @default(cuid())
+  userId            String    @unique
+  totalRefunds      Int       @default(0)
+  totalRefundAmount Decimal   @default(0) @db.Decimal(10, 2)
+  refundRate        Decimal   @default(0) @db.Decimal(5, 2)
+  lastRefundAt      DateTime?
+  isFlagged         Boolean   @default(false)
+  flaggedAt         DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([isFlagged])
+  @@index([refundRate])
+}
+
+// Fraud audit log — immutable record of every risk action
+model FraudAuditLog {
+  id          String          @id @default(cuid())
+  actionType  FraudActionType
+  performedBy String?
+  targetId    String?
+  targetType  String?
+  reason      String?
+  before      Json?
+  after       Json?
+  ipAddress   String?
+  createdAt   DateTime        @default(now())
+
+  @@index([actionType, createdAt])
+  @@index([performedBy, createdAt])
+  @@index([targetId, targetType])
+  @@index([createdAt])
+}

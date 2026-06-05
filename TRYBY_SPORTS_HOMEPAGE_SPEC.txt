@@ -1,0 +1,1906 @@
+================================================================================
+  TRYBY SPORTS — HOMEPAGE UI MASTER SPECIFICATION
+  Role: Principal Designer + UX Architect + CRO Expert + Staff Engineer
+  Generated: 2026-06-03
+================================================================================
+
+
+================================================================================
+  SECTION 0 — HOMEPAGE AUDIT (CURRENT STATE)
+================================================================================
+
+WHAT EXISTS (TrendDrop):
+  7 sections: Hero, Trending, ProblemSolvers, Viral, Trust, Reviews, Newsletter
+  Light theme (#FFFFFF, #F9FAFB backgrounds) — wrong for premium sports
+  Primary color: #2563EB (generic blue) — no sports identity
+  Font: Inter only — no display/impact font
+  Logo: Zap icon + "TrendDrop" — zero sports relevance
+  Nav links: Trending | New Arrivals | Best Sellers | Categories | Deals
+  Hero: rotating words (Productivity, Wellness, Home Living) — wrong domain
+  Trust section: light gray bg — breaks premium dark feel
+
+CRITICAL PROBLEMS:
+  1. WRONG THEME — Light bg is Flipkart/Amazon. Premium sports is dark.
+  2. WRONG BRAND — TrendDrop, Zap icon, blue accents = generic dropship site
+  3. NO SPORT IDENTITY — No cricket, football, gym, running anywhere
+  4. NO MEGA MENU — Sports site needs category-first mega navigation
+  5. NO FEATURED JERSEYS — #1 revenue product has zero hero placement
+  6. NO SPORT CATEGORY ENTRY — "Shop by Sport" is the most critical missing section
+  7. NO SUPPLIER TRUST — B2B visitors (suppliers) have no reason to trust
+  8. NO SCARCITY/URGENCY — "X sold today", "Only 3 left" are absent
+  9. HERO IS WRONG — "Discover Products That Actually Improve Productivity" ≠ sports
+  10. MOBILE NAV — No bottom tab bar, no sport-first mobile entry
+  11. REVIEWS ARE GENERIC — No sport, no verified purchase, no photo reviews
+  12. FOOTER — Missing size guide, athlete program, supplier partnership links
+
+
+================================================================================
+  SECTION 1 — HOMEPAGE IMPROVEMENTS
+================================================================================
+
+KEEP (adapt for sports):
+  Announcement bar rotation mechanic (good UX)
+  Marquee review rows (strong social proof format)
+  Horizontal product carousel (efficient real estate)
+  Newsletter success state handling
+  Cart badge animation
+
+REPLACE ENTIRELY:
+  Hero — complete new sports-first layout
+  Trust section — dark card design, sports-specific claims
+  Footer — dark, sport-column structure, supplier section
+  Navbar — mega menu, sport links, dark glassmorphism
+
+ADD NEW:
+  Featured Jerseys section (highest margin, highest intent)
+  Shop By Sport grid (intent capture for all 5 audiences)
+  Best Sellers section (social proof at product level)
+  New Arrivals section (recency + freshness signal)
+  Supplier Partnership CTA (B2B trust building)
+  Instagram / UGC feed (community + authenticity)
+  FAQ section (pre-purchase objection removal)
+
+STRUCTURAL CHANGE:
+  Old order: Hero → Trending → ProblemSolvers → Viral → Trust → Reviews → Newsletter
+  New order:
+    Announcement Bar
+    Navbar (with mega menu)
+    Hero
+    Featured Jerseys        ← NEW
+    Shop By Sport           ← NEW
+    Trending Products       ← UPGRADED
+    Best Sellers            ← NEW
+    New Arrivals            ← NEW
+    Why TRYBY Sports        ← UPGRADED (dark theme)
+    Customer Reviews        ← UPGRADED (sport-specific)
+    Supplier Partnership    ← NEW
+    Instagram / Social      ← NEW
+    FAQ                     ← NEW
+    Newsletter              ← UPGRADED
+    Footer                  ← UPGRADED
+
+
+================================================================================
+  SECTION 2 — COMPLETE DESIGN SYSTEM
+================================================================================
+
+────────────────────────────────────────────────────────────────────────────────
+  2.1 COLOR TOKENS
+────────────────────────────────────────────────────────────────────────────────
+
+  BRAND COLORS
+  ────────────
+  --color-red-500:         #FF3B30    Performance Red — primary CTA, badges, urgency
+  --color-red-600:         #E5352B    Performance Red Hover
+  --color-red-700:         #CC2F26    Performance Red Active/Press
+  --color-red-muted:       rgba(255, 59, 48, 0.12)   Red tinted surface
+  --color-red-glow:        rgba(255, 59, 48, 0.30)   Red glow for shadows
+
+  --color-cyan-400:        #00D4FF    Electric Cyan — secondary accent, speed
+  --color-cyan-500:        #00C6FF    Electric Cyan base
+  --color-cyan-600:        #00A8D6    Electric Cyan hover
+  --color-cyan-muted:      rgba(0, 198, 255, 0.12)
+
+  --color-gold-400:        #FFD000    Victory Gold — achievements, ratings, premium
+  --color-gold-500:        #FFB800    Victory Gold base
+  --color-gold-600:        #E6A500    Victory Gold hover
+  --color-gold-muted:      rgba(255, 184, 0, 0.12)
+
+  SURFACE COLORS (Dark Theme Only)
+  ─────────────────────────────────
+  --color-bg:              #080808    Deepest black — page background
+  --color-surface:         #0F0F0F    Card backgrounds, section backgrounds
+  --color-surface-raised:  #141414    Elevated elements (nav, drawers)
+  --color-surface-overlay: #1A1A1A    Modals, tooltips, hover states
+  --color-surface-sunken:  #050505    Input backgrounds, inset areas
+
+  BORDER COLORS
+  ─────────────
+  --color-border:          #1C1C1C    Default border
+  --color-border-subtle:   #141414    Barely-there separators
+  --color-border-strong:   #282828    Emphasized borders
+  --color-border-focus:    #FF3B30    Focus ring (brand red)
+  --color-border-success:  #00E676    Success state border
+  --color-border-error:    #FF3B30    Error state border (same as red)
+
+  TEXT COLORS
+  ───────────
+  --color-text:            #FFFFFF    Primary text
+  --color-text-secondary:  #A0A0A0    Secondary / metadata text
+  --color-text-tertiary:   #606060    Placeholder, disabled labels
+  --color-text-muted:      #3A3A3A    Faintest text (captions on dark)
+  --color-text-inverse:    #080808    Text on light/colored backgrounds
+
+  SEMANTIC COLORS
+  ───────────────
+  --color-success:         #00E676    Green — in stock, confirmed, verified
+  --color-success-bg:      rgba(0, 230, 118, 0.10)
+  --color-warning:         #FFB800    Amber — low stock, pending
+  --color-warning-bg:      rgba(255, 184, 0, 0.10)
+  --color-error:           #FF3B30    Red — OOS, failed, required
+  --color-error-bg:        rgba(255, 59, 48, 0.10)
+
+  SPORT TAG COLORS
+  ────────────────
+  --color-sport-cricket:   #4CAF50    Cricket green
+  --color-sport-football:  #2196F3    Football blue
+  --color-sport-gym:       #FF3B30    Gym red (same as primary)
+  --color-sport-running:   #FF9800    Running orange
+  --color-sport-badminton: #9C27B0    Badminton purple
+  --color-sport-swimming:  #00BCD4    Swimming teal
+
+  GRADIENTS
+  ─────────
+  --gradient-hero:         linear-gradient(135deg, #080808 0%, #0D0D18 50%, #080808 100%)
+  --gradient-hero-glow:    radial-gradient(ellipse 80% 60% at 60% 40%, rgba(255,59,48,0.12) 0%, transparent 70%)
+  --gradient-card:         linear-gradient(145deg, #141414 0%, #0F0F0F 100%)
+  --gradient-red:          linear-gradient(135deg, #FF3B30 0%, #CC2F26 100%)
+  --gradient-gold:         linear-gradient(135deg, #FFD000 0%, #FF9800 100%)
+  --gradient-text-fire:    linear-gradient(135deg, #FF3B30 0%, #FFB800 100%)
+  --gradient-text-ice:     linear-gradient(135deg, #FFFFFF 0%, #A0A0A0 100%)
+  --gradient-overlay:      linear-gradient(180deg, transparent 0%, rgba(8,8,8,0.95) 100%)
+  --gradient-shimmer:      linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.05) 50%, transparent 100%)
+
+  GLOW / SHADOW TOKENS
+  ─────────────────────
+  --glow-red-sm:           0 0 12px rgba(255, 59, 48, 0.40)
+  --glow-red-md:           0 0 24px rgba(255, 59, 48, 0.35)
+  --glow-red-lg:           0 0 48px rgba(255, 59, 48, 0.25)
+  --glow-gold-sm:          0 0 12px rgba(255, 184, 0, 0.40)
+  --glow-cyan-sm:          0 0 12px rgba(0, 198, 255, 0.40)
+  --glow-card:             0 0 0 1px rgba(255,255,255,0.04), 0 4px 24px rgba(0,0,0,0.60)
+  --glow-card-hover:       0 0 0 1px rgba(255,59,48,0.15), 0 8px 32px rgba(0,0,0,0.70), var(--glow-red-sm)
+
+
+────────────────────────────────────────────────────────────────────────────────
+  2.2 TYPOGRAPHY
+────────────────────────────────────────────────────────────────────────────────
+
+  FONTS
+  ─────
+  Display / Impact:  "Barlow Condensed" — weights 600, 700, 800
+                     Google Fonts: https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800
+                     Use for: headlines, sport names, hero, CTA labels, section titles
+                     Character: wide, athletic, scoreboard energy, directional
+
+  Body / UI:         "Inter" — weights 400, 500, 600
+                     Already installed. Use for: body text, nav links, metadata, inputs, captions
+
+  Mono:              "JetBrains Mono" — weight 400, 500
+                     Use for: prices, order numbers, tracking codes, stats
+
+  TYPE SCALE
+  ──────────
+  Style         Font              Size    Weight  Line-H  Letter-S  Transform   Usage
+  ─────────────────────────────────────────────────────────────────────────────────
+  Display-1     Barlow Condensed  96px    800     1.0     -0.02em   UPPERCASE   Hero primary (desktop)
+  Display-2     Barlow Condensed  72px    800     1.0     -0.02em   UPPERCASE   Hero primary (tablet)
+  Display-3     Barlow Condensed  56px    800     1.05    -0.01em   UPPERCASE   Hero primary (mobile)
+  H1            Barlow Condensed  48px    700     1.1     -0.01em   Title Case  Section headlines (desktop)
+  H2            Barlow Condensed  36px    700     1.15    0em       Title Case  Section headlines (tablet)
+  H3            Barlow Condensed  28px    700     1.2     0em       Title Case  Card headlines
+  H4            Inter             20px    600     1.3     0em       Normal      Subheadings, labels
+  Body-LG       Inter             18px    400     1.6     0em       Normal      Hero body copy
+  Body-MD       Inter             16px    400     1.6     0em       Normal      Default body
+  Body-SM       Inter             14px    400     1.5     0em       Normal      Metadata, captions
+  Caption       Inter             12px    500     1.4     0.02em    Normal      Tags, badges, overlines
+  Eyebrow       Barlow Condensed  13px    600     1.2     0.12em    UPPERCASE   Section eyebrows
+  Price-LG      JetBrains Mono    28px    700     1.0     -0.02em   Normal      Hero/featured price
+  Price-MD      JetBrains Mono    20px    600     1.0     -0.01em   Normal      Card price
+  Price-SM      JetBrains Mono    14px    500     1.0     0em       Normal      Secondary price / crossed out
+
+  RESPONSIVE SCALING:
+  All display and H1/H2 sizes scale down by ~25% on tablet, ~40% on mobile.
+  Body and Caption stay fixed.
+
+
+────────────────────────────────────────────────────────────────────────────────
+  2.3 SPACING SYSTEM
+────────────────────────────────────────────────────────────────────────────────
+
+  Token     px    Tailwind    Usage
+  ──────────────────────────────────────────────────────
+  space-1   4px   p-1         Icon padding, tight internal spacing
+  space-2   8px   p-2         Badge padding, chip padding
+  space-3   12px  p-3         Input padding, small card padding
+  space-4   16px  p-4         Standard component padding
+  space-6   24px  p-6         Card padding, section element gaps
+  space-8   32px  p-8         Card padding (large), section sub-gaps
+  space-12  48px  py-12       Section vertical padding (mobile)
+  space-16  64px  py-16       Section vertical padding (tablet)
+  space-24  96px  py-24       Section vertical padding (desktop)
+
+  SECTION RHYTHM (desktop):
+    padding-top: 96px
+    padding-bottom: 96px
+    gap between sections: 0 (use bg color contrast instead)
+
+  CONTAINER:
+    max-width: 1280px
+    padding-x: 24px (mobile), 32px (tablet), 48px (desktop)
+    centered: margin auto
+
+
+────────────────────────────────────────────────────────────────────────────────
+  2.4 BORDER RADIUS SYSTEM
+────────────────────────────────────────────────────────────────────────────────
+
+  Token     px     Usage
+  ──────────────────────────────────────────────────────────
+  radius-xs  2px   Badges on top of other elements
+  radius-sm  4px   Tags, chips, code blocks
+  radius-md  8px   Buttons, inputs, small cards
+  radius-lg  12px  Standard cards, panels
+  radius-xl  16px  Product cards, featured cards
+  radius-2xl 20px  Hero cards, floating stats
+  radius-3xl 28px  Large modals, drawers
+  radius-full 9999px Pills, avatars, circular buttons
+
+
+────────────────────────────────────────────────────────────────────────────────
+  2.5 SHADOW SYSTEM
+────────────────────────────────────────────────────────────────────────────────
+
+  shadow-xs:      0 1px 2px rgba(0,0,0,0.50)
+  shadow-sm:      0 2px 4px rgba(0,0,0,0.60)
+  shadow-md:      0 4px 12px rgba(0,0,0,0.70)
+  shadow-lg:      0 8px 24px rgba(0,0,0,0.80)
+  shadow-xl:      0 16px 48px rgba(0,0,0,0.90)
+  shadow-card:    0 0 0 1px rgba(255,255,255,0.04), 0 4px 24px rgba(0,0,0,0.60)
+  shadow-card-hover: 0 0 0 1px rgba(255,59,48,0.20), 0 8px 32px rgba(0,0,0,0.70), 0 0 20px rgba(255,59,48,0.15)
+  shadow-modal:   0 0 0 1px rgba(255,255,255,0.06), 0 24px 80px rgba(0,0,0,0.95)
+  shadow-btn:     0 2px 8px rgba(255,59,48,0.40)
+  shadow-btn-hover: 0 4px 16px rgba(255,59,48,0.55)
+  shadow-gold:    0 2px 8px rgba(255,184,0,0.35)
+  shadow-navbar:  0 1px 0 rgba(255,255,255,0.04), 0 4px 20px rgba(0,0,0,0.60)
+
+
+────────────────────────────────────────────────────────────────────────────────
+  2.6 GLASSMORPHISM RULES
+────────────────────────────────────────────────────────────────────────────────
+
+  RULE: Use glass only on top of complex backgrounds (hero, images, gradients).
+  Never use glass on solid dark surfaces (it just looks muddy).
+
+  .glass-dark:
+    background: rgba(14, 14, 14, 0.80)
+    backdrop-filter: blur(20px) saturate(1.2)
+    -webkit-backdrop-filter: blur(20px) saturate(1.2)
+    border: 1px solid rgba(255, 255, 255, 0.06)
+
+  .glass-card:
+    background: rgba(20, 20, 20, 0.70)
+    backdrop-filter: blur(16px)
+    border: 1px solid rgba(255, 255, 255, 0.08)
+
+  .glass-floating:
+    background: rgba(8, 8, 8, 0.85)
+    backdrop-filter: blur(24px) saturate(1.5)
+    border: 1px solid rgba(255, 255, 255, 0.10)
+
+  Usage:
+    Navbar (on scroll): .glass-dark
+    Hero floating stat cards: .glass-floating
+    Mega menu: .glass-dark
+    Mobile drawer: .glass-dark (full height)
+
+
+────────────────────────────────────────────────────────────────────────────────
+  2.7 CARD RULES
+────────────────────────────────────────────────────────────────────────────────
+
+  BASE CARD:
+    background: var(--color-surface)         #0F0F0F
+    border: 1px solid var(--color-border)    #1C1C1C
+    border-radius: var(--radius-xl)          16px
+    box-shadow: var(--shadow-card)
+    transition: box-shadow 200ms ease, border-color 200ms ease, transform 200ms ease
+
+  HOVER STATE:
+    border-color: rgba(255, 59, 48, 0.25)
+    box-shadow: var(--shadow-card-hover)
+    transform: translateY(-2px)
+
+  PRODUCT CARD:
+    Same as base + overflow: hidden
+    Image area: aspect-ratio 4/5, bg #141414
+    Content area: padding 16px
+
+  FEATURED CARD (larger):
+    border-radius: var(--radius-2xl)         20px
+    padding: 24px
+
+  SUPPLIER CARD:
+    border: 1px solid rgba(255, 184, 0, 0.15)   Gold tint for B2B trust
+    hover: border-color rgba(255, 184, 0, 0.35)
+
+
+================================================================================
+  SECTION 3 — COMPONENT SPECIFICATIONS
+================================================================================
+
+────────────────────────────────────────────────────────────────────────────────
+  3.1 BUTTONS
+────────────────────────────────────────────────────────────────────────────────
+
+  PRIMARY BUTTON (Red CTA):
+    Background:    linear-gradient(135deg, #FF3B30 0%, #CC2F26 100%)
+    Text:          #FFFFFF, Barlow Condensed 700, 15px, UPPERCASE, tracking 0.05em
+    Border:        none
+    Border-radius: 8px
+    Padding:       12px 28px (default), 10px 20px (sm), 14px 36px (lg)
+    Box-shadow:    var(--shadow-btn)
+    Height:        44px (default), 36px (sm), 52px (lg)
+
+    HOVER:
+      background: linear-gradient(135deg, #E5352B 0%, #B82822 100%)
+      box-shadow: var(--shadow-btn-hover)
+      transform: translateY(-1px)
+      transition: all 150ms ease
+
+    ACTIVE:
+      transform: translateY(0px) scale(0.99)
+      box-shadow: none
+
+    LOADING:
+      opacity: 0.8
+      cursor: not-allowed
+      spinner replaces label text
+
+    DISABLED:
+      opacity: 0.35
+      cursor: not-allowed
+      no hover effects
+
+  SECONDARY BUTTON (Ghost):
+    Background:    transparent
+    Text:          #FFFFFF, same font as primary
+    Border:        1px solid rgba(255,255,255,0.20)
+    Border-radius: 8px
+    Padding:       same as primary
+
+    HOVER:
+      background: rgba(255,255,255,0.06)
+      border-color: rgba(255,255,255,0.35)
+
+  GHOST SPORT (Colored border):
+    Same as secondary but border: 1px solid var(--color-red-500)
+    Text: var(--color-red-500)
+    HOVER: background var(--color-red-muted)
+
+  ICON BUTTON (circle):
+    Size: 40px × 40px
+    background: var(--color-surface-raised)
+    border: 1px solid var(--color-border)
+    border-radius: 50%
+    Hover: background var(--color-surface-overlay), border-color var(--color-border-strong)
+
+  ACCESSIBILITY:
+    min-touch-target: 44×44px (all variants)
+    focus-visible: outline 2px solid var(--color-red-500), offset 2px
+    aria-busy on loading state
+    aria-disabled on disabled state
+
+
+────────────────────────────────────────────────────────────────────────────────
+  3.2 PRODUCT CARDS
+────────────────────────────────────────────────────────────────────────────────
+
+  STANDARD PRODUCT CARD:
+    Width:       260px (carousel), 100% (grid)
+    Border-radius: 16px
+    Background:  #0F0F0F
+    Border:      1px solid #1C1C1C
+
+    IMAGE AREA:
+      Aspect-ratio: 4/5 (portrait — good for jerseys and apparel)
+      Background:   #141414
+      border-radius: 16px 16px 0 0
+      overflow: hidden
+      position: relative
+
+      HOVER: image scale(1.04), transition 400ms ease
+
+      BADGES (absolute, top-left stack, gap 4px):
+        TRENDING badge:  bg rgba(255,59,48,0.90), text #FFF, 11px Barlow Condensed 600 UPPERCASE, px 8 py 3, radius-sm
+        NEW badge:       bg rgba(0,230,118,0.90), text #000
+        SALE badge:      bg var(--color-red-500), text #FFF
+        OFFICIAL badge:  bg rgba(255,184,0,0.90), text #000  ← for licensed jerseys
+
+      WISHLIST BUTTON (absolute, top-right):
+        40×40px icon button
+        bg rgba(8,8,8,0.70) glass
+        Heart icon (Lucide), 18px
+        ACTIVE: heart filled, red (#FF3B30)
+        Hover: bg rgba(255,59,48,0.15), border-color red-muted
+
+      QUICK ADD (absolute, bottom, full width):
+        Hidden by default
+        APPEARS on card hover (slide up 8px, fade in)
+        Height: 40px
+        bg rgba(255,59,48,0.95)
+        Text: "QUICK ADD" Barlow Condensed 600 13px UPPERCASE
+        On click: opens size selector popover (if variants) or adds to cart
+
+    CONTENT AREA (padding: 14px 16px 16px):
+      Sport tag:     Eyebrow style, 11px, sport color, uppercase, tracking-wide
+      Product name:  H4, 15px Inter 500, 2-line clamp, color #FFFFFF
+      Rating row:    ★★★★★ (gold, 13px) + count "(128)" text-secondary 12px
+      Price row:
+        Current:     JetBrains Mono 700 18px white
+        Original:    JetBrains Mono 14px line-through #606060 (if on sale)
+        Badge:       "–30%" red pill if discounted
+
+      SOLD TICKER (below price, only on trending cards):
+        "🔥 1,247 sold" — 11px Inter 500, color #FF9800, flex row
+
+    SKELETON STATE:
+      Image area:    shimmer block (full area)
+      Sport tag:     shimmer 60px × 12px
+      Name:          shimmer 180px × 14px + 120px × 14px
+      Rating:        shimmer 100px × 12px
+      Price:         shimmer 80px × 18px
+
+
+────────────────────────────────────────────────────────────────────────────────
+  3.3 CATEGORY CARDS (Shop By Sport)
+────────────────────────────────────────────────────────────────────────────────
+
+  LARGE CATEGORY CARD:
+    Width:        100% (grid item)
+    Aspect-ratio: 4/3 (desktop), 3/2 (mobile)
+    border-radius: 20px
+    overflow: hidden
+    position: relative
+
+    BACKGROUND IMAGE: sport action photo, full bleed
+    OVERLAY: linear-gradient(180deg, rgba(8,8,8,0.10) 0%, rgba(8,8,8,0.80) 100%)
+
+    CONTENT (absolute, bottom-left, padding 20px):
+      Sport emoji:  24px
+      Sport name:   Barlow Condensed 700 24px UPPERCASE white
+      Product count: Inter 13px #A0A0A0 "47 products"
+      CTA link:     "Explore →" Inter 13px 500, red color, hidden by default
+
+    HOVER:
+      image scale(1.04), 400ms ease
+      overlay opacity += 0.15
+      CTA link slides up 4px + appears (opacity 0→1)
+      border: 1px solid rgba(255,59,48,0.25)
+
+    ACTIVE SPORT TAG:
+      Top-left chip: sport color bg + sport name, radius-full
+
+
+────────────────────────────────────────────────────────────────────────────────
+  3.4 SUPPLIER CARDS
+────────────────────────────────────────────────────────────────────────────────
+
+  Used in Supplier Partnership section.
+
+  CARD:
+    bg: #0F0F0F
+    border: 1px solid rgba(255,184,0,0.15)    ← gold tint = B2B trust
+    border-radius: 16px
+    padding: 24px
+    hover: border-color rgba(255,184,0,0.35), translateY(-2px)
+
+  CONTENT:
+    Logo/icon area:   48×48px, bg rgba(255,184,0,0.10), radius-xl, centered icon
+    Company type:     Eyebrow 11px, gold color, uppercase ("OFFICIAL SUPPLIER")
+    Benefit title:    H4 Inter 600 16px white
+    Benefit body:     Body-SM Inter 14px #A0A0A0
+    CTA link:         "Learn More →" red 13px Inter 500
+
+
+────────────────────────────────────────────────────────────────────────────────
+  3.5 TRUST BADGES
+────────────────────────────────────────────────────────────────────────────────
+
+  INLINE TRUST BADGE (used in hero, product rows):
+    Layout: flex row, gap 8px
+    Icon: 16px, colored per type
+    Text: 13px Inter 500 #A0A0A0
+
+  TRUST CARD (used in Why TRYBY section):
+    bg: #0F0F0F
+    border: 1px solid #1C1C1C
+    border-radius: 16px
+    padding: 24px
+
+    Icon container: 48×48px, bg sport-red-muted, radius-xl
+    Icon: 24px, var(--color-red-500)
+    Title: H4 Inter 600 16px white, margin-top 16px
+    Body: Body-SM 14px #A0A0A0, margin-top 8px
+
+    HOVER: border-color rgba(255,59,48,0.20)
+
+
+────────────────────────────────────────────────────────────────────────────────
+  3.6 REVIEW CARDS
+────────────────────────────────────────────────────────────────────────────────
+
+  MARQUEE REVIEW CARD:
+    Width:         320px (fixed)
+    bg:            #0F0F0F
+    border:        1px solid #1C1C1C
+    border-radius: 16px
+    padding:       20px
+
+    Rating row:     ★★★★★ gold stars (14px) + verified badge ("✓ Verified Purchase" green 11px)
+    Review text:    Inter 14px #A0A0A0, 4-line clamp, margin-top 12px
+    Sport badge:    sport color chip (Cricket / Gym / Football), radius-full, 10px
+    Divider:        1px #1C1C1C, margin-y 14px
+    Author row:     Avatar 36px (initials, bg gradient) + name Inter 600 14px white + city 12px #606060
+    Product row:    Mini thumbnail 32×32px radius-md + product name 12px #A0A0A0 2-line clamp
+
+  VERIFIED BADGE:
+    bg: rgba(0,230,118,0.10)
+    border: 1px solid rgba(0,230,118,0.25)
+    text: #00E676
+    padding: 2px 8px, radius-full
+
+
+────────────────────────────────────────────────────────────────────────────────
+  3.7 NEWSLETTER FORM
+────────────────────────────────────────────────────────────────────────────────
+
+  LAYOUT: flex row (desktop), stacked column (mobile)
+
+  EMAIL INPUT:
+    Height:        48px
+    bg:            rgba(255,255,255,0.05)
+    border:        1px solid rgba(255,255,255,0.10)
+    border-radius: 8px
+    padding:       0 16px 0 44px (left icon)
+    placeholder:   "Enter your email address"
+    font:          Inter 15px, color white
+    Left icon:     Mail 18px, color #606060, absolute left 14px
+
+    FOCUS:
+      border-color: var(--color-red-500)
+      background: rgba(255,59,48,0.04)
+      box-shadow: 0 0 0 3px rgba(255,59,48,0.12)
+
+    ERROR:
+      border-color: var(--color-red-500)
+      helper text below: "Please enter a valid email" 12px red
+
+  SUBMIT BUTTON:
+    Same as PRIMARY BUTTON (lg size)
+    Width: auto (desktop), 100% (mobile)
+
+  SUCCESS STATE:
+    Replace form with:
+    ✓ icon (48px, green circle)
+    "You're in!" Barlow Condensed 700 24px white
+    "Check your inbox for a welcome surprise." Inter 14px #A0A0A0
+
+
+────────────────────────────────────────────────────────────────────────────────
+  3.8 SEARCH BAR
+────────────────────────────────────────────────────────────────────────────────
+
+  TRIGGER (in navbar):
+    Width:         220px desktop, icon-only mobile
+    bg:            rgba(255,255,255,0.05)
+    border:        1px solid rgba(255,255,255,0.08)
+    border-radius: 8px
+    height:        36px
+    padding:       0 12px
+    Placeholder:   "Search gear, jerseys..." Inter 14px #606060
+    Right side:    "⌘K" kbd chip: bg rgba(255,255,255,0.08), radius-sm, 11px mono
+
+    HOVER: border-color rgba(255,255,255,0.16)
+
+  COMMAND PALETTE (Cmd+K modal):
+    Overlay: fixed, bg rgba(0,0,0,0.80), backdrop-blur-sm
+    Panel: max-width 600px, bg #141414, border 1px solid #282828, radius-2xl, shadow-modal
+    Input: full-width, 56px height, border-b only, Inter 18px, no bg
+    Results: scrollable list, max-height 400px
+    Result item: flex row, 48px height, hover bg #1A1A1A, 14px Inter
+    Sport badge on results
+    Empty state: "No results for X" with search icon
+
+
+────────────────────────────────────────────────────────────────────────────────
+  3.9 MEGA MENU
+────────────────────────────────────────────────────────────────────────────────
+
+  TRIGGER: "Sports ▾" nav link
+  OPEN: hover (200ms delay to prevent accidental trigger), or click
+
+  PANEL:
+    Position:    absolute, full-width below navbar, left 0
+    bg:          rgba(10,10,10,0.95)
+    backdrop-filter: blur(24px)
+    border-top:  1px solid #1C1C1C
+    border-bottom: 1px solid #1C1C1C
+    padding:     32px 48px
+    max-height:  480px
+
+  LAYOUT (3 columns):
+    Col 1 — Sports Grid (6 sport tiles):
+      Cricket | Football | Gym | Running | Badminton | More
+      Each tile: 80×64px, icon 24px + sport name 12px, bg #141414, radius-lg, hover border-red
+
+    Col 2 — Featured Collection:
+      Large card 260×200px with jersey image
+      Title: "IPL 2026 Kits"
+      Sub: "Official Licensed"
+      CTA: "Shop Collection →"
+
+    Col 3 — Quick Links:
+      New Arrivals (with "NEW" badge)
+      Trending (with fire icon)
+      Best Sellers
+      Deals (with "SALE" badge)
+      ─────
+      Size Guide
+      Return Policy
+
+  ANIMATION:
+    Enter: translateY(-8px) opacity(0) → translateY(0) opacity(1), 200ms ease-out
+    Exit: reverse, 150ms ease-in
+
+
+────────────────────────────────────────────────────────────────────────────────
+  3.10 MOBILE NAVIGATION
+────────────────────────────────────────────────────────────────────────────────
+
+  BOTTOM TAB BAR (mobile, fixed bottom, height 60px):
+    bg: rgba(10,10,10,0.95), backdrop-blur, border-top 1px #1C1C1C
+    5 tabs: [Home] [Sports] [Search] [Wishlist] [Account]
+    Active tab: icon + label red, indicator dot above icon
+    Inactive: icon #606060, no label
+
+  TOP HAMBURGER (opens full-screen drawer):
+    Drawer: fixed, full screen, bg #0F0F0F, z-top
+    Top: TRYBY SPORTS logo + close button
+    Sport grid: 2×3 grid of sport tiles (large, 100% width)
+    Nav links: full-width rows with chevrons
+    Bottom: Sign In / Create Account CTAs
+
+  ACCESSIBILITY:
+    Focus trap in open drawer
+    aria-expanded on trigger
+    Escape key closes
+    No interaction with page beneath when open
+
+
+────────────────────────────────────────────────────────────────────────────────
+  3.11 CART BADGE
+────────────────────────────────────────────────────────────────────────────────
+
+  Icon: ShoppingBag (Lucide), 22px
+  Badge: absolute top-right, -8px -8px offset
+    Size: 18×18px min, radius-full
+    bg: var(--color-red-500)
+    Text: JetBrains Mono 700 10px white
+    Display "9+" when count > 9
+  Animation: scale spring (0.5 → 1.2 → 1.0) on count change, 300ms
+
+
+────────────────────────────────────────────────────────────────────────────────
+  3.12 WISHLIST BUTTON (standalone)
+────────────────────────────────────────────────────────────────────────────────
+
+  INACTIVE: Heart outline icon, 22px, color #A0A0A0
+  ACTIVE: Heart filled icon, 22px, color #FF3B30
+  Transition: scale(1.3) then back, 200ms spring
+  bg: icon-button style (see 3.1 Icon Button)
+  aria-label: "Add to wishlist" / "Remove from wishlist"
+  aria-pressed: true/false
+
+
+================================================================================
+  SECTION 4 — SECTION-BY-SECTION SPECIFICATIONS
+================================================================================
+
+────────────────────────────────────────────────────────────────────────────────
+  SECTION 4.1 — ANNOUNCEMENT BAR
+────────────────────────────────────────────────────────────────────────────────
+
+  BUSINESS GOAL:
+    Drive urgency. Surface key value props before user evaluates anything else.
+    Build immediate trust (COD, free delivery, official license).
+
+  CONVERSION GOAL:
+    Reduce bounce by surfacing #1 objection-handlers immediately.
+
+  LAYOUT:
+    Height:   36px desktop, 32px mobile
+    bg:       #0F0F0F (1 shade lighter than body — barely perceptible contrast)
+    border-bottom: 1px solid #1C1C1C
+    position: sticky top-0, z-index: 300
+
+  CONTENT:
+    3 rotating messages (cross-fade, 3.5s each):
+      Message 1: "🏏 IPL Season Sale — Up to 40% OFF on Cricket Kits  [Shop Now →]"
+      Message 2: "⚡ Free Delivery on orders above ₹499 · Pan-India Coverage"
+      Message 3: "✅ 100% Official Licensed Jerseys · COD Available · 7-Day Returns"
+
+    Layout:   [← arrow]  [message centered]  [→ arrow]
+    Typography: Inter 13px 500, color #A0A0A0
+    CTA link:  red #FF3B30, underline on hover
+    Arrows:    ChevronLeft/Right 14px, color #606060, hover #A0A0A0
+
+  TABLET: Same, smaller font (12px)
+  MOBILE: Same, hide arrows, full message centered
+
+  ACCESSIBILITY:
+    role="marquee" on container
+    aria-live="polite" on message content
+    prefers-reduced-motion: disable rotation, show first message always
+
+  FRAMER MOTION:
+    variants: { initial: {opacity:0, y:2}, animate: {opacity:1, y:0}, exit: {opacity:0, y:-2} }
+    transition: { duration: 0.4, ease: "easeInOut" }
+    AnimatePresence mode="wait"
+
+  PERFORMANCE: Static HTML, no JS required for first paint
+
+
+────────────────────────────────────────────────────────────────────────────────
+  SECTION 4.2 — NAVBAR
+────────────────────────────────────────────────────────────────────────────────
+
+  BUSINESS GOAL:
+    Primary navigation vehicle. Must surface sport categories above all else.
+    First impression of brand quality.
+
+  CONVERSION GOAL:
+    Get users to category intent (sport) as fast as possible.
+    Cart access always visible.
+
+  LAYOUT (desktop, 64px height):
+    ┌──────────────────────────────────────────────────────────┐
+    │ [TRYBY SPORTS]  Sports▾  Jerseys▾  Gear  Deals  │  [🔍][♡][👤][🛒3] │
+    └──────────────────────────────────────────────────────────┘
+    Left section:   logo (140px wide) + primary nav links
+    Right section:  search bar + icon buttons
+
+  LAYOUT (tablet, 56px):
+    [TRYBY SPORTS]   [sport links hidden]   [🔍][🛒][ ≡ ]
+
+  LAYOUT (mobile, 56px):
+    [≡ hamburger]   [TRYBY SPORTS centered]   [🔍][🛒]
+    Bottom tab bar (separate component, see 3.10)
+
+  LOGO:
+    "TRYBY" — Barlow Condensed 800 22px white
+    "SPORTS" — Barlow Condensed 600 22px, color var(--color-red-500)
+    Small lightning bolt icon to left, red, 18px
+    Total width: ~140px
+
+  NAV LINKS (desktop):
+    Sports ▾    (triggers mega menu)
+    Jerseys ▾   (dropdown: Cricket, Football, Basketball, Fan Wear)
+    Gear        (direct link to /products?category=gear)
+    Deals       (with "HOT" badge if active sale)
+
+  NAV LINK STYLES:
+    Inter 14px 500, color #A0A0A0
+    HOVER: color #FFFFFF
+    ACTIVE (current page): color #FFFFFF + 2px red underline bottom
+    transition: color 150ms ease
+
+  SCROLL BEHAVIOR:
+    At top:      transparent bg, no shadow
+    On scroll:   glass-dark bg + shadow-navbar, transition 200ms ease
+
+  SEO:
+    <nav> with aria-label="Main navigation"
+    Logo is <a href="/"> with aria-label="TRYBY SPORTS - Home"
+
+  PERFORMANCE:
+    Client component (for cart count, auth state)
+    Cart count from Zustand (already persisted)
+
+
+────────────────────────────────────────────────────────────────────────────────
+  SECTION 4.3 — HERO SECTION
+────────────────────────────────────────────────────────────────────────────────
+
+  BUSINESS GOAL:
+    Establish TRYBY SPORTS as premium sports brand in <3 seconds.
+    Capture intent for top product category (jerseys).
+    Build immediate trust.
+
+  CONVERSION GOAL:
+    Primary CTA → Shop Cricket Gear (highest volume)
+    Secondary CTA → Shop Football Kits (second highest)
+    Trust bar → reduce first-visit bounce
+
+  DESKTOP LAYOUT (min-height: 100vh, max-height: 900px):
+    Grid: 55% left (content) | 45% right (visual)
+    bg: var(--gradient-hero) + radial red glow at 60% 40%
+    padding-top: 96px (navbar height + space)
+
+    LEFT COLUMN (padding-left: 48px on container, content max-width 560px):
+      [EYEBROW]     "⚡ OFFICIALLY LICENSED GEAR"
+                    Barlow Condensed 600 13px, color red, tracking 0.12em, UPPERCASE
+                    Left-side 2px red line border
+
+      [HEADLINE]    "GEAR UP."
+                    Barlow Condensed 800 96px, UPPERCASE, white, line-height 1.0
+                    "PLAY HARD."
+                    Same style but gradient text (red → gold)
+
+      [BODY]        "Premium sports essentials for cricket, football,
+                     gym, and beyond. Delivered across India."
+                    Inter 18px 400, color #A0A0A0, line-height 1.6
+                    margin-top: 24px, max-width: 440px
+
+      [CTA ROW]     margin-top: 40px, flex row, gap 16px
+                    [Shop Cricket Gear →]  — PRIMARY RED BUTTON (lg)
+                    [Shop Football Kits]   — SECONDARY GHOST BUTTON (lg)
+
+      [TRUST BAR]   margin-top: 48px, flex row, gap 24px, flex-wrap
+                    ★★★★★ 4.8 · 50,000+ Athletes · Free Delivery ₹499+
+                    Divider: 1px #282828 between items
+                    Icons: 14px, color #606060
+                    Text: Inter 13px #A0A0A0
+
+    RIGHT COLUMN (relative, padding: 48px 48px 0 24px):
+      MAIN PRODUCT IMAGE:
+        Width: 440px, aspect-ratio: 4/5
+        border-radius: 24px
+        overflow: hidden
+        object-fit: cover
+        box-shadow: 0 32px 80px rgba(0,0,0,0.80)
+        border: 1px solid rgba(255,255,255,0.06)
+
+      FLOATING STAT CARDS (absolute positioned):
+        Card 1 — bottom-left (-32px offset):
+          glass-floating, radius-2xl, padding 14px 18px
+          "🔥 2,341 sold this week"
+          Inter 600 14px white + 11px gold "THIS WEEK"
+
+        Card 2 — top-right (-24px offset):
+          glass-floating, radius-2xl, padding 12px 16px
+          "⚡ Ships in 24h"
+          Inter 600 13px cyan
+
+        Card 3 — mid-right (absolute right -20px, vertically centered):
+          glass-floating, radius-2xl, padding 12px 16px
+          "#1 Jersey" + gold trophy icon
+          Inter 600 13px gold
+
+      RED GLOW:
+        position absolute, top 20%, left 20%
+        width 300px, height 300px
+        bg radial red glow
+        filter blur(80px)
+        z-index -1, pointer-events none
+
+  TABLET LAYOUT (768–1024px):
+    Stack: content above (60%), visual below (40%)
+    Headline: 72px
+    Product image: 300px width, centered
+    Floating cards: repositioned (above/beside image)
+
+  MOBILE LAYOUT (<768px):
+    Full-stack, content first
+    Headline: 56px
+    Body: 16px
+    CTA buttons: full-width, stacked
+    Product image: full-width (calc 100% - 32px), aspect 4/3
+    Floating cards: 2 visible (hide one to prevent clutter)
+    Trust bar: wrap, 2-col grid
+
+  ACCESSIBILITY:
+    Hero headline: <h1>
+    Product image: alt="[product name] - TRYBY SPORTS official gear"
+    Decorative glow: aria-hidden="true"
+    CTA buttons: descriptive aria-labels
+
+  SEO:
+    <h1> contains "TRYBY SPORTS" + primary keyword
+    Product image with structured alt text
+
+  FRAMER MOTION:
+    Eyebrow:   { initial: {opacity:0, y:12}, animate: {opacity:1, y:0}, transition: {delay:0.1, duration:0.5} }
+    Headline:  each word staggers 0.08s apart, spring({stiffness:200, damping:20})
+    Body:      { delay:0.5, duration:0.5 }
+    CTA row:   { delay:0.7, duration:0.5 }
+    Trust bar: { delay:0.9, duration:0.5 }
+    Image:     { delay:0.3, x:40→0, opacity:0→1, duration:0.7 ease-expo-out }
+    Float cards: each with useAnimation loop: y [0, -8, 0], 3s infinite ease-in-out
+    Red glow:  scale [1, 1.08, 1], 4s infinite ease-in-out
+
+  LOADING STATE:
+    Skeleton: 56px shimmer block (headline area)
+    Skeleton: 40px shimmer (body)
+    Skeleton: 2× button skeletons
+    Skeleton: image area shimmer
+
+  PERFORMANCE:
+    Hero image: priority={true} loading="eager"
+    Glow: CSS animation (not JS) where possible
+    CTA links are <a> tags (not JS navigation) for prefetch
+
+
+────────────────────────────────────────────────────────────────────────────────
+  SECTION 4.4 — FEATURED JERSEYS
+────────────────────────────────────────────────────────────────────────────────
+
+  BUSINESS GOAL:
+    Jerseys = highest margin + highest repeat purchase. Feature them prominently.
+    Captures the #1 buyer intent: "buy jersey of my team."
+
+  CONVERSION GOAL:
+    Move jersey buyers directly to intent-matched product in <2 taps.
+
+  LAYOUT (desktop):
+    Section padding: 96px 0
+    Header row: left-aligned eyebrow + headline | right-aligned "Shop All Jerseys →"
+    Eyebrow: "🏅 OFFICIAL LICENSED JERSEYS" — red eyebrow style
+    Headline: H1 "Rep Your Team." — Barlow Condensed 700 48px
+
+    JERSEY CARDS (horizontal scroll, gap 16px):
+      Card width: 240px (desktop), 200px (tablet), 160px (mobile)
+      Aspect-ratio: 3/4 (portrait — ideal for jersey display)
+      bg: #141414
+      border-radius: 20px
+      overflow: hidden
+      border: 1px solid #1C1C1C
+
+      IMAGE: full-bleed jersey photo
+      OVERLAY: gradient bottom (transparent → #141414 80%)
+
+      CONTENT (absolute bottom, padding 16px):
+        Team badge: 32×32px circle
+        Team name: Barlow Condensed 700 18px UPPERCASE white
+        League: Inter 12px #A0A0A0
+        Price: JetBrains Mono 700 16px white
+        "OFFICIAL" chip: gold bg #FFB800, text #000, radius-full 10px Barlow Condensed 600
+
+      HOVER: image scale(1.05), overlay darkens slightly
+
+    Show 7 teams (scrollable):
+      MI (Mumbai Indians) · CSK (Chennai Super Kings) · RCB
+      India Cricket (Blue) · Real Madrid · Barcelona · Manchester City
+
+  TABLET: Same, fewer visible (scroll)
+  MOBILE: 2.5 cards visible, horizontal scroll snap
+
+  ACCESSIBILITY:
+    scrollable container: role="list", each card role="listitem"
+    aria-label="Featured jersey: [team name]"
+    Keyboard: tab-focusable, arrow keys scroll horizontally
+
+  SKELETON: 7 shimmer cards
+
+
+────────────────────────────────────────────────────────────────────────────────
+  SECTION 4.5 — SHOP BY SPORT
+────────────────────────────────────────────────────────────────────────────────
+
+  BUSINESS GOAL:
+    Capture 5 distinct buyer audiences at one glance.
+    Route each audience to relevant catalog immediately.
+    This section is the most important for retention and conversion.
+
+  CONVERSION GOAL:
+    Reduce time-to-product for sport-specific buyers.
+    Eliminate generic browsing, replace with intent-matching.
+
+  LAYOUT (desktop):
+    Section padding: 96px 0
+    Eyebrow: "🎯 FIND YOUR SPORT" — centered
+    Headline: H1 "Shop By Sport." — centered, Barlow Condensed 700 48px
+    Sub: "Premium gear for every athlete." Inter 16px #A0A0A0 centered
+
+    GRID: 3 columns × 2 rows, gap 16px
+    (On 1440px+: 6 columns × 1 row)
+
+    6 SPORT CARDS (see Category Card spec 3.3):
+      [🏏 Cricket]       bg image: cricket match action
+      [⚽ Football]      bg image: football match action
+      [💪 Gym & Fitness] bg image: gym/lifting action
+      [🏃 Running]       bg image: track running action
+      [🏸 Racket Sports] bg image: badminton/tennis action
+      [🥊 Combat Sports] bg image: boxing/MMA action
+
+  TABLET: 2×3 grid, same cards
+  MOBILE: 2×3 grid, reduced card height (aspect 3/2)
+
+  ACCESSIBILITY:
+    Grid: role="list"
+    Each card: role="listitem" + aria-label="Shop [Sport] gear"
+    Decorative images: aria-hidden
+
+  FRAMER MOTION:
+    Cards stagger on scroll-enter: 0.08s apart
+    Each: { initial: {opacity:0, scale:0.95}, animate: {opacity:1, scale:1}, spring }
+    Use Intersection Observer trigger (once:true)
+
+
+────────────────────────────────────────────────────────────────────────────────
+  SECTION 4.6 — TRENDING PRODUCTS
+────────────────────────────────────────────────────────────────────────────────
+
+  BUSINESS GOAL:
+    Social proof via volume signals. Show what's working.
+    Expose broad catalog depth across sports.
+
+  CONVERSION GOAL:
+    FOMO-driven add-to-cart. "If everyone's buying it, I should too."
+
+  LAYOUT (desktop):
+    Section padding: 96px 0
+    bg: var(--color-surface) #0F0F0F (slight contrast from page bg)
+
+    Header row:
+      Left: eyebrow "🔥 TRENDING NOW" + headline "What Athletes Are Buying."
+      Right: Filter tabs [All] [Cricket] [Football] [Gym] [Running] + "View All →"
+
+    Filter tabs:
+      Pill buttons, Inter 13px 500
+      INACTIVE: bg #1A1A1A, text #A0A0A0, border 1px #282828
+      ACTIVE: bg red-muted, text white, border red-muted
+      Transition: bg 150ms ease (not layout shift)
+      Tab switch uses layout animation (LayoutGroup)
+
+    PRODUCT GRID: 4 columns desktop, gap 16px
+    Show 8 products (2 rows of 4)
+    Each uses STANDARD PRODUCT CARD with SOLD TICKER
+
+    "View All Trending →" CTA below grid, centered, ghost button
+
+  TABLET: 3 columns
+  MOBILE: 2 columns, filter tabs scroll horizontally
+
+  LOADING / SKELETON: 8 card skeletons
+
+  FRAMER MOTION:
+    Tab switch: content AnimatePresence mode="wait", fade 200ms
+    Cards on tab switch: stagger 0.04s re-entrance
+
+
+────────────────────────────────────────────────────────────────────────────────
+  SECTION 4.7 — BEST SELLERS
+────────────────────────────────────────────────────────────────────────────────
+
+  BUSINESS GOAL:
+    Highest conversion products front and center.
+    "Best seller" label is the strongest social proof at product level.
+
+  CONVERSION GOAL:
+    Move visitors directly to products most likely to convert.
+
+  LAYOUT (desktop):
+    Eyebrow: "🥇 COMMUNITY FAVOURITES" — gold color
+    Headline: "India's Most Ordered." — Barlow Condensed 700 48px
+    Sub: "What 50,000+ athletes keep coming back for."
+
+    HORIZONTAL SCROLL CAROUSEL (same mechanic as trending section)
+    5 cards visible. Arrow navigation L/R.
+    Cards: standard product cards + "#1 Best Seller in [Category]" ribbon (gold diagonal top-left)
+
+  TABLET / MOBILE: 2.5 cards visible, swipe scroll
+
+
+────────────────────────────────────────────────────────────────────────────────
+  SECTION 4.8 — NEW ARRIVALS
+────────────────────────────────────────────────────────────────────────────────
+
+  BUSINESS GOAL:
+    Recency signal. Encourages repeat visits.
+    Captures early adopters and trend-followers.
+
+  CONVERSION GOAL:
+    "NEW" badge drives urgency to buy before stock runs out.
+
+  LAYOUT (desktop):
+    Eyebrow: "✨ JUST DROPPED" — cyan color
+    Headline: "Fresh Gear, Just In." — Barlow Condensed 700 48px
+    Sub: "New arrivals added every week."
+
+    GRID: 4 columns, 8 products (2 rows)
+    Cards: standard product cards with "NEW" badge forced on (green)
+    Sort by: newest createdAt
+
+  RIGHT RAIL (desktop only, 3-col layout):
+    Main grid: 3 cols wide
+    Side card: 1 col wide, tall featured "Drop of the Week" card
+      — large image, "🔥 DROP OF THE WEEK" eyebrow, product name, price, CTA
+
+
+────────────────────────────────────────────────────────────────────────────────
+  SECTION 4.9 — WHY TRYBY SPORTS
+────────────────────────────────────────────────────────────────────────────────
+
+  BUSINESS GOAL:
+    Overcome purchase objections. Build differentiated trust vs Flipkart/Meesho.
+    Works for both customer trust AND supplier trust.
+
+  CONVERSION GOAL:
+    Reduce abandonment caused by "is this legit?" hesitation.
+
+  LAYOUT (desktop):
+    Section bg: var(--color-surface) #0F0F0F
+    padding: 96px 0
+
+    Header: centered
+    Eyebrow: "⭐ THE TRYBY DIFFERENCE" — red
+    Headline: "Why Athletes Choose Us." — Barlow Condensed 700 48px white
+
+    STATS ROW (4 large stats, centered, gap 48px):
+      50,000+ | Athletes Served
+      98.4%   | Positive Reviews
+      2-5 Days| Average Delivery
+      100%    | Official Licensed
+
+      Each stat: JetBrains Mono 700 48px gradient (red→gold) + Inter 14px #A0A0A0 label below
+      Animated: count-up on scroll-enter (0 → final, 1.5s ease-out)
+
+    TRUST CARDS GRID (4 columns, margin-top 64px):
+      Card 1: ✅ Official Licensed Products
+        Icon: Shield with checkmark, red
+        Body: "Every jersey verified and authenticated. We source directly from official distributors."
+
+      Card 2: 🚚 Pan-India Fast Delivery
+        Icon: Truck, cyan
+        Body: "27,000+ pincodes covered. Standard 3-5 days. Express 1-2 days."
+
+      Card 3: 💰 Best Price Guarantee
+        Icon: Tag, gold
+        Body: "Found it cheaper elsewhere? We match the price. No questions asked."
+
+      Card 4: 🔄 7-Day Easy Returns
+        Icon: RotateCcw, green
+        Body: "Sizing issue? Changed your mind? Free pickup and full refund within 7 days."
+
+    Each card: TRUST CARD design (see 3.5)
+
+  TABLET: 2×2 grid
+  MOBILE: 1 column stack, stats row 2×2 grid
+
+
+────────────────────────────────────────────────────────────────────────────────
+  SECTION 4.10 — CUSTOMER REVIEWS
+────────────────────────────────────────────────────────────────────────────────
+
+  BUSINESS GOAL:
+    Maximum social proof. Overcome "are these real?" doubt.
+    Sport-specific reviews build deeper relevance.
+
+  CONVERSION GOAL:
+    Seeing real athletes review specific products increases intent to buy.
+
+  LAYOUT (desktop):
+    Section padding: 96px 0
+    bg: page bg #080808
+
+    Header: centered
+    Eyebrow: "⭐ ATHLETE REVIEWS" — gold
+    Headline: "Trusted by 50,000+ Athletes." — Barlow Condensed 700 48px
+
+    RATING SUMMARY ROW (centered, margin-top 24px):
+      "4.8 / 5.0" — JetBrains Mono 700 56px, gradient red→gold
+      ★★★★★ stars (gold, 20px each)
+      "Based on 12,847 verified reviews" — Inter 14px #A0A0A0
+
+    MARQUEE ROW 1 (scroll left, gap 16px):
+      8 review cards, auto-scroll 40s linear infinite
+      Pause on hover
+
+    MARQUEE ROW 2 (scroll right, gap 16px, margin-top 16px):
+      8 review cards, same but reverse direction
+      Pause on hover
+
+    Review cards: REVIEW CARD spec (see 3.6)
+
+  MOBILE: Same, slightly slower scroll, cards 300px wide
+
+  ACCESSIBILITY:
+    marquee containers: aria-label="Customer reviews"
+    Pause on hover + prefers-reduced-motion: pause animation
+    Reviews also available in a static list below fold (hidden visually, visible to screen readers)
+
+  FRAMER MOTION:
+    Header stagger on scroll-enter
+    Rating count-up (4.8 counts from 0, 1s ease-out)
+    Marquees: CSS animation (translateX), not JS (performance)
+
+
+────────────────────────────────────────────────────────────────────────────────
+  SECTION 4.11 — SUPPLIER PARTNERSHIP CTA
+────────────────────────────────────────────────────────────────────────────────
+
+  BUSINESS GOAL:
+    Convert supplier visitors into partner inquiries.
+    Shows TRYBY is a serious B2B platform, not just a dropship hobby.
+    Builds credibility with both suppliers AND customers who see it.
+
+  CONVERSION GOAL:
+    Drive "Partner With Us" form submissions from suppliers.
+
+  LAYOUT (desktop):
+    Section bg: #0F0F0F with subtle gold border-top 1px rgba(255,184,0,0.15)
+    padding: 80px 0
+
+    TWO COLUMNS:
+      LEFT (60%):
+        Eyebrow: "🤝 PARTNER WITH TRYBY" — gold, Barlow Condensed 600 13px UPPERCASE
+        Headline: "Are You a Sports Brand or Supplier?" Barlow Condensed 700 40px white
+        Body: "We work with official distributors, brands, and manufacturers across India.
+               List your products on TRYBY and reach 50,000+ active sports buyers."
+
+        BENEFIT LIST (margin-top 24px, flex column gap 12px):
+          ✓ Zero upfront cost — pay only on sales
+          ✓ Access to 50,000+ active buyers
+          ✓ Full logistics and payment handled
+          ✓ Real-time inventory and order dashboard
+          Each: flex row, 16px icon (gold check), Inter 15px white
+
+        CTA ROW (margin-top 32px):
+          [Become a Supplier →] — PRIMARY RED BUTTON (lg)
+          [Download Partner Deck] — GHOST BUTTON (lg)
+
+      RIGHT (40%):
+        3 SUPPLIER BENEFIT CARDS stacked (see Supplier Card spec 3.4):
+          Card 1: 📦 Easy Onboarding — "Live in 48 hours"
+          Card 2: 📊 Real-Time Dashboard — "Track sales, orders, inventory"
+          Card 3: 💳 Weekly Payouts — "Direct bank transfer every Monday"
+
+  TABLET: Stack, left above right
+  MOBILE: Full-stack, 1 column, benefit cards horizontal scroll
+
+
+────────────────────────────────────────────────────────────────────────────────
+  SECTION 4.12 — INSTAGRAM / SOCIAL PROOF
+────────────────────────────────────────────────────────────────────────────────
+
+  BUSINESS GOAL:
+    UGC (user-generated content) builds authentic community feel.
+    Proof that real people use and love TRYBY products.
+
+  CONVERSION GOAL:
+    "If these people love it, I will too." Hesitation reducer.
+
+  LAYOUT (desktop):
+    Section padding: 80px 0
+    Eyebrow: "#TRYBYSPORTS" — cyan, centered
+    Headline: "Join the Community." — Barlow Condensed 700 40px centered
+    Sub: "Follow @trybysports" — Inter 14px #A0A0A0 + IG icon, centered, link
+
+    PHOTO GRID: horizontal scroll, 8 photos
+      Each: 220×220px square, border-radius 16px, overflow hidden, gap 12px
+      HOVER: overlay appears (rgba black 50%) + like count + caption excerpt
+      Overlay: fade in 200ms
+
+    View on Instagram CTA: centered below grid
+      "Follow @trybysports on Instagram →" ghost button with IG icon
+
+  MOBILE: 4×2 grid (2 rows of 4), fixed height 160px each
+
+
+────────────────────────────────────────────────────────────────────────────────
+  SECTION 4.13 — FAQ
+────────────────────────────────────────────────────────────────────────────────
+
+  BUSINESS GOAL:
+    Remove last-mile objections before purchase.
+    Reduce support ticket volume.
+
+  CONVERSION GOAL:
+    Answering "is this legit?", "will it fit?", "can I return it?" converts fence-sitters.
+
+  LAYOUT (desktop):
+    Section padding: 80px 0
+    bg: #080808
+
+    TWO COLUMNS:
+      LEFT (35%):
+        Eyebrow: "❓ GOT QUESTIONS?" — red
+        Headline: "Frequently Asked Questions" Barlow Condensed 700 36px white
+        Body: "Can't find your answer? [Contact Support →]"
+        Trust chip: "Usually reply in under 2 hours" ← sets expectation
+
+      RIGHT (65%):
+        6 accordion items (Radix Accordion)
+        Each item:
+          Trigger: Inter 600 16px white, full-width, flex space-between, chevron icon
+          Content: Inter 14px #A0A0A0, padding 0 0 16px 0, border-bottom 1px #1C1C1C
+
+        Q1: Are your jerseys officially licensed?
+        Q2: How do I choose the right jersey size?
+        Q3: What is your return policy?
+        Q4: Do you offer Cash on Delivery?
+        Q5: How long does delivery take?
+        Q6: Can I track my order after dispatch?
+
+    Each item CLOSED: chevron points right
+    Each item OPEN: chevron rotates 90°, content slides down (Framer Motion height animation)
+
+  TABLET / MOBILE: Single column, questions above answer
+
+
+────────────────────────────────────────────────────────────────────────────────
+  SECTION 4.14 — NEWSLETTER
+────────────────────────────────────────────────────────────────────────────────
+
+  BUSINESS GOAL:
+    Build owned channel (email list). Reduces ad dependency.
+    Capture sports drop / restock interest.
+
+  CONVERSION GOAL:
+    10%+ visitor-to-subscriber rate.
+
+  LAYOUT (desktop):
+    Section bg: radial gradient — dark red glow at center
+      background: radial-gradient(ellipse 60% 100% at 50% 50%, rgba(255,59,48,0.10) 0%, #080808 100%)
+    border-top: 1px solid rgba(255,59,48,0.12)
+    border-bottom: 1px solid rgba(255,59,48,0.12)
+    padding: 80px 0
+
+    CONTENT (centered, max-width 560px):
+      Eyebrow: "📬 STAY IN THE GAME" — red, centered
+      Headline: "Get Early Access to Drops." Barlow Condensed 700 40px white centered
+      Body: "New jersey releases. Exclusive deals. Training tips." Inter 16px #A0A0A0 centered
+
+      FORM (margin-top 32px):
+        Flex row: [email input (flex-1)] [Subscribe button]
+        Email input + button: full-width on mobile (stacked)
+
+      FOOTER TEXT (margin-top 16px, centered):
+        "4,200+ athletes subscribed · Zero spam · Unsubscribe anytime"
+        Inter 13px #606060
+
+  FRAMER MOTION:
+    Headline: fade + slide-up on scroll-enter
+    Input: subtle glow pulse when focused (border-color animation)
+
+
+────────────────────────────────────────────────────────────────────────────────
+  SECTION 4.15 — FOOTER
+────────────────────────────────────────────────────────────────────────────────
+
+  BUSINESS GOAL:
+    Navigation fallback. Trust signals. Brand reinforcement.
+    Supplier and press links for B2B discovery.
+
+  LAYOUT (desktop, 4-column):
+    bg: #0F0F0F
+    border-top: 1px solid #1C1C1C
+    padding: 64px 0 40px 0
+
+    COL 1 (BRAND, 30%):
+      TRYBY SPORTS logo (full version, 160px)
+      Tagline: "Gear Up. Play Hard." Inter 14px #606060
+      "Premium sports essentials since 2026."
+      Social icons row (margin-top 24px):
+        Instagram | YouTube | Twitter/X | Facebook
+        Each: 40×40px icon button (see spec 3.1)
+      COD badge: "Cash on Delivery Available" — small chip, green border
+
+    COL 2 (SPORTS):
+      Header: "Sports" Barlow Condensed 600 13px UPPERCASE #606060 tracking-wide
+      Links: Cricket Gear | Football Jerseys | Gym Equipment | Running Gear | All Sports
+      each: Inter 14px #A0A0A0, hover #FFFFFF, block, padding-y 6px
+
+    COL 3 (HELP):
+      Header: "Help"
+      Links: Track Order | Returns & Refunds | Size Guide | Contact Us | FAQ
+
+    COL 4 (COMPANY):
+      Header: "Company"
+      Links: About TRYBY | Partner With Us | Press | Careers | Privacy Policy | Terms
+
+  BOTTOM STRIP (padding: 24px 0, border-top 1px #1C1C1C):
+    Left: "© 2026 TRYBY SPORTS · Made in India 🇮🇳"
+          Inter 13px #606060
+    Center: Payment icons row (48px wide each):
+            Razorpay | UPI | Visa | Mastercard | Amex | GPay | PhonePe | COD
+    Right: "All systems operational" — green dot + Inter 12px #606060
+
+  TABLET: 2×2 grid
+  MOBILE: Accordion-style (each column header expands) to save space
+
+
+================================================================================
+  SECTION 5 — MOBILE STRATEGY
+================================================================================
+
+  BREAKPOINTS:
+    Mobile:  0px — 767px
+    Tablet:  768px — 1023px
+    Desktop: 1024px+
+    Wide:    1440px+ (max-container 1280px + side padding)
+
+  MOBILE-FIRST RULES:
+    1. Bottom Tab Bar replaces top hamburger for primary nav (reach-friendly)
+    2. All touch targets minimum 44×44px
+    3. Product images fill full width at mobile (no fixed widths)
+    4. CTA buttons always full-width on mobile
+    5. Modals/drawers slide from bottom (not right) on mobile
+    6. Horizontal scrolls have scroll snapping enabled (scroll-snap-type: x mandatory)
+    7. No hover-dependent interactions — all hover states have tap equivalents
+    8. Cart drawer: right-slide desktop, bottom-sheet mobile
+    9. Announcement bar: hide arrows on mobile, text centers
+
+  MOBILE TYPOGRAPHY SCALING:
+    Display-1 → Display-3: 56px on mobile
+    H1 → 32px on mobile
+    H2 → 26px on mobile
+    Body stays 16px (never smaller for readability)
+    Caption min 11px
+
+  MOBILE PERFORMANCE:
+    Lazy load images below fold (loading="lazy")
+    Use next/image with sizes="(max-width: 768px) 100vw, 50vw"
+    Marquee reviews: CSS animation only (no JS)
+    Skeleton cards: 2-col grid on mobile
+    Font preload: Barlow Condensed and Inter via <link rel="preload">
+
+
+================================================================================
+  SECTION 6 — ACCESSIBILITY STRATEGY
+================================================================================
+
+  COLOR CONTRAST (all text on dark backgrounds):
+    White (#FFF) on #080808:           21:1 ✓
+    #A0A0A0 on #080808:               5.7:1 ✓ (AA)
+    #606060 on #0F0F0F:               3.6:1 ✓ (AA for large text only — use for captions only)
+    Red (#FF3B30) on #080808:         4.6:1 ✓ (AA for normal text)
+    Gold (#FFB800) on #080808:        8.2:1 ✓
+
+  KEYBOARD NAVIGATION:
+    All interactive elements focusable in logical DOM order
+    Focus ring: 2px solid #FF3B30, offset 2px (red matches brand)
+    Skip-to-main: <a href="#main"> first element, visually hidden until focused
+    Mega menu: arrow key navigation within panel
+    Carousels: arrow key navigation between cards
+
+  SCREEN READER:
+    <main> landmark on page content
+    <nav aria-label="Main navigation">
+    <nav aria-label="Footer navigation">
+    Announcement bar: aria-live="polite", aria-atomic="true"
+    Marquee: aria-label, aria-hidden on duplicate rows (only one readable)
+    Product cards: complete information in aria-label (name + price + rating)
+    Wishlist button: aria-pressed + aria-label
+    Cart button: aria-label="Cart, N items"
+
+  MOTION:
+    @media (prefers-reduced-motion: reduce):
+      Disable all Framer Motion transitions (duration: 0)
+      Pause marquee animations
+      Disable rotating announcement bar
+      Disable count-up animations
+      Disable hero floating cards loop
+
+  SEMANTIC HTML:
+    <h1> only once per page (hero headline)
+    <h2> section headlines
+    <h3> card headlines
+    Product cards wrapped in <article>
+    Category grid: <ul> with <li> items
+    Reviews: <blockquote> + <cite> markup
+
+
+================================================================================
+  SECTION 7 — ANIMATION STRATEGY
+================================================================================
+
+  PHILOSOPHY:
+    "Performance-first, then delight."
+    Animations must never block interactivity.
+    Every animation has a purpose (guide attention, confirm action, reduce perceived wait).
+    Duration budget: max 600ms for any entrance. Max 200ms for interactions.
+
+  ANIMATION INVENTORY:
+
+  1. PAGE LOAD SEQUENCE (cascading, total ~1s):
+     t=0ms:   Navbar fades in (opacity 0→1, 200ms)
+     t=100ms: Hero eyebrow slides up (y:12→0, 300ms)
+     t=200ms: Hero headline words stagger in (0.08s each, spring)
+     t=500ms: Hero body + CTA slides up
+     t=700ms: Hero image slides in from right (x:40→0, 400ms)
+     t=800ms: Floating stat cards pop in (scale 0.8→1, spring)
+     t=900ms: Trust bar fades in
+
+  2. SCROLL-TRIGGERED ENTRANCES:
+     Trigger: element enters viewport (IntersectionObserver, threshold 0.15)
+     Default: { opacity:0, y:24 } → { opacity:1, y:0 }, 400ms ease-out
+     Stagger: 0.08s between siblings (product cards, stat cards)
+     Run once: true (no re-animation on scroll-back)
+
+  3. INTERACTION MICRO-ANIMATIONS:
+     Button press:       scale(0.98), 100ms
+     Button hover:       translateY(-1px) + shadow increase, 150ms
+     Card hover:         translateY(-2px) + glow border, 200ms
+     Wishlist toggle:    heart scale(1.4) then back, spring 300ms
+     Cart badge count:   scale spring when count changes
+     Tab switch:         layout animation + content fade, 200ms
+     Accordion open:     height auto animation, 300ms ease-out
+     Nav link hover:     color transition + underline slide, 150ms
+
+  4. MARQUEE REVIEWS:
+     CSS: animation: marqueeLeft 40s linear infinite
+     @keyframes marqueeLeft: { from: translateX(0), to: translateX(-50%) }
+     Second row: marqueeRight (reverse)
+     Pause: animation-play-state: paused on hover
+     Prefers-reduced-motion: animation-duration: 0.01ms
+
+  5. COUNT-UP ANIMATION:
+     Stats (50,000+, 4.8, etc.)
+     Library: custom hook using requestAnimationFrame
+     Duration: 1.5s ease-out
+     Trigger: on scroll-enter
+     Format: locale string (50,000 not 50000)
+
+  6. JERSEY CARD HOVER:
+     Image scale(1.05): 400ms ease
+     Overlay darkens: opacity +0.15, 300ms
+     "Explore →" CTA: translateY(4px)→(0), opacity 0→1, 200ms
+
+  7. FLOATING STAT CARDS (hero):
+     useAnimation loop: { y: [0, -8, 0] }
+     Each card: different duration (3s, 3.4s, 3.8s) for natural feel
+     ease: "easeInOut"
+
+  8. PAGE TRANSITIONS (route changes):
+     Exit: opacity 1→0, translateY 0→-8px, 200ms
+     Enter: opacity 0→1, translateY 8px→0, 200ms
+     Implemented via layout.tsx AnimatePresence wrapper
+
+
+================================================================================
+  SECTION 8 — CONVERSION STRATEGY
+================================================================================
+
+────────────────────────────────────────────────────────────────────────────────
+  8.1 TRUST SIGNALS (Customer)
+────────────────────────────────────────────────────────────────────────────────
+
+  TIER 1 — ABOVE FOLD:
+    ✅ "100% Official Licensed" in announcement bar
+    ⭐ "4.8/5 · 50,000+ Athletes" in hero trust bar
+    💳 "Free Delivery ₹499+" in hero trust bar
+
+  TIER 2 — MID SCROLL:
+    🏅 "OFFICIAL" gold chip on all jersey cards
+    🔥 Sold ticker on product cards ("2,341 sold this week")
+    ✓ Verified Purchase badge on every review
+    🇮🇳 "Made with care in India" in footer
+
+  TIER 3 — FOOTER (decision reinforcement):
+    Payment icons: Razorpay, UPI, Visa, Mastercard, GPay, PhonePe, COD
+    "All systems operational" status indicator
+    7-Day Easy Returns mentioned in footer links
+
+
+────────────────────────────────────────────────────────────────────────────────
+  8.2 SUPPLIER TRUST ELEMENTS
+────────────────────────────────────────────────────────────────────────────────
+    Dedicated "Partner With Us" section (not just a footer link)
+    3 benefit cards with concrete promises (48h onboarding, weekly payouts)
+    "Download Partner Deck" CTA — signals seriousness
+    Footer "Company" column includes "Partner With Us" link
+    No generic stock imagery — implies real business operation
+    Gold color accents in supplier section — premium B2B positioning
+
+
+────────────────────────────────────────────────────────────────────────────────
+  8.3 SCARCITY & URGENCY TRIGGERS
+────────────────────────────────────────────────────────────────────────────────
+    "🔥 2,341 sold this week" — hero floating card
+    "Only 3 left" — low stock indicator on product cards (when stock < 5)
+    "HOT" badge on Deals nav link (during active sale)
+    "IPL Season Sale — Up to 40% OFF" — time-limited announcement
+    "LIMITED" badge on featured jersey cards
+    Stock bar visual (8 segments, fill by stock %) on trending cards
+
+
+────────────────────────────────────────────────────────────────────────────────
+  8.4 CART CONVERSION BOOSTERS
+────────────────────────────────────────────────────────────────────────────────
+    Free shipping progress bar in cart drawer:
+      "Add ₹[X] more for FREE delivery" — green progress bar
+    Coupon code field in cart (not just checkout)
+    "You might also like" upsell row (2 products) above cart footer
+    Cart count badge always visible in navbar (even on scroll)
+    Quick Add on hover — reduces friction to cart (no PDP visit required for known products)
+    "Saving ₹[X]" display when coupon/sale applied
+
+
+────────────────────────────────────────────────────────────────────────────────
+  8.5 AVERAGE ORDER VALUE BOOSTERS
+────────────────────────────────────────────────────────────────────────────────
+    "Complete Your Kit" section on PDP below add-to-cart
+      (Jersey + shorts + socks bundle suggestion)
+    Best Sellers section drives discovery beyond initial purchase
+    Featured Jerseys carousel + "Official" badge → premium price acceptance
+    "Frequently bought together" on cart upsell row
+    Shipping threshold (₹499 free) encourages adding one more item
+    "OFFICIAL BUNDLE — Save 15%" badging on curated kit products
+
+
+================================================================================
+  SECTION 9 — FINAL WIREFRAME (ASCII)
+================================================================================
+
+DESKTOP FULL-PAGE WIREFRAME
+─────────────────────────────────────────────────────────────────────────────
+
+┌─────────────────────────────────────────────────────────────────────┐
+│  📢  IPL Season Sale — Up to 40% OFF   ·   Free Delivery ₹499+     │  ← Announcement Bar (36px)
+├─────────────────────────────────────────────────────────────────────┤
+│  ⚡ TRYBY SPORTS   [Sports▾] [Jerseys▾] [Gear] [Deals🔥]   [🔍][♡][👤][🛒3] │  ← Navbar (64px)
+├──────────────────────────────┬──────────────────────────────────────┤
+│                              │                                      │
+│  ⚡ OFFICIALLY LICENSED GEAR  │      [Jersey Product Photo]          │  ← HERO SECTION
+│                              │         +floating cards              │
+│  GEAR UP.                    │    [🔥 2,341 sold]  [⚡Ships 24h]    │
+│  PLAY HARD.                  │                                      │
+│                              │         [#1 Jersey 🏆]               │
+│  Premium sports essentials   │                                      │
+│  for every athlete.          │                                      │
+│                              │                                      │
+│  [Shop Cricket Gear →] [Football Kits]                              │
+│  ★★★★★ 4.8 · 50K+ Athletes · Free Delivery ₹499+                   │
+│                              │                                      │
+├──────────────────────────────┴──────────────────────────────────────┤
+│                                                                     │
+│  🏅 OFFICIAL LICENSED JERSEYS        [Shop All Jerseys →]          │  ← FEATURED JERSEYS
+│  Rep Your Team.                                                     │
+│  [MI][CSK][RCB][India][Madrid][Barca][ManCity]  ← scroll →         │
+│                                                                     │
+├─────────────────────────────────────────────────────────────────────┤
+│           🎯 FIND YOUR SPORT                                        │  ← SHOP BY SPORT
+│           Shop By Sport.                                            │
+│  ┌─────────┐  ┌──────────┐  ┌───────────┐                          │
+│  │ 🏏      │  │ ⚽       │  │ 💪        │                          │
+│  │ Cricket │  │ Football │  │ Gym       │                          │
+│  │ 47 prods│  │ 32 prods │  │ 28 prods  │                          │
+│  └─────────┘  └──────────┘  └───────────┘                          │
+│  ┌─────────┐  ┌──────────┐  ┌───────────┐                          │
+│  │ 🏃      │  │ 🏸       │  │ 🥊        │                          │
+│  │ Running │  │ Racket   │  │ Combat    │                          │
+│  └─────────┘  └──────────┘  └───────────┘                          │
+│                                                                     │
+├─────────────────────────────────────────────────────────────────────┤
+│  🔥 TRENDING NOW                [All][Cricket][Football][Gym][Run]  │  ← TRENDING PRODUCTS
+│  What Athletes Are Buying.                                          │
+│  ┌───────┐ ┌───────┐ ┌───────┐ ┌───────┐                           │
+│  │ [img] │ │ [img] │ │ [img] │ │ [img] │                           │
+│  │ name  │ │ name  │ │ name  │ │ name  │                           │
+│  │ ★★★★★ │ │ ★★★★☆ │ │ ★★★★★ │ │ ★★★★☆ │                           │
+│  │ ₹999  │ │ ₹1299 │ │ ₹599  │ │ ₹2499 │                           │
+│  │🔥 2.3k│ │🔥 890 │ │🔥 1.1k│ │🔥 450 │                           │
+│  └───────┘ └───────┘ └───────┘ └───────┘                           │
+│  ┌───────┐ ┌───────┐ ┌───────┐ ┌───────┐                           │
+│  │ row 2 │ │  ...  │ │  ...  │ │  ...  │                           │
+│  └───────┘ └───────┘ └───────┘ └───────┘                           │
+│                    [View All Trending →]                            │
+│                                                                     │
+├─────────────────────────────────────────────────────────────────────┤
+│  🥇 COMMUNITY FAVOURITES           [Shop All Best Sellers →]       │  ← BEST SELLERS
+│  India's Most Ordered.                                              │
+│  [card1] [card2] [card3] [card4] [card5]  ← scroll →               │
+│  #1 Best Seller ribbons on each card                                │
+│                                                                     │
+├─────────────────────────────────────────────────────────────────────┤
+│  ✨ JUST DROPPED                    [Shop All New Arrivals →]       │  ← NEW ARRIVALS
+│  Fresh Gear, Just In.                                               │
+│  ┌───────┐ ┌───────┐ ┌───────┐ ┌──────────────────────┐            │
+│  │ NEW   │ │ NEW   │ │ NEW   │ │  🔥 DROP OF THE WEEK  │            │
+│  │ [img] │ │ [img] │ │ [img] │ │        [img]          │            │
+│  │ ...   │ │ ...   │ │ ...   │ │  Product Name         │            │
+│  └───────┘ └───────┘ └───────┘ │  ₹1,999               │            │
+│  ┌───────┐ ┌───────┐ ┌───────┐ │  [Shop Now →]         │            │
+│  │ [img] │ │ [img] │ │ [img] │ └──────────────────────┘            │
+│  └───────┘ └───────┘ └───────┘                                     │
+│                                                                     │
+├─────────────────────────────────────────────────────────────────────┤
+│           ⭐ THE TRYBY DIFFERENCE                                   │  ← WHY TRYBY
+│           Why Athletes Choose Us.                                   │
+│                                                                     │
+│    50,000+      98.4%       2-5 Days      100%                      │
+│    Athletes   Positive      Delivery    Licensed                    │
+│                                                                     │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐               │
+│  │ ✅       │ │ 🚚       │ │ 💰       │ │ 🔄       │               │
+│  │ Official │ │ Fast Del │ │ Best Prc │ │ 7D Rtrn  │               │
+│  │ Licensed │ │ Pan India│ │ Guarntee │ │ Easy     │               │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘               │
+│                                                                     │
+├─────────────────────────────────────────────────────────────────────┤
+│           ⭐ ATHLETE REVIEWS                                        │  ← CUSTOMER REVIEWS
+│           Trusted by 50,000+ Athletes.                              │
+│           4.8 / 5.0  ★★★★★  Based on 12,847 reviews                │
+│                                                                     │
+│  ← [review][review][review][review][review][review] →  scroll left │
+│  → [review][review][review][review][review][review] ←  scroll right │
+│                                                                     │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │  ← SUPPLIER CTA
+│  Are You a Sports Brand or Supplier?  │  ┌──────────────┐          │
+│  ──────────────────────────────────── │  │📦 Onboarding │          │
+│  We work with official distributors…  │  ├──────────────┤          │
+│                                       │  │📊 Dashboard  │          │
+│  ✓ Zero upfront cost                  │  ├──────────────┤          │
+│  ✓ Access to 50,000+ buyers           │  │💳 Weekly Pay │          │
+│  ✓ Logistics handled                  │  └──────────────┘          │
+│  ✓ Real-time dashboard                │                             │
+│                                       │                             │
+│  [Become a Supplier →] [Partner Deck] │                             │
+│                                                                     │
+├─────────────────────────────────────────────────────────────────────┤
+│           #TRYBYSPORTS                                              │  ← INSTAGRAM
+│           Join the Community.  Follow @trybysports                  │
+│  [📷][📷][📷][📷][📷][📷][📷][📷]  ← scroll →                        │
+│                    [Follow on Instagram →]                          │
+│                                                                     │
+├─────────────────────────────────────────────────────────────────────┤
+│  ❓ GOT QUESTIONS?              │  ▶ Are jerseys officially licensed?│  ← FAQ
+│                                 │  ▶ How to choose the right size?  │
+│  Frequently Asked               │  ▼ Do you offer COD?              │
+│  Questions.                     │    Yes, COD is available...       │
+│                                 │  ▶ How long is delivery?          │
+│  Contact Support →              │  ▶ Can I track my order?          │
+│  "Reply in 2 hours"             │  ▶ What is the return policy?     │
+│                                                                     │
+├─────────────────────────────────────────────────────────────────────┤
+│           📬 STAY IN THE GAME                                       │  ← NEWSLETTER
+│           Get Early Access to Drops.                                │
+│     New jersey releases. Exclusive deals. Training tips.            │
+│                                                                     │
+│          [✉  Enter your email address    ] [GET ACCESS]             │
+│          4,200+ athletes subscribed · Zero spam                     │
+│                                                                     │
+├─────────────────────────────────────────────────────────────────────┤
+│  ⚡ TRYBY SPORTS    │  Sports        │  Help         │  Company      │  ← FOOTER
+│  Gear Up. Play Hard │  Cricket Gear  │  Track Order  │  About        │
+│  Premium sports     │  Football Jrs  │  Returns      │  Partner      │
+│  essentials since   │  Gym Equipment │  Size Guide   │  Press        │
+│  2026.              │  Running Gear  │  Contact Us   │  Privacy      │
+│                     │  All Sports    │  FAQ          │  Terms        │
+│  [IG][YT][X][FB]    │                │               │               │
+│  💳 COD Available   │                │               │               │
+├─────────────────────────────────────────────────────────────────────┤
+│  © 2026 TRYBY SPORTS · Made in India 🇮🇳   [Razorpay][UPI][VISA][MC][COD]  🟢 All systems OK  │
+└─────────────────────────────────────────────────────────────────────┘
+
+
+MOBILE WIREFRAME (375px)
+──────────────────────────────────────────
+┌───────────────────────────────────────┐
+│ IPL Season Sale — 40% OFF Cricket     │  ← Announcement (32px)
+├───────────────────────────────────────┤
+│ [≡]   ⚡ TRYBY SPORTS         [🔍][🛒3]│  ← Navbar (56px)
+├───────────────────────────────────────┤
+│                                       │
+│  ⚡ OFFICIALLY LICENSED GEAR          │  ← HERO
+│                                       │
+│  GEAR UP.                             │
+│  PLAY HARD.                           │
+│                                       │
+│  Premium sports essentials            │
+│  for every athlete.                   │
+│                                       │
+│  [  Shop Cricket Gear →  ]            │  ← full-width CTA
+│  [   Shop Football Kits   ]           │  ← full-width ghost
+│                                       │
+│  ┌───────────────────────────────┐    │
+│  │       [Jersey Photo]          │    │  ← full-width image
+│  │  [🔥 2,341 sold] [⚡Ships 24h]│    │
+│  └───────────────────────────────┘    │
+│                                       │
+│  ★★★★★ 4.8 · 50K+ Athletes            │
+│                                       │
+├───────────────────────────────────────┤
+│  🏅 Rep Your Team.                    │  ← Featured Jerseys
+│  [MI][CSK][RCB][India] →              │
+├───────────────────────────────────────┤
+│  🎯 Shop By Sport.                    │  ← Sport grid 2×3
+│  ┌────────┐ ┌────────┐               │
+│  │ Cricket│ │Football│               │
+│  └────────┘ └────────┘               │
+│  ┌────────┐ ┌────────┐               │
+│  │  Gym   │ │Running │               │
+│  └────────┘ └────────┘               │
+│  ┌────────┐ ┌────────┐               │
+│  │ Racket │ │ Combat │               │
+│  └────────┘ └────────┘               │
+├───────────────────────────────────────┤
+│  🔥 Trending.  [All][Cricket][Football]→│
+│  ┌──────┐ ┌──────┐                   │  ← 2-col grid
+│  │[img] │ │[img] │                   │
+│  │name  │ │name  │                   │
+│  │₹999  │ │₹1299 │                   │
+│  └──────┘ └──────┘                   │
+│  ┌──────┐ ┌──────┐                   │
+│  │[img] │ │[img] │                   │
+│  └──────┘ └──────┘                   │
+├───────────────────────────────────────┤
+│  … (Best Sellers, New Arrivals)       │
+├───────────────────────────────────────┤
+│  Why Athletes Choose Us.              │  ← Why TRYBY
+│  50K+ | 98.4% | 2-5d | 100%          │
+│  ┌──────────┐  ┌──────────┐          │
+│  │ Official │  │ Fast Del │          │
+│  └──────────┘  └──────────┘          │
+│  ┌──────────┐  ┌──────────┐          │
+│  │ Best Prc │  │ 7D Rtrn  │          │
+│  └──────────┘  └──────────┘          │
+├───────────────────────────────────────┤
+│  ★ 4.8  Trusted by 50,000+ Athletes  │  ← Reviews
+│  [review card] [review card] →        │
+│  [review card] [review card] →        │
+├───────────────────────────────────────┤
+│  Partner With Us.                     │  ← Supplier CTA
+│  [Join as Supplier →]                 │
+├───────────────────────────────────────┤
+│  #TRYBYSPORTS  [📷][📷][📷][📷] →     │  ← Instagram
+├───────────────────────────────────────┤
+│  FAQ ▼                                │  ← FAQ (accordion)
+├───────────────────────────────────────┤
+│  Get Early Access to Drops.           │  ← Newsletter
+│  [✉ email         ]                   │
+│  [     GET ACCESS     ]               │
+├───────────────────────────────────────┤
+│  ⚡ TRYBY SPORTS                       │  ← Footer
+│  > Sports    > Help    > Company      │  ← accordion on mobile
+│  [IG][YT][X][FB]                      │
+│  COD Available · Made in India 🇮🇳    │
+│  [UPI][VISA][MC][GPay][COD]           │
+├───────────────────────────────────────┤
+│  [🏠][⚽][🔍][♡][👤]                  │  ← Bottom Tab Bar (60px)
+└───────────────────────────────────────┘
+
+
+================================================================================
+  IMPLEMENTATION PRIORITY ORDER
+================================================================================
+
+  P0 — DO FIRST (brand & trust):
+    1. Dark theme globals.css (swap light → dark tokens)
+    2. Rebrand navbar (TrendDrop → TRYBY SPORTS, links, logo)
+    3. Install Barlow Condensed font
+    4. Hero section (new sports copy, layout, CTAs)
+    5. Announcement bar (sport messages)
+
+  P1 — HIGH VALUE SECTIONS:
+    6. Shop By Sport grid
+    7. Featured Jerseys carousel
+    8. Why TRYBY Sports (dark cards, stats row)
+    9. Footer (dark, sport columns, payment icons)
+
+  P2 — CONVERSION SECTIONS:
+    10. Trending Products (tabs, sold ticker on cards)
+    11. Customer Reviews (sport badges, verified labels)
+    12. Newsletter (red glow bg, updated copy)
+
+  P3 — GROWTH SECTIONS:
+    13. Best Sellers carousel
+    14. New Arrivals grid
+    15. Supplier Partnership CTA
+    16. Instagram / Social Proof
+    17. FAQ accordion
+
+================================================================================

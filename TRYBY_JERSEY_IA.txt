@@ -1,0 +1,1054 @@
+================================================================================
+  TRYBY — JERSEY STORE
+  INFORMATION ARCHITECTURE REDESIGN
+  Role: Senior UX Architect
+  Date: 2026-06-03
+================================================================================
+
+  STRATEGIC PIVOT
+  ───────────────
+  FROM: Multi-sport marketplace (cricket, football, gym, running, cycling,
+        accessories, protein products)
+  TO:   Dedicated jersey destination — the single best place in India to
+        buy authentic football and cricket jerseys
+
+  This is not a product catalogue reduction. It is a brand sharpening.
+  A store that sells one thing supremely well converts better, ranks better,
+  and is remembered better than a store that sells everything adequately.
+
+  BRAND STATEMENT (revised)
+  ─────────────────────────
+  TRYBY — India's Jersey Store.
+  "The jersey you want. Delivered."
+
+  WHAT THIS CHANGE AFFECTS
+  ────────────────────────
+  1. Sitemap — remove all non-jersey routes, add jersey-specific routes
+  2. Navigation — restructure entirely around jersey dimensions
+  3. Homepage sections — reorder, rename, remove sport-generic sections
+  4. Category hierarchy — jersey-first taxonomy
+  5. URL structure — jersey-native slugs
+  6. Search & filter logic — jersey-specific attributes (club, nation, season, size)
+  7. Product card — jersey-specific metadata (home/away/third, season year)
+
+
+================================================================================
+  AUDIT: WHAT MUST BE REMOVED
+================================================================================
+
+  CURRENT HOMEPAGE SECTIONS TO CUT OR REPLACE:
+  ─────────────────────────────────────────────
+  ✗  ShopBySportSection      — "Shop by Sport" grid includes Gym, Running, Racket,
+                               Combat Sports. Entire section removed. Replaced by
+                               "Shop by League" and "Shop by Nation" entry points.
+
+  ✗  TrendingGearSection     — "Gear" implies accessories, equipment, non-jersey
+                               products. Renamed → "Trending Jerseys" with
+                               jersey-specific filter tabs (Football / Cricket /
+                               National Teams / Retro).
+
+  ✗  SupplierNetworkSection  — B2B section implying multi-category supply chain.
+                               Replaced by "Official Jersey Partners" section that
+                               specifically signals licensed jersey sourcing.
+
+  ✗  InstagramCommunitySection — Copy must change from "athlete community" framing
+                               to "jersey culture" framing. Section retained but
+                               repositioned and rewritten.
+
+  CURRENT NAV LINKS TO CUT:
+  ─────────────────────────
+  ✗  "Gear"      — removed entirely
+  ✗  "Sports ▾"  — replaced by jersey-dimension menus
+  ✗  "Gym & Fitness", "Running", "Racket Sports", "Combat Sports"
+                 — all removed from mega menu
+
+  CURRENT DATA TO AUDIT:
+  ──────────────────────
+  ✗  mock.ts product categories: "Desk & Productivity", "Home & Living",
+     "Health & Wellness", "Travel", "Gym & Fitness" — all removed
+  ✗  Filter tabs on PLP: "Gym", "Running", "Badminton", "Swimming" — removed
+  ✗  Hero copy: "sports essentials for cricket, football, gym, and beyond"
+                → "every jersey. every club. every season."
+
+
+================================================================================
+  SECTION 1 — FULL SITEMAP
+================================================================================
+
+  LEGEND:
+    [S]  = Server component / SSG / ISR
+    [C]  = Client-heavy component
+    [A]  = Auth required
+    [P]  = Public
+
+────────────────────────────────────────────────────────────────────────────────
+  1.1  STORE — PUBLIC PAGES
+────────────────────────────────────────────────────────────────────────────────
+
+  /                                   Homepage [S][P]
+  /jerseys                            Master jersey catalogue (all) [S][P]
+
+  FOOTBALL JERSEYS
+  /jerseys/football                   Football jerseys hub [S][P]
+  /jerseys/football/club              Club jerseys [S][P]
+  /jerseys/football/national          National team jerseys [S][P]
+  /jerseys/football/retro             Retro football jerseys [S][P]
+  /jerseys/football/[slug]            Individual product page [S][P]
+
+  CRICKET JERSEYS
+  /jerseys/cricket                    Cricket jerseys hub [S][P]
+  /jerseys/cricket/national           National cricket jerseys [S][P]
+  /jerseys/cricket/ipl                IPL team jerseys [S][P]
+  /jerseys/cricket/retro              Retro cricket jerseys [S][P]
+  /jerseys/cricket/[slug]             Individual product page [S][P]
+
+  COLLECTIONS (editorial, curated)
+  /collections                        All collections index [S][P]
+  /collections/new-arrivals           Latest drops [S][P]
+  /collections/best-sellers           Most ordered [S][P]
+  /collections/sale                   Discounted jerseys [S][P]
+  /collections/retro                  All retro across sports [S][P]
+  /collections/national-teams         All national team jerseys [S][P]
+  /collections/[slug]                 Custom curated collection [S][P]
+
+  CLUB DIRECTORY (Football)
+  /clubs                              A-Z club browser [S][P]
+  /clubs/[slug]                       All jerseys for one club [S][P]
+                                      e.g. /clubs/manchester-united
+                                           /clubs/real-madrid
+                                           /clubs/csk
+                                           /clubs/mumbai-indians
+
+  NATIONAL TEAMS
+  /nations                            Country selector [S][P]
+  /nations/[slug]                     All jerseys for one nation [S][P]
+                                      e.g. /nations/india
+                                           /nations/brazil
+                                           /nations/england
+
+  SEARCH
+  /search?q=...                       Search results [S][P]
+
+  CONTENT / EDITORIAL
+  /size-guide                         Jersey sizing chart [S][P]
+  /authenticity                       How we verify jerseys [S][P]
+  /jersey-culture                     Blog / editorial hub [S][P]
+  /jersey-culture/[slug]              Individual article [S][P]
+
+  AUTH
+  /auth/login                         Login [C][P]
+  /auth/register                      Register [C][P]
+  /auth/forgot-password               Forgot password [C][P]
+  /auth/reset-password                Reset password [C][P]
+  /auth/verify                        Email verification [S][P]
+
+  CHECKOUT FLOW
+  /cart                               Cart page [C][P]
+  /checkout                           Address step [C][A soft]
+  /checkout/payment                   Payment step [C][A soft]
+  /checkout/success                   Order confirmed [S][P]
+  /checkout/failed                    Order failed [S][P]
+
+  ACCOUNT (auth required)
+  /account                            Account overview [S][A]
+  /account/orders                     Order history [S][A]
+  /account/orders/[id]                Order detail [S][A]
+  /account/wishlist                   Saved jerseys [S][A]
+  /account/addresses                  Saved addresses [S][A]
+  /account/profile                    Profile settings [C][A]
+
+  SUPPORT
+  /track-order                        Guest order tracking [C][P]
+  /returns                            Returns policy + initiate [C][P]
+  /contact                            Contact form [C][P]
+  /faq                                FAQ page [S][P]
+
+  LEGAL
+  /privacy                            Privacy policy [S][P]
+  /terms                              Terms of service [S][P]
+  /shipping-policy                    Shipping info [S][P]
+
+────────────────────────────────────────────────────────────────────────────────
+  1.2  ADMIN — INTERNAL PAGES
+────────────────────────────────────────────────────────────────────────────────
+
+  /admin                              Dashboard
+  /admin/products                     Jersey inventory management
+  /admin/products/new                 Add jersey
+  /admin/products/[id]                Edit jersey
+  /admin/orders                       All orders
+  /admin/orders/[id]                  Order detail + shipping
+  /admin/customers                    Customer list
+  /admin/collections                  Manage curated collections
+  /admin/clubs                        Club directory management
+  /admin/nations                      National teams management
+  /admin/coupons                      Coupon management
+  /admin/reviews                      Review moderation
+  /admin/returns                      Returns management
+  /admin/analytics                    Revenue + conversion analytics
+  /admin/inventory                    Stock levels
+  /admin/suppliers                    Jersey supplier management
+  /admin/support                      Support tickets
+  /admin/settings                     Store settings
+
+  NOTE: Removed from admin — /admin/marketing (will reintegrate),
+  /admin/profit (keep), /admin/categories (replaced by collections + clubs)
+
+
+================================================================================
+  SECTION 2 — CATEGORY HIERARCHY
+================================================================================
+
+  DESIGN PRINCIPLE:
+  Jerseys have three primary discovery dimensions:
+    1. SPORT      — Football vs Cricket (the top-level fork)
+    2. TYPE       — Club / National / Retro (sub-dimension within sport)
+    3. ENTITY     — Specific club or nation (the intent-match layer)
+
+  Every user has a primary intent that fits one of these:
+    "I want a [sport] jersey"            → Sport hub
+    "I want a [club/nation] jersey"      → Entity page
+    "I want a [specific product]"        → Search / PDP
+    "I want to browse"                   → Collections
+
+  Taxonomy should serve ALL four intent patterns simultaneously.
+
+────────────────────────────────────────────────────────────────────────────────
+  LEVEL 0: STORE ROOT
+────────────────────────────────────────────────────────────────────────────────
+
+  TRYBY — Jersey Store
+  └── Football Jerseys
+  └── Cricket Jerseys
+  └── Collections
+  └── Clubs
+  └── Nations
+
+────────────────────────────────────────────────────────────────────────────────
+  LEVEL 1: SPORT
+────────────────────────────────────────────────────────────────────────────────
+
+  FOOTBALL JERSEYS                    CRICKET JERSEYS
+  /jerseys/football                   /jerseys/cricket
+
+  Each sport hub page contains:
+  - Editorial hero image (match action)
+  - Sub-category tiles (Club / National / Retro)
+  - Featured clubs/teams for that sport
+  - Trending jerseys in that sport
+  - "New drops" for that sport
+
+────────────────────────────────────────────────────────────────────────────────
+  LEVEL 2: TYPE (within each sport)
+────────────────────────────────────────────────────────────────────────────────
+
+  FOOTBALL:
+  ├── Club Jerseys          /jerseys/football/club
+  │     Premier League clubs, La Liga, Serie A, Bundesliga, ISL
+  ├── National Team Jerseys /jerseys/football/national
+  │     India, Brazil, France, England, Argentina, Germany, Spain, Portugal
+  └── Retro Jerseys         /jerseys/football/retro
+        Classic cuts, vintage seasons (1990s–2010s)
+
+  CRICKET:
+  ├── IPL Team Jerseys      /jerseys/cricket/ipl
+  │     MI, CSK, RCB, KKR, SRH, RR, PBKS, DC, GT, LSG
+  ├── National Team Jerseys /jerseys/cricket/national
+  │     India, Pakistan, Australia, England, West Indies, South Africa
+  └── Retro Jerseys         /jerseys/cricket/retro
+        Historic India kits, classic World Cup jerseys
+
+────────────────────────────────────────────────────────────────────────────────
+  LEVEL 3: ENTITY (club / nation pages)
+────────────────────────────────────────────────────────────────────────────────
+
+  Each entity page (/clubs/[slug] or /nations/[slug]) shows:
+  - Club/nation identity header (badge, colours, full name)
+  - All available jerseys for that entity
+  - Filter by: Season Year | Home/Away/Third | Size
+  - "Complete the collection" cross-sell
+
+  FOOTBALL CLUBS (initial catalogue):
+    Premier League:  Manchester United, Liverpool, Arsenal, Chelsea,
+                     Manchester City, Tottenham
+    La Liga:         Real Madrid, Barcelona, Atletico Madrid
+    Serie A:         Juventus, AC Milan, Inter Milan
+    ISL (India):     Mumbai City, Bengaluru FC, Kerala Blasters, ATK Mohun Bagan
+    Others:          PSG, Borussia Dortmund, Bayern Munich
+
+  CRICKET TEAMS (initial catalogue):
+    IPL:             MI, CSK, RCB, KKR, SRH, RR, PBKS, DC, GT, LSG
+    National:        India (Blue), India (Test White), Pakistan, Australia,
+                     England, West Indies, South Africa, New Zealand
+
+────────────────────────────────────────────────────────────────────────────────
+  LEVEL 4: PRODUCT
+────────────────────────────────────────────────────────────────────────────────
+
+  Each product (jersey) has these attributes — all filterable:
+
+  REQUIRED:
+    sport           Football | Cricket
+    type            Club | National | IPL | Retro
+    entity          Club or nation slug (FK to entity page)
+    season          "2024-25" | "2023-24" | "2022-23" | "Classic"
+    kit             Home | Away | Third | Goalkeeper | Special Edition
+    name_number     Player name/number on back (Yes/No) + customise option
+    sizes           XS | S | M | L | XL | XXL | Kids (4-5Y, 6-7Y, 9-10Y, 12-13Y)
+    material        Player Version (ADV) | Fan Version (STD)
+    license         Official | Replica | Unofficial (must be clearly labelled)
+
+  OPTIONAL:
+    patch           UCL patch | FIFA patch | League patch
+    captain_band    Yes/No
+    match_worn      Yes/No (premium tier)
+
+  PRODUCT URL PATTERN:
+    /jerseys/football/[club-slug]-[season]-[home|away|third]-jersey
+    e.g. /jerseys/football/real-madrid-2024-25-home-jersey
+         /jerseys/cricket/csk-ipl-2024-home-jersey
+         /jerseys/cricket/india-t20-world-cup-2024-jersey
+
+
+================================================================================
+  SECTION 3 — NAVIGATION STRUCTURE
+================================================================================
+
+────────────────────────────────────────────────────────────────────────────────
+  3.1  PRIMARY NAVIGATION — DESKTOP
+────────────────────────────────────────────────────────────────────────────────
+
+  LAYOUT (left to right):
+  [⚡ TRYBY]  |  Football  Cricket  Collections  Clubs  Deals  |  [🔍  Search jerseys...  ⌘K]  [♡]  [👤]  [🛒 2]
+
+  NAV ITEM 1: Football  ▾  (mega menu)
+  NAV ITEM 2: Cricket   ▾  (mega menu)
+  NAV ITEM 3: Collections  (direct link → /collections)
+  NAV ITEM 4: Clubs     ▾  (dropdown — quick club links)
+  NAV ITEM 5: Deals        (direct link → /collections/sale, "HOT" badge when active)
+
+  WHAT IS REMOVED FROM NAV:
+  ✗  "Sports" mega-menu  — replaced by Football + Cricket as top-level items
+  ✗  "Gear"              — completely removed
+  ✗  Any sport other than football and cricket
+
+────────────────────────────────────────────────────────────────────────────────
+  3.2  MEGA MENU — FOOTBALL
+────────────────────────────────────────────────────────────────────────────────
+
+  Panel width: full container (1280px), height: ~400px
+  3 columns:
+
+  COL 1 — SHOP BY TYPE:
+    Title: "BY JERSEY TYPE"
+    ┌──────────────────────────────────┐
+    │  ⚽ Club Jerseys                  │ → /jerseys/football/club
+    │     Premier League, La Liga +    │
+    │  🌍 National Team Jerseys        │ → /jerseys/football/national
+    │     34 nations                   │
+    │  🕰️  Retro Jerseys               │ → /jerseys/football/retro
+    │     Classic cuts, vintage kits   │
+    │  ─────────────────────────────  │
+    │  🆕 New Arrivals                 │ → /collections/new-arrivals
+    │  🔥 Best Sellers                 │ → /collections/best-sellers
+    │  💰 Sale                         │ → /collections/sale
+    └──────────────────────────────────┘
+
+  COL 2 — POPULAR CLUBS (quick-jump):
+    Title: "POPULAR CLUBS"
+    Two-column list of club names (logo + name):
+    Man United  |  Real Madrid
+    Liverpool   |  Barcelona
+    Arsenal     |  PSG
+    Man City    |  Juventus
+    Chelsea     |  Bayern Munich
+    [View all clubs →]  → /clubs
+
+  COL 3 — FEATURED DROP:
+    Large card (240×180px) with current featured jersey
+    "FEATURED DROP"  eyebrow (red)
+    Jersey name + season
+    Price
+    [Shop Now →]
+
+────────────────────────────────────────────────────────────────────────────────
+  3.3  MEGA MENU — CRICKET
+────────────────────────────────────────────────────────────────────────────────
+
+  Panel: same structure, cricket-specific content
+
+  COL 1 — SHOP BY TYPE:
+    Title: "BY JERSEY TYPE"
+    ┌──────────────────────────────────┐
+    │  🏏 IPL Team Jerseys             │ → /jerseys/cricket/ipl
+    │     All 10 IPL franchises        │
+    │  🌍 National Team Jerseys        │ → /jerseys/cricket/national
+    │     India, Pakistan + more       │
+    │  🕰️  Retro Jerseys               │ → /jerseys/cricket/retro
+    │     Classic India kits, WC 2011  │
+    │  ─────────────────────────────  │
+    │  🆕 New Arrivals                 │
+    │  🔥 Best Sellers                 │
+    │  💰 Sale                         │
+    └──────────────────────────────────┘
+
+  COL 2 — IPL TEAMS (quick-jump):
+    Title: "IPL TEAMS"
+    All 10 teams in a 2-col grid with team badge:
+    MI   |  CSK
+    RCB  |  KKR
+    SRH  |  RR
+    PBKS |  DC
+    GT   |  LSG
+
+  COL 3 — FEATURED DROP:
+    Same format — e.g. "India T20 World Cup Jersey 2024"
+
+────────────────────────────────────────────────────────────────────────────────
+  3.4  DROPDOWN — CLUBS  ▾
+────────────────────────────────────────────────────────────────────────────────
+
+  Simple dropdown (not mega), 2 columns, ~12 clubs:
+    FOOTBALL CLUBS    |  CRICKET CLUBS (IPL)
+    Man United        |  MI
+    Liverpool         |  CSK
+    Real Madrid       |  RCB
+    Barcelona         |  KKR
+    Arsenal           |  SRH
+    Man City          |  India
+    [Browse all clubs →]  → /clubs
+
+────────────────────────────────────────────────────────────────────────────────
+  3.5  SEARCH — JERSEY-SPECIFIC BEHAVIOUR
+────────────────────────────────────────────────────────────────────────────────
+
+  Placeholder: "Search jerseys, clubs, nations..."
+  Width: 240px desktop, collapses to icon on tablet
+
+  COMMAND PALETTE (⌘K) — result types:
+    Jerseys:      product name + club badge + price
+    Clubs:        club name + badge → /clubs/[slug]
+    Nations:      flag + country → /nations/[slug]
+    Collections:  collection name → /collections/[slug]
+    Quick links:  Size Guide, Track Order, Returns
+
+  RECENT SEARCHES: last 5, stored in localStorage
+  POPULAR SEARCHES (static suggestions when empty):
+    "Real Madrid 2024"
+    "India T20 jersey"
+    "CSK IPL 2024"
+    "Retro Man United"
+    "Brazil away jersey"
+
+────────────────────────────────────────────────────────────────────────────────
+  3.6  MOBILE NAVIGATION
+────────────────────────────────────────────────────────────────────────────────
+
+  TOP BAR (56px):
+    [≡ hamburger]   [⚡ TRYBY centered]   [🔍][🛒 2]
+
+  BOTTOM TAB BAR (60px, fixed):
+    [🏠 Home]  [⚽ Football]  [🔍 Search]  [🏏 Cricket]  [👤 Account]
+
+  HAMBURGER DRAWER (full-screen):
+    TRYBY logo + close ×
+    ─────────────────────────────────
+    [⚽ Football Jerseys →]
+       Club · National · Retro
+    [🏏 Cricket Jerseys →]
+       IPL · National · Retro
+    [📦 Collections →]
+    [🏟️  Browse Clubs →]
+    [🌍 Browse Nations →]
+    ─────────────────────────────────
+    [📏 Size Guide]
+    [🔄 Returns]
+    [📦 Track Order]
+    ─────────────────────────────────
+    [Sign In]  [Create Account]
+
+  MOBILE BOTTOM TAB — active state:
+    Football tab active: red dot + label goes red
+    Cricket tab active: same
+    Search opens command palette full-screen
+    Account: redirects to /auth/login if not authenticated
+
+────────────────────────────────────────────────────────────────────────────────
+  3.7  ANNOUNCEMENT BAR
+────────────────────────────────────────────────────────────────────────────────
+
+  3 rotating messages — all jersey-specific:
+    "🏏 IPL 2026 Kits — Official CSK, MI, RCB jerseys now in stock"
+    "⚡ Free Delivery on all jersey orders above ₹499 · Pan-India"
+    "✅ 100% Official Licensed Jerseys · COD Available · 7-Day Returns"
+
+  REMOVED: any message referencing gear, accessories, fitness
+
+────────────────────────────────────────────────────────────────────────────────
+  3.8  FOOTER NAVIGATION
+────────────────────────────────────────────────────────────────────────────────
+
+  COL 1 — TRYBY (brand):
+    Logo + "India's Jersey Store."
+    Social links
+    "Official Licensed Jerseys" trust chip
+
+  COL 2 — FOOTBALL:
+    Football Jerseys (hub)
+    Club Jerseys
+    National Team Jerseys
+    Retro Football
+    Browse All Clubs
+
+  COL 3 — CRICKET:
+    Cricket Jerseys (hub)
+    IPL Team Jerseys
+    National Team Jerseys
+    Retro Cricket
+    Browse IPL Teams
+
+  COL 4 — COLLECTIONS:
+    New Arrivals
+    Best Sellers
+    Sale
+    Retro Collection
+    National Teams
+
+  COL 5 — HELP:
+    Track Order
+    Returns & Refunds
+    Size Guide
+    Authenticity Promise
+    Contact Us
+    FAQ
+
+  COL 6 — COMPANY:
+    About TRYBY
+    Jersey Culture (blog)
+    Supplier Partners
+    Press
+    Privacy Policy
+    Terms of Service
+
+  NOTE: Removed from footer — "Gym Equipment", "Running Gear",
+  "All Sports", "Racket Sports", "Combat Sports"
+
+
+================================================================================
+  SECTION 4 — HOMEPAGE STRUCTURE (REVISED)
+================================================================================
+
+  DESIGN PRINCIPLE FOR HOMEPAGE:
+  The homepage has exactly ONE job: get the user to their jersey in
+  the minimum number of decisions.
+
+  Every section answers one question:
+    Hero:              "What is TRYBY?"
+    League Carousel:   "Which league/competition do I care about?"
+    Featured Drops:    "What's new and desirable right now?"
+    Browse by Club:    "Show me jerseys for my specific team."
+    Best Sellers:      "What are other people buying?"
+    Why TRYBY:         "Can I trust this store?"
+    Reviews:           "Do real people love their jerseys?"
+    Size Guide CTA:    "Will it fit me?"
+    Newsletter:        "How do I stay up to date on drops?"
+    Footer:            "Where else can I go?"
+
+────────────────────────────────────────────────────────────────────────────────
+  SECTION ORDER (top to bottom)
+────────────────────────────────────────────────────────────────────────────────
+
+  [1]  ANNOUNCEMENT BAR
+  [2]  NAVBAR
+  [3]  HERO
+  [4]  LEAGUE / COMPETITION CAROUSEL
+  [5]  LATEST DROPS
+  [6]  SHOP BY CLUB
+  [7]  TRENDING JERSEYS
+  [8]  NATIONAL TEAM SPOTLIGHT
+  [9]  WHY TRYBY
+  [10] CUSTOMER REVIEWS
+  [11] SIZE GUIDE CTA BAND
+  [12] NEWSLETTER
+  [13] FOOTER
+
+  REMOVED SECTIONS (vs previous spec):
+  ✗  "Shop By Sport" grid — replaced by league carousel (more specific)
+  ✗  "Gym & Fitness" category tiles — removed
+  ✗  "Running & Training" — removed
+  ✗  "Accessories" — removed
+  ✗  "Supplier Network" (generic B2B section) — removed. Supplier trust is
+     communicated via "Official Licensed Jerseys" badges, not a dedicated section.
+  ✗  "Instagram Community" — removed as a standalone section. Social proof
+     handled by reviews marquee + "jersey culture" editorial content.
+
+────────────────────────────────────────────────────────────────────────────────
+  4.1  HERO — REVISED BRIEF
+────────────────────────────────────────────────────────────────────────────────
+
+  WHAT CHANGES:
+    Old headline: "GEAR UP. / PLAY HARD."  — too generic, sounds like a
+                  multi-sport fitness store
+    New headline: "THE JERSEY / YOU WANT." — specific, direct, jersey-native
+
+    Old body:  "Premium sports essentials for cricket, football,
+                gym, and beyond."
+    New body:  "Official football and cricket jerseys. Every club.
+                Every season. Delivered across India."
+
+    Old CTAs:  [Shop Cricket Gear →] [Shop Football Kits]
+    New CTAs:  [Shop Football →]  [Shop Cricket →]
+               (equal weight — two sport entry points, not "gear" language)
+
+    Old trust: "★★★★★ 4.8 · 50,000+ Athletes · Free Delivery ₹499+"
+    New trust: "★★★★★ 4.8 · 50,000+ Jerseys Delivered · Free Delivery ₹499+"
+
+  VISUAL:
+    Hero product image changes from generic sports image to a hero jersey
+    showcase — ideally a fan photo wearing a jersey in a stadium.
+    Floating stat cards:
+      "🔥 1,847 jerseys sold this week"  (not "gear" or "products")
+      "✅ Official Licensed"
+      "#1 Jersey Store"
+
+────────────────────────────────────────────────────────────────────────────────
+  4.2  LEAGUE / COMPETITION CAROUSEL  ← NEW SECTION
+────────────────────────────────────────────────────────────────────────────────
+
+  REPLACES: "Shop By Sport" grid
+  PURPOSE:  Intent capture — every jersey buyer thinks in leagues and
+            competitions, not generic "sports". This is the fastest path
+            from homepage to intent-matched catalogue.
+
+  EYEBROW:  "SHOP BY LEAGUE"
+  HEADLINE: "Your League. Your Jersey."
+
+  CAROUSEL ITEMS (horizontal scroll, 8 tiles):
+    Each tile: league logo + name + jersey count + "Shop →"
+
+    1. Premier League      → /jerseys/football/club?league=premier-league
+    2. La Liga             → /jerseys/football/club?league=la-liga
+    3. IPL 2026            → /jerseys/cricket/ipl
+    4. India Cricket       → /clubs/india-cricket
+    5. UEFA Champions Lge  → /collections/champions-league
+    6. FIFA World Cup      → /collections/world-cup
+    7. Serie A             → /jerseys/football/club?league=serie-a
+    8. Bundesliga          → /jerseys/football/club?league=bundesliga
+
+  TILE DESIGN:
+    Width: 160px, aspect-ratio: 3/2
+    bg: #141414, border: 1px #1C1C1C, radius: 16px
+    League logo: centered, 64px
+    League name: Barlow Condensed 600 14px UPPERCASE
+    Product count: "47 jerseys" Inter 12px #606060
+    Hover: border-color red, logo scale(1.05)
+
+────────────────────────────────────────────────────────────────────────────────
+  4.3  LATEST DROPS  ← RENAMED (was "Featured Jerseys")
+────────────────────────────────────────────────────────────────────────────────
+
+  EYEBROW:  "🆕 JUST DROPPED"
+  HEADLINE: "New Season. New Kit."
+  SUB:      "Fresh jerseys added every week."
+
+  CONTENT: Horizontal scroll carousel of 6–8 recent product arrivals
+  Each card: jersey product card (standard spec)
+  "NEW" badge on all cards (forced green badge)
+  Sort by: newest createdAt
+
+  CTA: [View All New Arrivals →] → /collections/new-arrivals
+
+────────────────────────────────────────────────────────────────────────────────
+  4.4  SHOP BY CLUB  ← NEW SECTION
+────────────────────────────────────────────────────────────────────────────────
+
+  PURPOSE:  The highest-intent entry point for jersey buyers. Most buyers
+            know exactly which club they want. Surface top clubs immediately.
+
+  EYEBROW:  "SHOP BY CLUB"
+  HEADLINE: "Find Your Club."
+
+  TWO TABS: [Football] [Cricket / IPL]
+
+  FOOTBALL TAB — 2 rows × 6 club tiles:
+    Row 1 (Premier League): Man Utd · Liverpool · Arsenal · Man City · Chelsea · Tottenham
+    Row 2 (Europe + ISL):   Real Madrid · Barcelona · PSG · Juventus · Mumbai City · Bengaluru FC
+
+  CRICKET TAB — 2 rows × 5 IPL tiles + 1 "National" tile:
+    Row 1: MI · CSK · RCB · KKR · SRH
+    Row 2: RR · PBKS · DC · GT · LSG · [India Cricket]
+
+  CLUB TILE DESIGN:
+    Width: 100px (desktop), 80px (mobile)
+    Circle: 64px, bg #141414, border 1px #1C1C1C
+    Club badge: 48px centered
+    Club name: Inter 11px #A0A0A0 below circle, 2-line clamp centered
+    Hover: border-color red, badge scale(1.08), name → white
+
+  [Browse All Clubs →] → /clubs
+
+────────────────────────────────────────────────────────────────────────────────
+  4.5  TRENDING JERSEYS  ← RENAMED + REFOCUSED (was "Trending Gear")
+────────────────────────────────────────────────────────────────────────────────
+
+  EYEBROW:  "🔥 TRENDING NOW"
+  HEADLINE: "What Fans Are Wearing."
+
+  FILTER TABS (jersey-specific, no gym/running):
+    [All] [Football] [Cricket] [National Teams] [Retro]
+
+  REMOVED TABS: [Gym] [Running] [Badminton] [Combat Sports]
+
+  Content: 4-col grid, 8 products (2 rows × 4)
+  Each: standard product card with SOLD TICKER
+
+  [View All Trending →] → /jerseys?sort=trending
+
+────────────────────────────────────────────────────────────────────────────────
+  4.6  NATIONAL TEAM SPOTLIGHT  ← NEW SECTION
+────────────────────────────────────────────────────────────────────────────────
+
+  PURPOSE:  National team jerseys are a distinct high-value category — India,
+            Brazil, Argentina — that deserves its own section above the fold.
+            Tournament moments drive massive traffic spikes (World Cup, T20 WC).
+
+  EYEBROW:  "🌍 NATIONAL TEAMS"
+  HEADLINE: "Wear Your Nation."
+
+  LAYOUT: 4 large nation cards, horizontal scroll on mobile
+
+  NATION CARDS (desktop 4-col):
+    India Cricket   — India blue jersey image + flag + "32 jerseys"
+    India Football  — India football kit image + flag
+    Brazil          — Brazil yellow + "44 jerseys"
+    England         — England white + "28 jerseys"
+
+  Each card: same as Category Card spec, but shows nation flag in top-right corner
+  Hover: "Explore →" CTA slides up
+
+  [Browse All Nations →] → /nations
+
+────────────────────────────────────────────────────────────────────────────────
+  4.7  WHY TRYBY  ← REVISED CONTENT (structure unchanged)
+────────────────────────────────────────────────────────────────────────────────
+
+  OLD trust props (generic sports store):
+    "Official Licensed Products", "Pan-India Fast Delivery",
+    "Best Price Guarantee", "7-Day Easy Returns"
+
+  NEW trust props (jersey-specific):
+
+  Card 1: ✅ 100% Official Licensed
+    "Every jersey is sourced from official distributors. No fakes. Ever."
+    WHY THIS MATTERS: Jersey buyers are paranoid about authenticity.
+    This is their #1 objection.
+
+  Card 2: 📏 Perfect Fit Guaranteed
+    "Not sure of your size? Our jersey size guide covers every club.
+    Wrong size? Free exchange."
+    WHY THIS MATTERS: Sizing anxiety is the #2 reason jersey buyers abandon.
+
+  Card 3: 🚚 Delivered in 2–5 Days
+    "27,000+ pincodes covered. Same-day dispatch on orders before 2 PM."
+    WHY THIS MATTERS: Jersey buyers are often buying for a match — speed matters.
+
+  Card 4: 🔄 7-Day Easy Returns
+    "Didn't love it? Free pickup and full refund. No questions asked."
+
+  STATS ROW (revised):
+    Old: "50,000+ Athletes Served"
+    New: "50,000+ Jerseys Delivered"
+
+    Old: "100% Official Licensed"
+    New: "100% Authentic — Zero Fakes"
+
+    Others: same (98.4% Positive Reviews, 2–5 Days Delivery)
+
+────────────────────────────────────────────────────────────────────────────────
+  4.8  CUSTOMER REVIEWS  ← REVISED CONTENT
+────────────────────────────────────────────────────────────────────────────────
+
+  OLD review cards: generic athlete reviews ("great for gym", "good running gear")
+  NEW review cards: jersey-specific — every review must mention:
+    - Which jersey purchased (with thumbnail)
+    - Club/nation the person supports
+    - Authenticity feedback OR sizing feedback
+    - Location in India
+
+  EXAMPLE review card content:
+    ★★★★★  "Got the Man United 2024-25 home jersey. Stitching is perfect,
+    badge is official. Delivered in 3 days to Pune. Worth every rupee."
+    — Rohit M., Pune  ·  ⚽ Football Fan  ·  ✓ Verified Purchase
+    [Man Utd 2024-25 Home Jersey thumbnail]
+
+  HEADLINE:  "Trusted by 50,000+ Jersey Fans."  (not "athletes")
+  EYEBROW:   "⭐ JERSEY REVIEWS"
+
+────────────────────────────────────────────────────────────────────────────────
+  4.9  SIZE GUIDE CTA BAND  ← NEW SECTION
+────────────────────────────────────────────────────────────────────────────────
+
+  PURPOSE:  Size anxiety is the #2 abandonment reason for jersey buyers.
+            A dedicated CTA band drives this link to maximum visibility.
+            Also builds trust and reduces returns.
+
+  POSITION:  Between Reviews and Newsletter — catches users who are nearly
+             convinced but still unsure about sizing.
+
+  LAYOUT:  Full-width band, dark bg (#0F0F0F), border top/bottom #1C1C1C
+  HEIGHT:  120px desktop, auto mobile
+
+  CONTENT (2-column split):
+    LEFT:   "📏 Not sure about sizing?"
+            Barlow Condensed 700 28px white
+            "Club jerseys run differently from national team kits.
+             Our size guide covers every brand." Inter 14px #A0A0A0
+
+    RIGHT:  [View Jersey Size Guide →] — PRIMARY RED BUTTON
+            "Free exchanges if you get the size wrong"
+            Inter 12px #606060 below button
+
+────────────────────────────────────────────────────────────────────────────────
+  4.10  NEWSLETTER  ← REVISED COPY
+────────────────────────────────────────────────────────────────────────────────
+
+  OLD copy: "Get Early Access to Drops." / "New jersey releases.
+             Exclusive deals. Training tips."
+
+  NEW copy:
+    HEADLINE:  "First to Know. First to Shop."
+    BODY:      "New jersey drops. Restock alerts. Sale previews.
+                No fitness tips. Just jerseys."
+    SUBTEXT:   "6,200+ jersey fans subscribed · Zero spam · Unsubscribe anytime"
+
+  WHY "No fitness tips. Just jerseys." — This line does double duty:
+    1. Funny, honest, on-brand
+    2. Immediately differentiates TRYBY from generic sports newsletters
+    3. Confirms to the user that this is a jersey-only brand
+
+
+================================================================================
+  SECTION 5 — URL STRUCTURE & SEO ARCHITECTURE
+================================================================================
+
+  JERSEY SEO IS DRIVEN BY LONG-TAIL INTENT:
+  People search:  "manchester united 2024 home jersey india"
+                  "india cricket jersey online buy"
+                  "csk ipl 2024 jersey"
+                  "retro brazil world cup jersey"
+
+  URL STRUCTURE MUST CAPTURE THIS INTENT:
+
+  CATEGORY PAGES (broad intent):
+    /jerseys/football                   "football jerseys"
+    /jerseys/football/club              "club football jerseys india"
+    /jerseys/football/national          "national team football jerseys"
+    /jerseys/cricket/ipl                "ipl jersey 2024"
+
+  ENTITY PAGES (mid-tail):
+    /clubs/manchester-united            "manchester united jersey india"
+    /clubs/csk                          "csk jersey buy online"
+    /nations/india                      "india cricket jersey official"
+
+  PRODUCT PAGES (long-tail):
+    /jerseys/cricket/india-t20-wc-2024-jersey
+    "india t20 world cup jersey 2024 official buy"
+
+  COLLECTION PAGES (event-driven):
+    /collections/ipl-2026              "ipl 2026 jerseys"
+    /collections/world-cup             "fifa world cup jerseys india"
+
+  SEO RULES:
+    1. Every product slug includes: entity + season + kit type + "jersey"
+    2. Every category page has unique <h1> and meta description
+    3. Club pages use official club name (not abbreviation) for H1
+    4. Breadcrumbs on all product pages:
+       Home > Football Jerseys > Club Jerseys > Manchester United > [Product Name]
+    5. Structured data (JSON-LD): Product schema on all PDPs
+       includes: name, brand (TRYBY), offers (price, availability), image
+
+
+================================================================================
+  SECTION 6 — PLP (PRODUCT LISTING PAGE) — FILTER ARCHITECTURE
+================================================================================
+
+  OLD FILTERS (generic multi-sport):
+    Category: Cricket | Football | Gym | Running | Badminton
+    Price range slider
+    Min rating
+
+  NEW FILTERS (jersey-specific):
+
+  PRIMARY DIMENSION (always shown):
+    Sport:   ● All  ○ Football  ○ Cricket
+
+  SECONDARY DIMENSIONS (contextual — update based on Sport selection):
+    Jersey Type:   □ Club  □ National  □ IPL  □ Retro
+    Kit:           □ Home  □ Away  □ Third  □ Goalkeeper  □ Special Edition
+    League:        □ Premier League  □ La Liga  □ IPL  □ ISL  □ Serie A  □ Bundesliga
+                   □ Internacional  □ Champions League
+    Season:        □ 2024-25  □ 2023-24  □ 2022-23  □ Classic / Retro
+    Size:          □ XS  □ S  □ M  □ L  □ XL  □ XXL  □ Kids
+    Price:         [slider] ₹0 — ₹5000
+    Availability:  □ In Stock Only
+
+  ACTIVE FILTER CHIPS:
+    Show above grid: [Football ×] [Home Kit ×] [Premier League ×]
+    Clear all link
+
+  SORT OPTIONS:
+    Trending  |  Newest  |  Price: Low to High  |  Price: High to Low
+    Best Rated  |  Best Sellers
+
+  URL PARAM PATTERN:
+    /jerseys?sport=football&type=club&league=premier-league&kit=home&season=2024-25
+
+
+================================================================================
+  SECTION 7 — PRODUCT DETAIL PAGE (PDP) — JERSEY-SPECIFIC ADDITIONS
+================================================================================
+
+  JERSEY-SPECIFIC ELEMENTS TO ADD TO PDP:
+
+  1. KIT SELECTOR (below product name):
+     [● Home] [○ Away] [○ Third] [○ Goalkeeper]
+     Switching kit updates product image and price immediately.
+     If kit not available: grey out + "Notify me"
+
+  2. SEASON SELECTOR:
+     [● 2024-25] [○ 2023-24] [○ Classic]
+     Links to same club's other season products.
+
+  3. SIZE SELECTOR (mandatory before Add to Cart):
+     XS | S | M | L | XL | XXL | Kids
+     Out of stock sizes: shown greyed with strikethrough, not hidden.
+     "Size Guide" link opens modal — shows chest/waist measurements
+     specific to this brand (Nike sizing ≠ Adidas sizing).
+
+  4. AUTHENTICITY BLOCK (between Add to Cart and trust icons):
+     "✅ Official Licensed Product"
+     "This jersey is sourced from an official licensed distributor.
+      Certificate of authenticity available on request."
+     Visual: gold bordered box, shield icon.
+
+  5. JERSEY DETAILS ACCORDION (below main purchase area):
+     • Fabric & Material
+     • Club / Badge Details
+     • Washing Instructions
+     • Size & Fit Notes
+
+  6. RELATED JERSEYS (bottom):
+     "More from [Club Name]" — same club, different kits/seasons
+     "Fans also bought" — jersey bundles (shorts, socks)
+     NOT: generic "You might also like" showing unrelated products
+
+  7. CUSTOMISATION OPTION (if supported):
+     "Add Name & Number" — text input + number selector
+     + ₹150 upcharge
+     Preview mockup (static text overlay on jersey image)
+
+
+================================================================================
+  SECTION 8 — INFORMATION ARCHITECTURE MAP (VISUAL)
+================================================================================
+
+TRYBY JERSEY STORE — IA TREE
+══════════════════════════════════════════════════════════════════════════
+
+                           [TRYBY]
+                              │
+          ┌───────────────────┼───────────────────┐
+          │                   │                   │
+    [Football]           [Cricket]          [Collections]
+          │                   │                   │
+    ┌─────┼─────┐       ┌─────┼─────┐      ┌──────┼──────┐
+  [Club] [Natl] [Retro] [IPL][Natl][Retro] [New] [Best] [Sale]
+     │      │              │                [Retro][Natl Teams]
+   [Clubs]  │           [IPL Teams]
+   per club │           per team
+          [Nations]
+          per nation
+
+DISCOVERY PATHS:
+═══════════════
+
+  PATH A — Sport → Type → Entity → Product
+    Homepage → Football → Club Jerseys → Manchester United → Product
+
+  PATH B — Entity direct (bookmarked fan)
+    Homepage → Search "CSK" → /clubs/csk → Product
+
+  PATH C — Browse & discover
+    Homepage → Trending Jerseys → Product
+
+  PATH D — Collection / editorial
+    Homepage → "New Arrivals" CTA → /collections/new-arrivals → Product
+
+  PATH E — National team event-driven
+    Homepage → National Team Spotlight → /nations/india → Product
+
+  PATH F — Search intent
+    Cmd+K → "real madrid 2024" → Product directly
+
+HOMEPAGE FUNNEL DIAGRAM:
+════════════════════════
+
+  HOMEPAGE
+      │
+      ├── Hero CTA [Football] ──────────────────────────► /jerseys/football
+      │
+      ├── Hero CTA [Cricket] ───────────────────────────► /jerseys/cricket
+      │
+      ├── League Carousel [Premier League] ─────────────► /jerseys/football/club?league=pl
+      │
+      ├── League Carousel [IPL] ────────────────────────► /jerseys/cricket/ipl
+      │
+      ├── Latest Drops [product card] ──────────────────► /jerseys/[sport]/[slug]  (PDP)
+      │
+      ├── Shop By Club [Man Utd tile] ─────────────────► /clubs/manchester-united
+      │
+      ├── Trending Jerseys [product card] ─────────────► /jerseys/[sport]/[slug]  (PDP)
+      │
+      ├── National Team Spotlight [India] ─────────────► /nations/india
+      │
+      └── Footer nav [any link] ────────────────────────► respective page
+
+
+================================================================================
+  SECTION 9 — WHAT TO BUILD FIRST (PRIORITY ORDER)
+================================================================================
+
+  SPRINT 1 — BRAND ACCURACY (1–2 days, no new pages needed):
+    1. Update navbar: remove Gear, add Football + Cricket mega menus
+    2. Update hero copy: "THE JERSEY YOU WANT" + jersey CTAs
+    3. Update announcement bar: jersey-specific messages
+    4. Update trending section filter tabs: remove Gym/Running/Badminton
+    5. Update footer: jersey columns, remove Gym/Running/Racket links
+    6. Update newsletter copy: "Just jerseys."
+    7. Update trust section copy: jersey-specific trust props
+
+  SPRINT 2 — NEW HOMEPAGE SECTIONS (3–5 days):
+    8. Build League Carousel section (replaces Shop By Sport)
+    9. Build Shop By Club section (tab-switched club tiles)
+    10. Build National Team Spotlight section (4 nation cards)
+    11. Build Size Guide CTA band
+    12. Update review cards with jersey-specific content
+
+  SPRINT 3 — ROUTES + CATALOGUE (1 week):
+    13. Build /jerseys/football hub page
+    14. Build /jerseys/cricket hub page
+    15. Build /clubs/[slug] entity page
+    16. Build /nations/[slug] entity page
+    17. Update mock.ts — replace all non-jersey products with jersey products
+    18. Update PLP filters: jersey-specific filters
+
+  SPRINT 4 — PDP JERSEY FEATURES (1 week):
+    19. Kit selector (Home/Away/Third)
+    20. Season selector
+    21. Authenticity block
+    22. Jersey details accordion
+    23. Size guide modal with per-brand measurements
+
+================================================================================
+  END OF DOCUMENT
+================================================================================

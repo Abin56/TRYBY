@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+Disallow: /api/
+Disallow: /admin/
+Disallow: /auth/
+Disallow: /account/
+Disallow: /supplier/
+Disallow: /splash
+Disallow: /maintenance
+
+Sitemap: https://www.tryby.in/sitemap.xml

@@ -1,0 +1,2844 @@
+=================================================
+TRYBY PLATFORM — COMPLETE PROJECT DOCUMENTATION
+=================================================
+Generated: 2026-06-05
+Version: 1.0 (Matches codebase state as of June 2026)
+
+This document is the single source of truth for the TRYBY dropshipping
+e-commerce platform. It covers architecture, business logic, all modules,
+APIs, database models, workflows, and operational procedures.
+
+=================================================
+TABLE OF CONTENTS
+=================================================
+
+ 1. Project Overview
+ 2. System Architecture
+ 3. User Website Modules
+ 4. Admin Panel Modules
+ 5. Supplier Panel Modules
+ 6. Super Admin Modules
+ 7. Database Reference
+ 8. API Reference
+ 9. Business Workflows
+10. External Services
+11. Feature Flags
+12. Cron Jobs & Background Jobs
+13. Deployment Guide
+14. Troubleshooting Guide
+15. Current Completion Status
+16. Future Roadmap
+
+=================================================
+1. PROJECT OVERVIEW
+=================================================
+
+WHAT IS TRYBY?
+--------------
+TRYBY is a premium B2C sports merchandise dropshipping e-commerce platform
+built for the Indian market. It sells official and premium sports jerseys,
+equipment, and accessories — initially focused on cricket, football, gym &
+fitness, and running categories.
+
+TRYBY is not a traditional inventory-holding retailer. It operates as a
+dropshipping marketplace where:
+- Suppliers hold the physical inventory
+- TRYBY markets and sells to customers
+- Suppliers fulfill and ship orders
+- TRYBY earns commission on each sale
+- Suppliers receive payouts after a settlement hold period
+
+BUSINESS MODEL
+--------------
+Revenue Sources:
+  1. Commission: TRYBY charges suppliers a percentage-based commission
+     per delivered order (configurable by category, supplier, or globally)
+  2. GST on Commission: TRYBY charges 18% GST on its commission amount
+  3. Shipping Deduction: Shipping cost may be partially deducted from
+     supplier earnings depending on commission rule configuration
+
+Key Financial Flow:
+  Customer pays ₹X → TRYBY receives ₹X via Razorpay
+  → Supplier earns ₹X minus commission minus GST minus shipping
+  → After 7-day hold period, supplier can withdraw to bank
+
+Pricing Strategy:
+  - Suppliers provide cost price
+  - TRYBY calculates selling price via margin % + minimum profit guarantee
+  - Automatic price sync when supplier cost changes
+
+DROPSHIPPING WORKFLOW (HIGH LEVEL)
+-----------------------------------
+  1. Customer browses TRYBY store, adds to cart
+  2. Customer places order with online payment (Razorpay) or COD
+  3. Order flows to supplier dashboard
+  4. Supplier accepts, packs, and ships via courier integration
+  5. Shiprocket/Delhivery generates AWB and tracking
+  6. Webhook events update order tracking in real time
+  7. On delivery, settlement is created with 7-day hold
+  8. After hold expires, supplier balance is credited
+  9. Supplier requests payout to their registered bank account
+
+SUPPLIER WORKFLOW
+-----------------
+  1. Apply via supplier portal (form + document upload)
+  2. Admin reviews and approves supplier application
+  3. Supplier signs agreement (versioned, digital)
+  4. Supplier uploads products or enables sync profile
+  5. Admin maps supplier SKUs to TRYBY product variants
+  6. Inventory syncs automatically at configured frequency
+  7. Supplier receives orders via dashboard
+  8. Supplier updates order status (packed → shipped)
+  9. Supplier tracks SLA performance score
+  10. Supplier monitors wallet, ledger, settlements
+  11. Supplier requests payout when balance is available
+
+CUSTOMER WORKFLOW
+-----------------
+  1. Customer visits TRYBY store (or mobile app)
+  2. Browses homepage, categories, search
+  3. Views product detail, selects size/variant
+  4. Adds to cart or wishlist
+  5. Applies coupon code (optional)
+  6. Enters shipping address
+  7. Selects payment method (online / COD)
+  8. Pays via Razorpay checkout
+  9. Receives order confirmation email + in-app notification
+  10. Tracks shipment via tracking page
+  11. Receives delivery notification
+  12. Can raise return request within return window
+  13. Earns loyalty points on delivered orders
+  14. Can write product review after delivery
+
+ADMIN WORKFLOW
+--------------
+  1. Monitor dashboard: revenue, orders, pending actions
+  2. Review new supplier applications
+  3. Approve/reject products from suppliers
+  4. Manage product catalog, pricing, categories
+  5. Process and resolve customer returns
+  6. Moderate product reviews
+  7. Manage coupon campaigns and promotions
+  8. Monitor inventory levels and sync health
+  9. Manage shipping and courier integrations
+  10. Approve supplier payouts
+  11. Review fraud alerts and blacklist management
+  12. View financial reports: profit, commissions, GST
+  13. Run marketing campaigns (email, WhatsApp)
+  14. Manage content: homepage blocks, announcements, SEO
+
+SUPER ADMIN WORKFLOW
+--------------------
+  1. Full access to all admin functions
+  2. Manage admin team: add/remove admins, set roles
+  3. Set fine-grained permissions per admin
+  4. Force-logout any admin session
+  5. Access complete audit trail of all admin actions
+  6. Toggle system feature flags
+  7. Configure maintenance mode
+  8. Monitor system health: background jobs, services
+  9. Manage security: blacklists, COD rules, fraud thresholds
+  10. View all supplier agreements and override commission rules
+
+
+=================================================
+2. SYSTEM ARCHITECTURE
+=================================================
+
+MONOREPO STRUCTURE
+------------------
+  Dropshipping/
+  ├── store/          ← Main app (Next.js): storefront + admin + supplier portal
+  ├── admin/          ← Standalone admin dashboard (separate Next.js app, currently UI-only)
+  └── [docs]/         ← Architecture docs, specs, status files
+
+NOTE: The `store/` directory is the primary production application. The
+`admin/` directory is a separate standalone dashboard that appears to be
+a UI prototype/reference — it uses mock data and does not share the
+Prisma database. All production admin functionality lives in store/app/admin/.
+
+FRONTEND ARCHITECTURE
+---------------------
+Framework: Next.js 16.2.6 (App Router, React Server Components)
+Language: TypeScript 5
+Styling: Tailwind CSS 4
+Animations: Framer Motion 12
+Icons: Lucide React
+Toast Notifications: Sonner
+State Management: Zustand 5
+Form Handling: React Hook Form + Zod validation
+UI Primitives: Radix UI (accessible, unstyled components)
+Table Library: TanStack React Table (admin data tables)
+Charts: Recharts (admin analytics)
+
+Rendering Strategy:
+  - Server Components by default (data fetching at server)
+  - Client Components for interactive UI (cart, checkout, modals)
+  - Edge Middleware for route protection and auth checks
+  - ISR/SSR for product pages, SSG for static pages
+
+BACKEND ARCHITECTURE
+--------------------
+Runtime: Node.js (Next.js API Routes)
+ORM: Prisma 5.22.0
+Database: PostgreSQL (hosted on Neon)
+Authentication: NextAuth.js v5 (beta) with JWT strategy
+API Style: REST (Next.js App Router Route Handlers)
+Error Tracking: Sentry (client + server + edge)
+
+Key architectural patterns:
+  - Route Handlers in app/api/* for all API endpoints
+  - Prisma transactions for multi-step operations
+  - Integer arithmetic (paise) for all financial calculations
+  - Idempotency keys for webhooks and settlements
+  - Double-entry ledger for supplier financial records
+  - Fire-and-forget pattern for non-critical side effects
+
+DATABASE ARCHITECTURE
+---------------------
+Database: PostgreSQL (Neon - serverless)
+Schema: Prisma schema at store/prisma/schema.prisma (2997 lines)
+Migrations: Located at store/prisma/migrations/
+Models: 75+ Prisma models covering all business domains
+
+Key design decisions:
+  - All financial amounts stored in PAISE (integer), not rupees (decimal)
+  - Immutable audit logs (AuditLog, SupplierLedger, StockSyncLog)
+  - Soft deletes via `isArchived` flags on products
+  - Event-sourced order status via OrderStatusHistory
+  - Idempotency via unique constraint on WebhookEvent(eventId, eventType)
+  - Running balance snapshot on each SupplierLedger entry
+
+API ARCHITECTURE
+----------------
+All APIs follow Next.js App Router conventions:
+  - Files: app/api/[path]/route.ts
+  - Methods: export async function GET/POST/PATCH/PUT/DELETE
+  - Auth: Checked via auth() from lib/auth.ts
+  - Role checks: via hasPermission() from lib/rbac.ts
+  - Validation: Zod schemas before DB operations
+  - Error format: { error: string } with appropriate HTTP status codes
+  - Rate limiting: lib/rate-limit.ts (sliding window per IP:route)
+
+Total API count: ~195+ route handlers
+
+Versioning:
+  - v1 endpoints under /api/v1/ (mobile app compatibility)
+  - Default endpoints unversioned (web app)
+
+EXTERNAL SERVICES ARCHITECTURE
+-------------------------------
+  Payment:   Razorpay → /api/webhooks/razorpay
+  Shipping:  Shiprocket → /api/webhooks/shiprocket
+             Delhivery → /api/webhooks/delhivery
+  Email:     Resend (transactional emails)
+  Images:    Cloudinary (CDN, transformations)
+  OAuth:     Google (via NextAuth.js)
+  Errors:    Sentry (frontend + backend + edge)
+
+AUTHENTICATION FLOW
+-------------------
+Customer Authentication:
+  1. Customer visits /auth/signin
+  2. Options: Email/Password or Google OAuth
+  3. NextAuth.js handles OAuth flow and JWT creation
+  4. JWT stored in httpOnly cookie (auth_token)
+  5. Session validated on each protected request via middleware.ts
+
+Admin Authentication:
+  1. Admin visits /admin (redirected to /admin/login if not authenticated)
+  2. Email + password login (no OAuth for admins)
+  3. Password verified against AdminProfile.passwordHash (bcrypt, 12 rounds)
+  4. JWT issued with role and permissions claims
+  5. Middleware checks role for every /admin/* and /api/admin/* request
+  6. SUPER_ADMIN gated routes checked additionally
+  7. AdminSession created per login (force-logout capable)
+
+Supplier Authentication:
+  1. Supplier visits /supplier/login
+  2. Email + password login
+  3. Supplier account linked to User record with UserRole.SUPPLIER
+  4. Session carries supplier context
+
+Role Hierarchy:
+  SUPER_ADMIN > ADMIN > [role-specific managers] > SUPPORT_AGENT
+
+JWT Contents:
+  - user.id, user.email, user.role
+  - adminProfile.role (for admins)
+  - adminProfile.permissions (extra permissions beyond role defaults)
+
+
+=================================================
+3. USER WEBSITE MODULES
+=================================================
+
+--- HOMEPAGE ---
+Purpose: Primary landing page showcasing brand, featured products,
+         categories, trust signals, and promotions.
+Routes: /
+Related APIs: /api/storefront/* (content blocks, social proof)
+Database Models: ContentBlock, AnnouncementMessage, Product, Category,
+                 SocialProofEvent
+Content Blocks (CMS-driven):
+  - HERO_BANNER: Main promotional banner with CTA
+  - CATEGORY_GRID: 4 sport categories with images
+  - TRENDING_PRODUCTS: Dynamically fetched trending products
+  - TRUST_BAR: Trust badges (official, free delivery, easy returns, secure)
+  - ANNOUNCEMENT_BAR: Scrolling promotional message
+  - INSTAGRAM_FEED: UGC posts (InstagramPost model)
+  - SOCIAL_PROOF_TICKER: "Someone just bought X" popups (SocialProofEvent)
+Components: components/home/*
+
+--- PRODUCT CATALOG (PLP) ---
+Purpose: Browse and filter all products by category, sport, price, etc.
+Routes: /products, /products?category=cricket&sort=trending
+Related APIs: /api/products (GET with filters)
+Database Models: Product, ProductVariant, Category, ProductImage, ProductBadge
+Features:
+  - Filter by: category, price range, sport, size availability
+  - Sort by: trending, newest, price asc/desc, best rated
+  - Grid/list view toggle
+  - Infinite scroll or pagination
+  - Product badges: TRENDING, NEW, SALE, OFFICIAL, BEST_SELLER, LIMITED
+Components: components/plp/*
+
+--- SEARCH ---
+Purpose: Full-text product search with instant results
+Routes: /products?q=cricket+jersey
+Related APIs: /api/search?q=term
+Database Models: Product, ProductVariant, Category
+Features:
+  - Full-text search on product name, description
+  - Autocomplete suggestions
+  - Recent searches (local storage)
+  - No results state with suggestions
+Components: components/search/*
+
+--- CATEGORIES ---
+Purpose: Browse products organized by sport or type
+Routes: /products?category=[slug]
+Related APIs: /api/products?category=[slug]
+Database Models: Category (with parentId hierarchy), Product
+Features:
+  - Category hierarchy (parent/child categories)
+  - SEO-friendly URLs
+  - Category-specific hero images and descriptions
+  - Related categories sidebar
+
+--- PRODUCT DETAIL PAGE (PDP) ---
+Purpose: Individual product page with all details, variants, and purchase CTA
+Routes: /products/[slug]
+Related APIs:
+  - /api/products/[slug] (GET product details)
+  - /api/reviews?productId=X (GET reviews)
+  - /api/cart (POST to add to cart)
+  - /api/favorites (POST/DELETE wishlist toggle)
+  - /api/shipping/serviceability?pincode=X (GET delivery check)
+Database Models: Product, ProductVariant, ProductImage, Review, WishlistItem
+Features:
+  - Image gallery with zoom
+  - Size/color variant selector
+  - Price display (MRP + selling price + discount %)
+  - Stock availability indicator
+  - Pincode delivery check
+  - Add to cart / Buy Now
+  - Add to wishlist
+  - Product badges (OFFICIAL, TRENDING, etc.)
+  - Reviews section with star ratings
+  - Related products
+Components: components/pdp/*
+
+--- CART ---
+Purpose: Shopping cart with quantity management and order summary
+Routes: /cart
+Related APIs:
+  - /api/cart (GET, POST, PATCH, DELETE)
+Database Models: CartItem, ProductVariant
+Features:
+  - Add/remove items
+  - Quantity increment/decrement
+  - Real-time price updates
+  - Stock validation on checkout
+  - Coupon code entry (applied at checkout)
+  - Order summary sidebar
+  - Estimated delivery dates
+  - Empty cart state
+Components: components/cart/*
+State: Zustand store at store/store/cart.ts
+
+--- CHECKOUT ---
+Purpose: Multi-step checkout flow: address → payment → confirmation
+Routes: /checkout
+Related APIs:
+  - /api/checkout (POST to place order)
+  - /api/addresses (GET/POST user addresses)
+  - /api/shipping/serviceability (GET delivery check)
+Database Models: Order, OrderItem, CartItem, Payment, Coupon
+Flow:
+  1. Login gate (redirect to auth if not logged in)
+  2. Select/add delivery address
+  3. Pincode serviceability check
+  4. Coupon code validation
+  5. Order summary display
+  6. Payment selection: Online (Razorpay) or COD (if enabled + allowed)
+  7. Razorpay modal opens for online payment
+  8. On payment success → /order-success?orderId=X
+  9. On payment failure → /order-failed
+Fraud Checks at Checkout:
+  - COD restricted for high-risk customers (CustomerRiskProfile)
+  - IP-based velocity checks
+  - Blacklist checks (email, phone, address)
+Components: components/checkout/*
+
+--- ORDER SUCCESS / FAILURE ---
+Purpose: Post-checkout confirmation or failure pages
+Routes: /order-success, /order-failed
+Related APIs: /api/orders/[id] (GET order details for success page)
+Database Models: Order, OrderItem, Payment, Shipment
+Features:
+  - Order confirmation with order number
+  - Expected delivery date
+  - Download invoice link
+  - Track order CTA
+
+--- CUSTOMER ACCOUNT ---
+Purpose: Customer self-service: profile, orders, notifications
+Routes: /account, /account/orders, /account/orders/[id],
+        /account/notifications
+Related APIs:
+  - /api/profile (GET/PUT)
+  - /api/orders (GET customer orders)
+  - /api/orders/[id] (GET order detail with tracking)
+Database Models: User, Order, OrderItem, Shipment, ShipmentEvent,
+                 Notification, LoyaltyPoint
+
+Sub-pages:
+  /account         → Profile overview, loyalty points, referral code
+  /account/orders  → Order history list
+  /account/orders/[id] → Order detail with live tracking timeline
+  /account/notifications → Notification inbox
+
+--- ORDER TRACKING ---
+Purpose: Live shipment tracking with event timeline
+Routes: /account/orders/[id]
+Related APIs: /api/orders/[id] (includes Shipment + ShipmentEvent)
+Database Models: Shipment, ShipmentEvent, Order
+Features:
+  - Tracking timeline (in-transit, out for delivery, delivered)
+  - Courier AWB number with external tracking link
+  - Estimated delivery date
+  - Event timestamps and locations
+Components: within account/orders/[id] page
+
+--- REVIEWS ---
+Purpose: Customer product reviews and ratings
+Routes: /products/[slug] (review section), /account/orders/[id] (write review)
+Related APIs:
+  - /api/reviews (GET product reviews, POST new review)
+  - /api/reviews/[id]/vote (POST helpful/not helpful vote)
+Database Models: Review, ReviewHelpfulVote
+Features:
+  - 1-5 star rating
+  - Text review with title
+  - Media upload (photos)
+  - Verified purchase badge
+  - Helpful/not helpful voting
+  - Moderation: PENDING → APPROVED / REJECTED
+  - Review aggregates on product card
+
+--- WISHLIST ---
+Purpose: Save products for later, get price drop notifications
+Routes: /wishlist
+Related APIs:
+  - /api/wishlist or /api/favorites (GET, POST, DELETE)
+Database Models: WishlistItem, ProductVariant, Product
+Features:
+  - Toggle add/remove from product cards and PDP
+  - Wishlist page with saved items
+  - Move to cart
+  - Out of stock indicator
+  - Price drop notifications (triggered via NotificationPreference)
+Guard: Requires login (redirect to /auth/signin)
+
+--- LOYALTY ---
+Purpose: Points-based loyalty program for repeat customers
+Routes: /account (loyalty points section)
+Related APIs: /api/profile (includes loyalty summary)
+Database Models: LoyaltyPoint
+Feature Flag: loyalty_enabled (must be ON)
+Points Events:
+  - EARN_ORDER: Earn points on delivered orders
+  - EARN_REVIEW: Bonus points for writing a review
+  - EARN_REFERRAL: Points for successful referrals
+  - REDEEM: Redeem points at checkout for discount
+  - EXPIRE: Points can expire (configurable)
+  - MANUAL_CREDIT/DEBIT: Admin adjustments
+Display: Points balance, history, expiry dates, redemption options
+
+--- REFERRAL ---
+Purpose: Customer referral program with unique referral codes
+Routes: /account (referral section)
+Related APIs: /api/profile (includes referral code)
+Database Models: Referral, User
+Feature Flag: referral_enabled (must be ON)
+Flow:
+  1. Customer gets unique referral code (shown in account)
+  2. Shares code with friends
+  3. Friend signs up + places first order using referral code
+  4. Referrer earns reward (points or coupon)
+  5. Referred friend may get discount
+  6. Referral tracked in Referral model with status
+
+--- COMMUNITY ---
+Purpose: Social feed / user-generated content hub
+Routes: /community
+Feature Flag: community_enabled (must be ON)
+Database Models: InstagramPost (UGC posts)
+Features:
+  - Community posts/gallery from customers
+  - Instagram-style feed
+  - Share TRYBY haul content
+
+--- NOTIFICATIONS ---
+Purpose: In-app notification center
+Routes: /account/notifications
+Related APIs: /api/notifications (GET, mark read)
+Database Models: Notification, NotificationDelivery, NotificationPreference
+Channels: IN_APP, EMAIL, WHATSAPP, PUSH, SMS
+Categories: ORDER, PAYMENT, SHIPPING, RETURN, LOYALTY, REFERRAL,
+            PROMOTION, SYSTEM, WISHLIST, STOCK
+Features:
+  - Unread badge count in header
+  - Notification list with timestamp and read status
+  - Mark all as read
+  - Per-category preferences
+  - Quiet hours (10 PM - 8 AM by default)
+  - Global unsubscribe from promotions
+
+--- STATIC PAGES ---
+Purpose: Legal, informational, and support pages
+Routes:
+  /about         → Brand story
+  /contact       → Contact form
+  /faq           → Frequently asked questions
+  /returns       → Return policy
+  /shipping      → Shipping information
+  /privacy-policy → Privacy policy
+  /terms         → Terms of service
+  /cookies       → Cookie policy
+  /disclaimer    → Disclaimer
+  /cancellation  → Cancellation policy
+  /splash        → Pre-launch splash page (if prelaunch_mode enabled)
+  /maintenance   → Maintenance page (shown when maintenance mode active)
+
+--- SUPPLIER DIRECTORY ---
+Purpose: Public-facing supplier showcase
+Routes: /suppliers, /suppliers/[slug]
+Related APIs: /api/storefront/suppliers/[slug]
+Database Models: Supplier
+Features:
+  - Public supplier profile pages
+  - Supplier products listing
+  - Performance badges (if enabled)
+Feature Flag: supplier_marketplace_enabled
+
+
+=================================================
+4. ADMIN PANEL MODULES
+=================================================
+
+The admin panel lives within the main store app at /admin/*.
+Authentication: Email + password only (no OAuth for admins)
+Access Control: RBAC with 10 roles and 42 granular permissions
+Super Admin exclusive: /admin/super, /admin/team, /admin/sessions, /admin/audit
+
+--- DASHBOARD ---
+Purpose: Overview of key business metrics and alerts
+Routes: /admin
+APIs: /api/admin/analytics
+Required Permission: Any admin role
+Displays:
+  - Revenue (today, week, month)
+  - Orders count (pending, processing, shipped, delivered)
+  - Active suppliers count
+  - Low stock alerts
+  - Recent orders feed
+  - Fraud alerts
+  - Pending actions (returns, payouts, supplier applications)
+
+--- ORDERS ---
+Purpose: View, manage, and process all customer orders
+Routes: /admin/orders, /admin/orders/[id]
+APIs: /api/admin/orders, /api/admin/orders/[id]
+Required Permission: orders:read, orders:write
+Models: Order, OrderItem, OrderStatusHistory, Payment, Shipment
+Features:
+  - Filter by: status, date range, supplier, payment method
+  - Bulk status update
+  - Manual order status override
+  - View payment details (Razorpay order/payment IDs)
+  - Initiate refund from order detail
+  - View shipment tracking inline
+  - Risk flags display
+  - Export orders to CSV (/api/admin/orders/export)
+  - Force-cancel with reason
+  - Link to supplier SLA record
+
+--- PRODUCTS ---
+Purpose: Complete product catalog management
+Routes:
+  /admin/products         → Product list with filters
+  /admin/products/new     → Create new product
+  /admin/products/[id]/edit → Edit product
+  /admin/products/[id]/variants → Manage SKU variants
+  /admin/products/archive → Archived products
+  /admin/products/bulk    → Bulk edit (price, status, category)
+  /admin/products/bulk-variants → Bulk variant operations
+  /admin/products/featured → Feature/unfeature products
+  /admin/products/health  → Product health (missing images, SEO gaps)
+  /admin/products/import  → CSV import products
+  /admin/products/performance → Sales performance per product
+  /admin/products/search  → Product search
+  /admin/products/supplier-map → Map products to suppliers
+  /admin/products/supplier-sku → Manage supplier SKU mappings
+APIs: /api/admin/products/*
+Required Permission: products:read, products:write, products:delete
+Models: Product, ProductVariant, ProductImage, ProductBadge, Category
+Features:
+  - Rich product editor (title, description, pricing, images)
+  - Variant management (size, color, SKU, stock, price)
+  - Cloudinary image upload
+  - Badge assignment (TRENDING, NEW, SALE, etc.)
+  - SEO fields (meta title, description)
+  - Product visibility toggle
+  - Archive/restore products
+  - Bulk price updates
+  - Supplier assignment
+  - SKU mapping to supplier codes
+
+--- CATEGORIES ---
+Purpose: Manage product category hierarchy
+Routes: /admin/categories
+APIs: /api/admin/categories
+Required Permission: products:read, products:write
+Models: Category
+Features:
+  - Create/edit/delete categories
+  - Parent-child hierarchy
+  - Category images
+  - SEO fields per category
+  - Reorder categories
+
+--- CATALOG CENTER ---
+Purpose: Hub for catalog operations and merchandising
+Routes: /admin/catalog-center, /admin/catalog-center/merchandising
+APIs: /api/admin/catalog/*
+Models: Product, Category, ContentBlock
+Features:
+  - Merchandising rules (boost/bury products)
+  - Catalog health overview
+  - Quick catalog actions
+
+--- CUSTOMERS ---
+Purpose: View and manage customer accounts
+Routes: /admin/customers
+APIs: /api/admin/customers
+Required Permission: customers:read, customers:write
+Models: User, Order, CustomerRiskProfile, LoyaltyPoint
+Features:
+  - Customer list with search and filter
+  - Customer detail: profile, order history, loyalty points
+  - Risk profile display
+  - Manually flag/unflag at-risk customers
+  - View/edit COD access
+  - Blacklist customer (email/phone/IP)
+
+--- RETURNS ---
+Purpose: Process and manage customer return requests
+Routes: /admin/returns, /admin/returns/[id]
+APIs: /api/admin/returns, /api/admin/returns/[id]
+Required Permission: returns:read, returns:write
+Models: ReturnRequest, ReturnItem, Order, OrderItem, Refund
+Features:
+  - Filter by: status, date, supplier
+  - Approve/reject return requests
+  - Request photos/evidence from customer
+  - Process refund (Razorpay refund API)
+  - Deduct from supplier settlement
+  - Return analytics (/admin/returns/analytics)
+  - Return reason breakdown
+
+--- REVIEWS ---
+Purpose: Moderate product reviews before they go live
+Routes: /admin/reviews, /admin/review-analytics
+APIs: /api/admin/reviews, /api/admin/reviews/[id]
+Required Permission: products:read
+Models: Review, ReviewHelpfulVote
+Features:
+  - Queue of pending reviews
+  - Approve or reject with reason
+  - Filter by: product, star rating, status
+  - Review analytics dashboard
+  - Spam/abuse flagging
+
+--- MARKETING ---
+Purpose: Run campaigns, manage coupons, track marketing performance
+Routes:
+  /admin/coupons        → Coupon management
+APIs:
+  /api/admin/campaigns
+  /api/admin/coupons
+  /api/admin/abandoned-cart
+  /api/admin/marketing-analytics
+Required Permission: marketing:read, marketing:write, coupons:read, coupons:write
+Models: Campaign, CampaignEvent, AbandonedCart, Coupon, NewsletterSubscriber
+Features:
+  - Create/edit coupon codes (PERCENTAGE, FLAT, FREE_SHIPPING)
+  - Coupon rules: min order value, max discount cap, per-user limit, date range
+  - Campaign management (EMAIL, WHATSAPP, COUPON, LOYALTY types)
+  - Abandoned cart recovery campaigns
+  - Campaign event tracking (open, click, convert)
+  - Marketing analytics: conversion rates, ROI
+  - Newsletter subscriber list export
+
+--- NOTIFICATIONS (ADMIN) ---
+Purpose: Send system/admin notifications to customers
+Routes: /admin/system/notifications
+APIs: /api/admin/notifications
+Required Permission: marketing:write
+Models: Notification, NotificationDelivery
+Features:
+  - Broadcast notifications to all/segment of users
+  - Template-based notifications
+  - Per-channel dispatch (email, in-app, WhatsApp)
+  - Delivery tracking
+
+--- FINANCE ---
+Purpose: Financial overview, GST reporting, and financial health
+Routes: /admin/finance
+APIs: /api/admin/finance, /api/admin/financial-analytics
+Required Permission: finance:read
+Models: Order, Payment, SupplierLedger, Payout, CommissionRule
+Features:
+  - Revenue overview (gross, net, commission, GST)
+  - GST summary report (output tax on commission)
+  - Commission breakdown by supplier/category
+  - Payment health dashboard (/admin/payment-health)
+  - Payment reconciliation (/admin/payments/reconcile)
+
+--- PROFIT ANALYSIS ---
+Purpose: Deep profit analysis per order/product/supplier
+Routes: /admin/profit
+APIs: /api/admin/profit
+Required Permission: profit:read
+Models: Order, OrderItem, CommissionRule, SupplierLedger
+Features:
+  - Profit per order (gross - commission - shipping - refunds)
+  - Profit by product
+  - Profit by supplier
+  - Margin analysis
+  - Period comparison
+
+--- PAYOUTS ---
+Purpose: Approve and process supplier payout requests
+Routes: /admin/payouts
+APIs: /api/admin/payouts, /api/admin/payouts/[id]
+Required Permission: payouts:read, payouts:write
+Models: Payout, Supplier, SupplierLedger
+Features:
+  - Queue of pending payout requests
+  - Approve/reject with reason
+  - Mark as processed with UTR number
+  - Bulk approval
+  - Payout history
+
+--- BUSINESS INTELLIGENCE ---
+Purpose: Advanced analytics and KPI tracking
+Routes: /admin/reports/kpi, /admin/reports/sales, /admin/reports/profit
+         /admin/reports/suppliers
+APIs: /api/admin/reports/*
+Required Permission: analytics:read
+Features:
+  - KPI dashboard: AOV, conversion rate, repeat purchase rate
+  - Sales report by date/category/product
+  - Supplier performance report
+  - Customer cohort analysis
+  - Revenue trends
+
+--- INVENTORY ---
+Purpose: Multi-warehouse stock management and supplier sync
+Routes:
+  /admin/inventory       → Inventory overview dashboard
+  /admin/inventory/logs  → Stock change audit trail
+  /admin/inventory/sync  → Trigger supplier sync
+  /admin/inventory/sync-logs → Sync session history
+  /admin/inventory/transfers → Inter-warehouse stock transfers
+APIs: /api/admin/inventory/*
+Required Permission: inventory:read, inventory:write
+Models: WarehouseStock, InventoryLog, Warehouse, StockTransfer, SupplierSkuMap,
+        StockSyncLog, SupplierSyncProfile
+Features:
+  - Stock levels per warehouse per variant
+  - Reserved stock tracking (order reservations)
+  - Low stock alerts
+  - Manual stock adjustment with reason code
+  - Bulk stock upload via CSV
+  - SKU mapping management
+  - Sync profile configuration per supplier
+  - Sync session logs with item-level audit
+
+--- WAREHOUSES ---
+Purpose: Manage physical warehouse locations and operations
+Routes:
+  /admin/warehouses         → Warehouse list
+  /admin/warehouses/dispatch → Dispatch management
+  /admin/warehouses/receiving → Goods receiving
+APIs: /api/admin/warehouses/*
+Required Permission: inventory:read, inventory:write
+Models: Warehouse, WarehouseStock, PurchaseOrder, StockTransfer
+Features:
+  - Warehouse configuration (name, pincode, contact, type)
+  - Stock receiving (inbound from purchase orders)
+  - Dispatch tracking (outbound to orders)
+  - Inter-warehouse transfer creation and tracking
+  - Receiving vs dispatch analytics
+
+--- SHIPPING ---
+Purpose: Courier management, AWB tracking, and shipping analytics
+Routes:
+  /admin/shipping             → Shipping dashboard
+  /admin/shipping/analytics   → Shipping analytics
+  /admin/shipping/intelligence → Shipping intelligence
+  /admin/shipping/labels      → Bulk label printing
+  /admin/shipping/profitability → Shipping cost analysis
+  /admin/settings/shipping    → Shipping rate configuration
+  /admin/settings/shipping/integrations → Courier API configuration
+APIs: /api/admin/shipping/*, /api/admin/settings/shipping/*
+Required Permission: orders:read, orders:write
+Models: Shipment, ShipmentEvent, Order
+Features:
+  - Overview of all shipments by status
+  - Bulk AWB generation via Shiprocket
+  - Label printing (PDF)
+  - Manifest and pickup scheduling
+  - Courier performance comparison
+  - Pincode serviceability check
+  - RTO rate tracking
+  - Shipping cost per order
+  - Courier API key management (Shiprocket, Delhivery, DTDC)
+
+--- SUPPLIER MANAGEMENT ---
+Purpose: Full lifecycle management of supplier relationships
+Routes:
+  /admin/suppliers              → Supplier list
+  /admin/suppliers/[id]         → Supplier detail
+  /admin/suppliers/commission   → Commission rule management
+  /admin/suppliers/leaderboard  → Supplier performance ranking
+  /admin/suppliers/performance  → Aggregate performance analytics
+  /admin/supplier-sync          → Supplier sync status board
+  /admin/supplier-products      → Products pending supplier approval
+  /admin/supplier-settlements   → Per-order settlement tracking
+  /admin/purchase-orders        → Purchase order management
+APIs: /api/admin/suppliers/*, /api/admin/supplier-sync/*
+Required Permission: suppliers:read, suppliers:write
+Models: Supplier, SupplierDocument, SupplierAgreement, SupplierSLA,
+        SupplierSettlement, SupplierLedger, CommissionRule
+Features:
+  - View and approve supplier applications
+  - Document verification (GST, PAN, bank statement)
+  - Agreement management (version, sign, revoke)
+  - SLA score tracking per supplier
+  - Composite supplier score (performance, fulfillment, quality, trust, SLA)
+  - Commission rule setup (global / supplier-level / category-level)
+  - Supplier wallet balance view
+  - Settlement status dashboard
+  - Supplier leaderboard ranking
+
+--- SUPPLIER SYNC ---
+Purpose: Automated supplier inventory and price synchronization
+Routes: /admin/inventory/sync, /admin/supplier-sync
+APIs: /api/admin/supplier-sync/*, /api/admin/inventory/sync-*
+Required Permission: inventory:read, inventory:write
+Models: SupplierSyncProfile, SupplierSkuMap, StockSyncLog, PriceSyncLog
+Features:
+  - Per-supplier sync profile (frequency: 15m/30m/1h/6h/24h)
+  - Auto stock sync on schedule
+  - Auto price recalculation (margin % + min profit)
+  - Manual sync trigger
+  - Sync session logs with per-item status (SUCCESS, NO_MAPPING, FAILED)
+  - Auto-hide/restore products based on stock
+
+--- FEATURE FLAGS ---
+Purpose: Toggle features on/off without code deployment
+Routes: /admin/system/feature-flags
+APIs: /api/admin/feature-flags
+Required Permission: settings:write (SUPER_ADMIN only in practice)
+Models: FeatureFlag
+See Section 11 for full feature flag list.
+
+--- MAINTENANCE MODE ---
+Purpose: Enable/disable maintenance page for customers
+Routes: /admin/system/maintenance
+APIs: /api/admin/maintenance, /api/status/maintenance
+Required Permission: settings:write
+Models: MaintenanceWindow
+Features:
+  - Enable maintenance with start/end time + custom message
+  - Admin bypass (admins can still access while maintenance is on)
+  - Maintenance page shown automatically via middleware
+
+--- SYSTEM SETTINGS ---
+Purpose: Platform-wide configuration
+Routes: /admin/system/*
+Sub-pages:
+  /system/backups       → Database backup management
+  /system/environment   → Environment variable viewer
+  /system/export        → Data export tools
+  /system/feature-flags → Feature toggle management
+  /system/jobs          → Background job monitoring
+  /system/launch-checklist → Pre-launch readiness checklist
+  /system/maintenance   → Maintenance mode
+  /system/notifications → Notification templates
+  /system/platform      → Platform name, contact settings
+  /system/services      → External service status/config
+  /system/settings-center → Settings hub
+APIs: /api/admin/system/*
+Required Permission: settings:read, settings:write
+
+--- AUDIT LOGS ---
+Purpose: Immutable trail of all admin actions
+Routes: /admin/audit
+APIs: /api/admin/audit, /api/admin/audit/login-history
+Required Permission: audit:read (SUPER_ADMIN only)
+Models: AuditLog, SecurityEvent, LoginAttempt
+Features:
+  - Filter by: admin, action type, date range, entity
+  - Login history per admin
+  - Security events (suspicious activity, lockouts)
+  - Export audit logs to CSV
+
+--- CONTENT (CMS) ---
+Purpose: Manage homepage content blocks and announcement bar
+Routes: /admin/content, /admin/content/announcements, /admin/content/homepage
+APIs: /api/admin/content, /api/admin/content/blocks, /api/admin/announcements
+Required Permission: content:read, content:write
+Models: ContentBlock, AnnouncementMessage
+Content Block Types:
+  HERO_BANNER, CATEGORY_GRID, FEATURED_PRODUCTS, TRENDING_PRODUCTS,
+  FLASH_SALE, BRAND_STORY, TRUST_BAR, TESTIMONIALS, INSTAGRAM_FEED,
+  EMAIL_CAPTURE, TEXT_BLOCK, IMAGE_BANNER, VIDEO_BANNER, PRODUCT_CAROUSEL,
+  COUNTDOWN_TIMER, COLLECTION_GRID, ANNOUNCEMENT_BAR, CUSTOM_HTML,
+  LOYALTY_WIDGET, RECENTLY_VIEWED
+Features:
+  - Drag-to-reorder content blocks
+  - Enable/disable individual blocks
+  - Inline content editing (JSON config per block)
+  - Preview mode
+  - Announcement messages: start/end date, color, link
+
+--- MEDIA LIBRARY ---
+Purpose: Centralized image/asset management
+Routes: /admin/media
+APIs: /api/admin/media, /api/admin/upload
+Required Permission: media:read, media:write
+Models: MediaAsset
+Features:
+  - Upload images to Cloudinary
+  - Browse all uploaded assets
+  - Search by name/tag
+  - Insert into products, content blocks, banners
+  - Delete assets (removes from Cloudinary)
+
+--- SEO ---
+Purpose: Manage SEO metadata per page
+Routes: /admin/seo
+APIs: /api/admin/seo
+Required Permission: seo:read, seo:write
+Models: SiteSettings
+Features:
+  - Per-page meta title, description, OG tags
+  - Robots.txt content
+  - Canonical URL settings
+  - Structured data configuration
+
+--- SECURITY ---
+Purpose: Security settings and fraud prevention configuration
+Routes: /admin/security
+APIs: /api/admin/fraud/*, /api/admin/security
+Required Permission: settings:write
+Models: CodSettings, CodBlockRule, BlacklistEntry, FraudAuditLog
+Features:
+  - COD settings (enable/disable, max order value, risk restrictions)
+  - COD auto-block rules (success rate thresholds)
+  - Customer blacklist management
+  - Login protection settings
+  - Security event log review
+
+--- SUPPORT TICKETS ---
+Purpose: Manage supplier support tickets
+Routes: /admin/tickets, /admin/tickets/[id]
+APIs: /api/admin/tickets, /api/admin/tickets/[id]
+Required Permission: orders:read (any admin can view)
+Models: SupplierTicket, SupplierTicketReply
+
+
+=================================================
+5. SUPPLIER PANEL MODULES
+=================================================
+
+Supplier portal lives at /supplier/* within the main store app.
+Authentication: Email + password (UserRole.SUPPLIER)
+
+--- SUPPLIER ONBOARDING ---
+Purpose: Supplier application and approval flow
+Routes: /supplier/apply
+APIs: /api/supplier/apply
+Models: Supplier, SupplierDocument, User
+Flow:
+  1. Supplier fills application form (company name, GST, bank details, products)
+  2. Uploads documents (GST certificate, PAN, bank statement)
+  3. Submits application (status: PENDING_APPROVAL)
+  4. Admin reviews and approves/rejects
+  5. On approval, supplier gets portal access
+  6. Supplier signs agreement
+
+--- SUPPLIER DASHBOARD ---
+Purpose: Overview of supplier performance and pending actions
+Routes: /supplier/dashboard
+APIs: /api/supplier/analytics
+Models: Order, Supplier, SupplierSLA, SupplierSettlement
+Displays:
+  - Today's orders (new, processing, shipped)
+  - This month's earnings
+  - SLA score
+  - Pending actions (orders to accept, pack)
+  - Performance score breakdown
+
+--- PRODUCT MANAGEMENT ---
+Purpose: Supplier manages their product listings
+Routes: /supplier/products
+APIs: /api/supplier/products
+Models: Product, ProductVariant, SupplierSkuMap
+Features:
+  - View products assigned to this supplier
+  - Update stock quantities
+  - SKU mapping management
+  - Product images (uploaded to Cloudinary)
+  - Pricing visibility (cost price they set vs TRYBY selling price)
+
+--- INVENTORY ---
+Purpose: Supplier monitors and updates inventory levels
+Routes: (within /supplier/products)
+APIs: /api/supplier/products (includes stock data)
+Models: ProductVariant (stock field), SupplierSkuMap
+Features:
+  - View current stock per variant
+  - Stock update (if manual entry allowed)
+  - Sync profile status (is auto-sync enabled?)
+  - Low stock alerts
+
+--- ORDERS ---
+Purpose: Supplier receives and processes orders
+Routes: /supplier/orders
+APIs: /api/supplier/orders
+Models: Order, OrderItem, Shipment, SupplierSLA
+Features:
+  - New orders queue
+  - Accept/reject orders
+  - Mark as packed (ready for pickup)
+  - Enter AWB/tracking number (if manual) or auto-generate
+  - Order detail with customer address (masked for privacy)
+  - SLA timer display (acceptance deadline, shipping deadline)
+  - Order history
+
+--- WALLET ---
+Purpose: Supplier financial overview
+Routes: /supplier/wallet
+APIs: /api/supplier/wallet
+Models: Supplier (balances), SupplierSettlement
+Displays:
+  - Available balance (ready for withdrawal)
+  - Pending balance (in 7-day hold)
+  - Processing balance (payout in progress)
+  - Total lifetime earnings
+
+--- LEDGER ---
+Purpose: Immutable transaction history
+Routes: (within /supplier/reports or /supplier/wallet)
+APIs: /api/supplier/ledger
+Models: SupplierLedger
+Entry Types Shown:
+  - ORDER_EARNING: Credit for delivered order
+  - COMMISSION_DEDUCTION: Debit for TRYBY commission
+  - GST_DEDUCTION: GST on commission
+  - REFUND_DEDUCTION: Debit when customer gets refund
+  - PAYOUT_DEBIT: Debit when payout is processed
+  - MANUAL_CREDIT/DEBIT: Admin adjustments
+Each entry shows: date, type, gross amount, deductions, net amount, running balance
+
+--- PAYOUTS ---
+Purpose: Supplier requests withdrawal of available balance
+Routes: /supplier/payouts
+APIs: /api/supplier/payouts
+Models: Payout
+Features:
+  - View available balance
+  - Request payout (triggers PENDING payout)
+  - Payout history with status (PENDING, APPROVED, PROCESSING, PROCESSED, REJECTED)
+  - View UTR number once processed
+  - Bank account details management
+
+--- REPORTS ---
+Purpose: Supplier financial and performance reports
+Routes: /supplier/reports
+APIs: /api/supplier/reports
+Models: Order, SupplierLedger, SupplierSLA
+Features:
+  - Earnings report by period
+  - Order volume trends
+  - SLA performance report
+  - Export to CSV
+
+--- SETTLEMENTS ---
+Purpose: Track per-order settlement hold status
+Routes: (within /supplier/wallet or separate)
+APIs: /api/supplier/wallet (includes settlement data)
+Models: SupplierSettlement
+Hold States:
+  HOLDING → AVAILABLE → PAYOUT_REQUESTED → PROCESSING → PAID
+Features:
+  - List of all order settlements
+  - Days remaining until hold releases
+  - Dispute option for incorrect amounts
+
+--- DISPUTES ---
+Purpose: Raise disputes on settlement amounts
+Routes: (within supplier portal)
+APIs: /api/supplier/disputes
+Models: SettlementDispute
+Features:
+  - Raise dispute on specific settlement
+  - Attach evidence
+  - Track dispute status (OPEN, UNDER_REVIEW, RESOLVED_SUPPLIER, RESOLVED_TRYBY)
+  - Admin resolution comment
+
+--- SYNC PROFILES ---
+Purpose: Configure automated inventory/price sync
+Routes: (within /supplier/products or /supplier/profile)
+APIs: (via admin sync APIs with supplier context)
+Models: SupplierSyncProfile
+Configuration:
+  - Enable/disable auto sync
+  - Sync frequency (15m/30m/1h/6h/24h)
+  - Buffer stock % (deduct X% from reported stock)
+  - Margin % for selling price calculation
+  - Minimum profit amount
+  - Auto-hide on zero stock (yes/no)
+  - Allow price override (yes/no)
+
+--- SUPPLIER PROFILE ---
+Purpose: Manage company info and documents
+Routes: /supplier/profile
+APIs: /api/supplier/profile, /api/supplier/documents
+Models: Supplier, SupplierDocument
+Editable:
+  - Company name, logo, description
+  - GST number, PAN
+  - Bank account details
+  - Contact information
+  - Business address
+
+--- AGREEMENTS ---
+Purpose: View and sign supplier agreements
+Routes: /supplier/agreements
+APIs: /api/supplier/agreements
+Models: SupplierAgreement
+Features:
+  - View current active agreement
+  - Agreement version history
+  - Digital signing (timestamp recorded)
+  - Agreement PDF download
+
+--- NOTIFICATIONS ---
+Purpose: Supplier notification inbox
+Routes: /supplier/notifications
+APIs: /api/supplier/notifications
+Models: Notification
+Notified For:
+  - New order received
+  - Settlement released
+  - Payout approved/rejected
+  - SLA breach warning
+  - Dispute updates
+  - System announcements
+
+--- SUPPORT TICKETS ---
+Purpose: Supplier raises support tickets
+Routes: /supplier/tickets
+APIs: /api/supplier/tickets, /api/supplier/tickets/[id]
+Models: SupplierTicket, SupplierTicketReply
+Features:
+  - Create ticket with category and description
+  - Thread replies between supplier and admin
+  - Status tracking (OPEN, IN_PROGRESS, RESOLVED, CLOSED)
+  - Ticket priority
+
+--- ANALYTICS ---
+Purpose: Supplier performance analytics
+Routes: /supplier/analytics
+APIs: /api/supplier/analytics
+Models: Order, SupplierSLA, Review
+Metrics:
+  - Order volume trend
+  - Revenue trend
+  - Average fulfillment time
+  - SLA score history
+  - Review ratings on their products
+  - RTO rate
+
+
+=================================================
+6. SUPER ADMIN MODULES
+=================================================
+
+Accessible only to users with AdminRole.SUPER_ADMIN.
+Route guard enforced in both middleware.ts and individual API handlers.
+
+--- ROLES & PERMISSIONS ---
+Purpose: Manage admin team members and their access levels
+Routes: /admin/team, /admin/team/[id]
+APIs: /api/admin/team, /api/admin/team/[id]
+Models: AdminProfile, User
+10 Admin Roles (see RBAC section for permissions):
+  SUPER_ADMIN, ADMIN, OPERATIONS_MANAGER, CONTENT_MANAGER,
+  PRODUCT_MANAGER, ORDER_MANAGER, FINANCE_MANAGER, SUPPORT_AGENT,
+  SUPPLIER_MANAGER, MARKETING_MANAGER
+Extra Permissions: Fine-grained overrides per admin (beyond role defaults)
+Features:
+  - Create new admin accounts
+  - Set/change admin role
+  - Add extra permissions or revoke permissions
+  - Enable/disable admin account
+  - Force password reset flag
+  - View last login, activity
+
+--- SECURITY ---
+Purpose: Monitor and manage security settings
+Routes: /admin/security
+APIs: /api/admin/security
+Models: SecurityEvent, LoginAttempt, CodSettings
+Features:
+  - Login attempt monitoring
+  - Account lockout management
+  - Security event stream
+  - COD risk configuration
+
+--- SESSIONS ---
+Purpose: View and manage active admin sessions
+Routes: /admin/sessions
+APIs: /api/admin/sessions
+Models: AdminSession
+Features:
+  - List all active admin sessions (who, when, IP, device)
+  - Force-logout any session instantly
+  - View session history
+
+--- AUDIT LOGS ---
+Purpose: Immutable record of all admin actions
+Routes: /admin/audit
+APIs: /api/admin/audit, /api/admin/audit/login-history
+Models: AuditLog, SecurityEvent
+Captures: Every create, update, delete action by any admin
+Entry format: adminId, action, entity, entityId, before (snapshot), after (snapshot),
+              ipAddress, userAgent, timestamp
+Features:
+  - Full audit log search and filter
+  - Login history per admin
+  - Security event timeline
+  - Export to CSV
+
+--- ADMIN MANAGEMENT ---
+Routes: /admin/super
+APIs: /api/admin/super
+Purpose: Super admin operations panel (platform-wide controls)
+Features:
+  - System health overview
+  - Emergency controls
+  - Platform configuration
+  - Seed/reset feature flags
+
+
+=================================================
+7. DATABASE REFERENCE
+=================================================
+
+All monetary amounts are stored in PAISE (integer) unless noted.
+Provider: PostgreSQL (Neon serverless)
+ORM: Prisma 5.22.0
+
+MODEL REFERENCE TABLE
+----------------------
+
+MODEL NAME            | PURPOSE                                    | KEY FIELDS
+----------------------|--------------------------------------------|-----------
+Account               | OAuth account links (Auth.js)             | userId, provider, providerAccountId
+Session               | Auth.js sessions                          | sessionToken, userId, expires
+VerificationToken     | Email verification tokens                 | identifier, token, expires
+User                  | All users (customer, supplier, admin)     | email, name, role (CUSTOMER/SUPPLIER/ADMIN)
+AdminProfile          | Admin-specific data                       | userId, role, passwordHash, permissions[]
+AuditLog              | Admin action audit trail                  | adminId, action, entity, before, after
+AdminSession          | Active admin login sessions               | adminId, token, ipAddress, isActive
+
+Category              | Product categories                        | name, slug, parentId, image, seoTitle
+Product               | Products                                  | name, slug, description, price, categoryId, supplierId, isHidden, isArchived
+ProductVariant        | SKU/size/color combinations               | productId, sku, size, color, stock, reservedStock, price
+ProductImage          | Product images (Cloudinary)               | productId, variantId, url, publicId, isPrimary, sortOrder
+ProductBadge          | Product badges (TRENDING, NEW, etc.)      | productId, type, expiresAt
+
+Warehouse             | Physical warehouse locations              | name, pincode, contactName, isActive
+WarehouseStock        | Stock per warehouse per variant           | warehouseId, variantId, quantity, reserved
+InventoryLog          | Stock change audit trail                  | variantId, warehouseId, delta, reason, before, after
+PurchaseOrder         | Supplier purchase orders                  | supplierId, warehouseId, status, totalAmount
+PurchaseOrderItem     | Items in purchase orders                  | poId, variantId, quantity, costPricePerUnit
+StockTransfer         | Inter-warehouse transfers                 | fromWarehouseId, toWarehouseId, status
+StockTransferItem     | Items in stock transfers                  | transferId, variantId, quantity
+OrderFulfillmentAlloc | Reserve warehouse stock for orders        | orderId, orderItemId, warehouseId, variantId, quantity
+
+Order                 | Customer orders                           | userId, status, totalAmount, paymentMethod, couponCode, shippingAmount
+OrderItem             | Line items in orders                      | orderId, variantId, productId, quantity, unitPrice, supplierId
+OrderStatusHistory    | Order status change log                   | orderId, status, note, changedBy
+Payment               | Razorpay payment records                  | orderId, razorpayOrderId, razorpayPaymentId, status, amount, method
+Shipment              | Shipment/courier records                  | orderId, awbCode, courier, status, trackingUrl, deliveredAt
+ShipmentEvent         | Tracking events from couriers             | shipmentId, status, location, description, timestamp
+ReturnRequest         | Customer return requests                  | orderId, userId, status, reason, resolution
+ReturnItem            | Items being returned                      | returnRequestId, orderItemId, quantity, reason
+
+CartItem              | Shopping cart items                       | userId, variantId, quantity
+WishlistItem          | Saved to wishlist                         | userId, variantId
+Coupon                | Discount coupon codes                     | code, type (PERCENTAGE/FLAT/FREE_SHIPPING), value, minOrderAmount, usageLimit
+Review                | Product reviews                           | productId, userId, orderId, rating, title, body, status, isVerified
+ReviewHelpfulVote     | Helpful votes on reviews                  | reviewId, userId, isHelpful
+
+Supplier              | Supplier company profiles                 | name, slug, gstNumber, availableBalance, pendingBalance, performanceScore
+SupplierActivityLog   | Supplier action audit trail               | supplierId, action, description
+SupplierDocument      | Supplier KYC documents                    | supplierId, type (GST/PAN/BANK_STATEMENT etc.), url, status
+SupplierAgreement     | Versioned supplier agreements             | supplierId, version, content, signedAt, isActive
+SupplierSLA           | Per-order SLA tracking                    | orderId, supplierId, acceptedAt, shippedAt, deliveredAt, overallStatus
+SupplierTicket        | Support tickets from suppliers            | supplierId, subject, status, priority
+SupplierTicketReply   | Replies in support threads                | ticketId, authorId, body, isInternal
+
+Payout                | Supplier payout requests and records      | supplierId, amount, status, utrNumber, bankSnapshot
+SupplierLedger        | Double-entry immutable ledger             | supplierId, type, grossAmount, commissionAmt, netAmount, runningBalance
+SupplierSettlement    | Per-order settlement holds                | orderId, supplierId, netAmount, status, holdUntil
+SettlementDispute     | Disputes on settlement amounts            | settlementId, supplierId, reason, status, resolution
+CommissionRule        | Commission configuration                  | scope (GLOBAL/SUPPLIER/CATEGORY), commissionPct, gstPct, supplierId, categoryId
+
+Campaign              | Marketing campaigns                       | name, type (EMAIL/WHATSAPP/COUPON/LOYALTY), status
+CampaignEvent         | Campaign interaction events               | campaignId, userId, eventType (sent/opened/clicked/converted)
+AbandonedCart         | Abandoned cart recovery records           | userId, cartSnapshot, emailSentAt, recoveredAt
+NewsletterSubscriber  | Newsletter opt-ins                        | email, isActive, source
+InstagramPost         | UGC/Instagram posts for community         | imageUrl, caption, instagramUrl, isApproved
+
+Notification          | In-app and multi-channel notifications    | userId, type, title, body, isRead, category, channel, data (JSON)
+NotificationDelivery  | Per-channel delivery tracking             | notificationId, channel, status, sentAt, failedAt
+NotificationPreference| User notification preferences             | userId, channel, categoryKey, isEnabled
+
+LoyaltyPoint          | Points ledger per user                    | userId, type (EARN_ORDER/REDEEM/EXPIRE etc.), points, description
+Referral              | Referral program tracking                 | referrerId, referredUserId, code, status, rewardIssued
+CustomerSegment       | Computed customer segments                | userId, tag (NEW/LOYAL/VIP/AT_RISK/CHURNED/etc.), computedAt
+
+ContentBlock          | Homepage/storefront CMS blocks            | type, title, content (JSON), isEnabled, position
+AnnouncementMessage   | Announcement bar messages                 | message, link, bgColor, isActive, startsAt, endsAt
+MediaAsset            | Cloudinary media library                  | name, url, publicId, mimeType, folder, tags
+SiteSettings          | Per-page SEO + global config              | pageKey, metaTitle, metaDescription, ogImage
+
+CustomerRiskProfile   | Fraud risk per customer                   | userId, riskScore, riskLevel (LOW/MEDIUM/HIGH/CRITICAL), codBlocked
+OrderRiskFlag         | Per-order risk assessment                 | orderId, flags (JSON), requiresManualReview, riskLevel
+BlacklistEntry        | Blocked email/phone/IP/address            | type, value, reason, isActive, expiresAt
+CodSettings           | Global COD configuration                  | isEnabled, maxOrderAmount, requiresManualReview
+CodAbuseRecord        | Aggregate COD abuse stats per customer    | userId, totalCodOrders, cancelledOrders, successRate
+CodBlockRule          | Auto-block rules for COD                  | minOrders, maxCancellations, minSuccessRate, blockDurationDays
+RefundAbuseRecord     | Refund abuse tracking per customer        | userId, totalRefunds, refundAmount, refundRate
+FraudAuditLog         | Fraud action audit trail                  | action, entityType, entityId, details, adminId
+
+MaintenanceWindow     | Maintenance mode config                   | isEnabled, message, startAt, endAt
+FeatureFlag           | Feature toggles                           | key, isEnabled, description
+SystemJob             | Background job tracking                   | type, status, payload, result, attempts, nextRunAt
+RateLimitEntry        | Sliding window rate limit records         | identifier (IP:route), count, windowStart, windowEnd
+SecurityEvent         | Auth security events                      | userId, type, ipAddress, userAgent, details
+LoginAttempt          | Failed login tracking                     | email, ipAddress, success, failureReason
+WebhookEvent          | Incoming webhook audit                    | source, eventId, eventType, payload, processedAt
+
+SupplierSkuMap        | Maps supplier SKU to ProductVariant       | supplierId, supplierSku, variantId, bufferQty, isIgnored, isPriceOverride
+StockSyncLog          | Sync session audit (item level)           | syncSessionId, supplierId, variantId, status, supplierQty, finalQty
+SupplierSyncProfile   | Auto-sync config per supplier             | supplierId, isEnabled, frequency, marginPct, bufferStockPct, autoHideOnZero
+PriceSyncLog          | Price change audit trail                  | supplierId, variantId, oldCostPrice, newCostPrice, newSellingPrice
+
+MobileDevice          | Registered mobile devices                | userId, platform (ANDROID/IOS), deviceToken, isActive
+MobileApiToken        | Mobile refresh tokens                    | userId, deviceId, token, expiresAt
+
+SocialProofEvent      | Recent purchase ticker events             | productId, variantId, buyerLocation, createdAt
+
+
+KEY RELATIONSHIPS
+-----------------
+User → AdminProfile (1:1, if admin)
+User → Supplier (1:1, if supplier)
+User → Order (1:many)
+User → CartItem, WishlistItem (1:many)
+User → LoyaltyPoint, Referral (1:many)
+User → CustomerRiskProfile (1:1)
+
+Product → ProductVariant (1:many)
+Product → ProductImage (1:many)
+Product → Review (1:many)
+Product → Category (many:1)
+Product → Supplier (many:1)
+
+Order → OrderItem (1:many)
+Order → Payment (1:1)
+Order → Shipment (1:1)
+Order → ReturnRequest (1:many)
+Order → OrderRiskFlag (1:1)
+Order → SupplierSettlement (1:many, per supplier per order)
+
+Supplier → SupplierLedger (1:many)
+Supplier → Payout (1:many)
+Supplier → SupplierSettlement (1:many)
+Supplier → SupplierSLA (1:many)
+Supplier → CommissionRule (1:many, optional overrides)
+
+ProductVariant → WarehouseStock (1:many)
+ProductVariant → SupplierSkuMap (1:many)
+ProductVariant → CartItem, OrderItem, WishlistItem (1:many)
+
+
+=================================================
+8. API REFERENCE
+=================================================
+
+FORMAT: METHOD /path — Purpose [Auth Required] (Role needed)
+
+AUTHENTICATION APIs
+-------------------
+POST /api/auth/signin            — NextAuth.js email sign-in [Public]
+GET  /api/auth/callback/google   — Google OAuth callback [Public]
+POST /api/v1/auth/login          — Mobile app login [Public]
+GET  /api/status/maintenance     — Check maintenance mode status [Public]
+
+CUSTOMER / STOREFRONT APIs
+---------------------------
+GET  /api/products               — List products with filters [Public]
+GET  /api/products/[slug]        — Product detail by slug [Public]
+GET  /api/search                 — Search products [Public]
+GET  /api/shipping/serviceability — Check pincode delivery [Public]
+GET  /api/social-proof           — Recent purchase events [Public]
+GET  /api/storefront/suppliers/[slug] — Public supplier profile [Public]
+GET  /api/reviews?productId=X    — Get product reviews [Public]
+POST /api/reviews                — Submit product review [Auth: Customer]
+POST /api/reviews/[id]/vote      — Helpful vote on review [Auth: Customer]
+
+GET  /api/cart                   — Get current user cart [Auth]
+POST /api/cart                   — Add to cart [Auth]
+PATCH /api/cart                  — Update cart item quantity [Auth]
+DELETE /api/cart                 — Remove cart item [Auth]
+
+GET  /api/wishlist               — Get wishlist [Auth]
+POST /api/wishlist               — Add to wishlist [Auth]
+DELETE /api/wishlist/[id]        — Remove from wishlist [Auth]
+GET  /api/favorites              — Alias for wishlist [Auth]
+POST /api/favorites              — Alias for wishlist [Auth]
+
+GET  /api/checkout               — Get user orders (also checkout context) [Auth]
+POST /api/checkout               — Place order with payment [Auth]
+
+GET  /api/orders                 — Customer order history [Auth]
+GET  /api/orders/[id]            — Order detail + tracking [Auth]
+
+GET  /api/profile                — Get user profile [Auth]
+PUT  /api/profile                — Update user profile [Auth]
+
+GET  /api/addresses              — Get saved addresses [Auth]
+POST /api/addresses              — Save new address [Auth]
+PUT  /api/addresses/[id]         — Update address [Auth]
+DELETE /api/addresses/[id]       — Delete address [Auth]
+
+WEBHOOK APIs (No auth, HMAC signature verification)
+----------------------------------------------------
+POST /api/webhooks/razorpay      — Razorpay payment events [Signed]
+POST /api/webhooks/shiprocket    — Shiprocket tracking events [Signed]
+POST /api/webhooks/delhivery     — Delhivery tracking events [Signed]
+
+ADMIN APIs (/api/admin/*) — All require AdminRole
+--------------------------------------------------
+DASHBOARD & ANALYTICS
+GET  /api/admin/analytics            — Dashboard metrics [orders:read]
+GET  /api/admin/financial-analytics  — Financial analytics [finance:read]
+GET  /api/admin/marketing-analytics  — Marketing metrics [marketing:read]
+
+ORDERS
+GET  /api/admin/orders               — Order list with filters [orders:read]
+GET  /api/admin/orders/[id]          — Order detail [orders:read]
+PATCH /api/admin/orders/[id]         — Update order status [orders:write]
+GET  /api/admin/orders/export        — Export orders CSV [orders:read]
+
+PAYMENTS
+GET  /api/admin/payments             — Payment list [finance:read]
+GET  /api/admin/payments/[id]        — Payment detail [finance:read]
+POST /api/admin/payments/[id]/refund — Initiate refund [finance:write]
+GET  /api/admin/payments/reconcile   — Payment reconciliation [finance:read]
+GET  /api/admin/payments/audit       — Payment audit log [finance:read]
+GET  /api/admin/payment-health       — Payment health metrics [finance:read]
+
+PRODUCTS
+GET  /api/admin/products             — Product list [products:read]
+POST /api/admin/products             — Create product [products:write]
+GET  /api/admin/products/[id]        — Product detail [products:read]
+PATCH /api/admin/products/[id]       — Update product [products:write]
+DELETE /api/admin/products/[id]      — Delete/archive product [products:delete]
+GET  /api/admin/products/[id]/variants — Variants list [products:read]
+POST /api/admin/products/[id]/variants — Create variant [products:write]
+GET  /api/admin/products/[id]/images — Product images [products:read]
+POST /api/admin/products/[id]/images — Upload image [products:write]
+POST /api/admin/products/bulk        — Bulk update products [products:write]
+POST /api/admin/products/bulk-variants — Bulk update variants [products:write]
+POST /api/admin/products/duplicate   — Duplicate product [products:write]
+POST /api/admin/products/import      — CSV import products [products:write]
+GET  /api/admin/products/export      — Export products CSV [products:read]
+GET  /api/admin/products/health      — Product health report [products:read]
+GET  /api/admin/products/performance — Performance metrics [analytics:read]
+GET  /api/admin/products/search      — Search products [products:read]
+GET  /api/admin/products/archive     — Archived products [products:read]
+GET  /api/admin/products/featured    — Featured products [products:read]
+GET  /api/admin/products/supplier-map — Supplier-product mapping [suppliers:read]
+GET  /api/admin/products/supplier-sku — SKU mappings [suppliers:read]
+
+CATEGORIES
+GET  /api/admin/categories           — Category list [products:read]
+POST /api/admin/categories           — Create category [products:write]
+PATCH /api/admin/categories/[id]     — Update category [products:write]
+DELETE /api/admin/categories/[id]    — Delete category [products:delete]
+
+CUSTOMERS
+GET  /api/admin/customers            — Customer list [customers:read]
+GET  /api/admin/customers/[id]       — Customer detail [customers:read]
+PATCH /api/admin/customers/[id]      — Update customer [customers:write]
+
+RETURNS
+GET  /api/admin/returns              — Return requests list [returns:read]
+GET  /api/admin/returns/[id]         — Return detail [returns:read]
+PATCH /api/admin/returns/[id]        — Approve/reject return [returns:write]
+GET  /api/admin/returns/analytics    — Return analytics [analytics:read]
+
+REVIEWS
+GET  /api/admin/reviews              — Review moderation queue [products:read]
+PATCH /api/admin/reviews/[id]        — Approve/reject review [products:write]
+GET  /api/admin/review-analytics     — Review analytics [analytics:read]
+
+SUPPLIERS
+GET  /api/admin/suppliers            — Supplier list [suppliers:read]
+POST /api/admin/suppliers            — Create/approve supplier [suppliers:write]
+GET  /api/admin/suppliers/[id]       — Supplier detail [suppliers:read]
+PATCH /api/admin/suppliers/[id]      — Update supplier [suppliers:write]
+GET  /api/admin/suppliers/[id]/sla   — SLA report for supplier [suppliers:read]
+GET  /api/admin/suppliers/commission-rules — Commission rules [suppliers:read]
+POST /api/admin/suppliers/commission-rules — Create commission rule [suppliers:write]
+GET  /api/admin/suppliers/leaderboard — Supplier ranking [suppliers:read]
+GET  /api/admin/suppliers/performance — Performance report [suppliers:read]
+GET  /api/admin/suppliers/score-engine — Score calculation [suppliers:read]
+
+SUPPLIER SYNC
+GET  /api/admin/supplier-sync        — Sync status board [inventory:read]
+POST /api/admin/supplier-sync/run    — Trigger sync [inventory:write]
+GET  /api/admin/supplier-sync/logs   — Sync session logs [inventory:read]
+GET  /api/admin/supplier-sync/profile — Sync profiles [inventory:read]
+POST /api/admin/supplier-sync/profile — Update sync profile [inventory:write]
+GET  /api/admin/supplier-sync/reports — Sync reports [inventory:read]
+
+SUPPLIER PRODUCTS
+GET  /api/admin/supplier-products    — Products pending approval [suppliers:read]
+POST /api/admin/supplier-products/approve — Approve product [suppliers:write]
+
+SUPPLIER SETTLEMENTS
+GET  /api/admin/supplier-settlements — Settlement list [payouts:read]
+PATCH /api/admin/supplier-settlements/[id] — Update settlement [payouts:write]
+
+PAYOUTS
+GET  /api/admin/payouts              — Payout request queue [payouts:read]
+POST /api/admin/payouts              — Approve payout [payouts:write]
+PATCH /api/admin/payouts/[id]        — Update payout status/UTR [payouts:write]
+
+INVENTORY
+GET  /api/admin/inventory            — Inventory overview [inventory:read]
+POST /api/admin/inventory/adjust     — Manual stock adjustment [inventory:write]
+GET  /api/admin/inventory/logs       — Stock change logs [inventory:read]
+GET  /api/admin/inventory/sku-mappings — SKU mappings [inventory:read]
+POST /api/admin/inventory/sku-mappings — Create mapping [inventory:write]
+GET  /api/admin/inventory/sync-logs  — Sync audit trail [inventory:read]
+GET  /api/admin/inventory/sync-stats — Sync statistics [inventory:read]
+POST /api/admin/inventory/sync-upload — Upload CSV stock [inventory:write]
+GET  /api/admin/inventory/transfers  — Stock transfers [inventory:read]
+POST /api/admin/inventory/transfers  — Create transfer [inventory:write]
+PATCH /api/admin/inventory/transfers/[id] — Update transfer [inventory:write]
+
+WAREHOUSES
+GET  /api/admin/warehouses           — Warehouse list [inventory:read]
+POST /api/admin/warehouses           — Create warehouse [inventory:write]
+PATCH /api/admin/warehouses/[id]     — Update warehouse [inventory:write]
+GET  /api/admin/warehouses/analytics — Warehouse analytics [analytics:read]
+GET  /api/admin/warehouses/dispatch  — Dispatch records [inventory:read]
+GET  /api/admin/warehouses/receiving — Receiving records [inventory:read]
+
+PURCHASE ORDERS
+GET  /api/admin/purchase-orders      — PO list [inventory:read]
+POST /api/admin/purchase-orders      — Create PO [inventory:write]
+PATCH /api/admin/purchase-orders/[id] — Update PO [inventory:write]
+POST /api/admin/purchase-orders/[id]/receive — Record goods received [inventory:write]
+
+SHIPPING
+GET  /api/admin/shipping             — Shipping dashboard [orders:read]
+POST /api/admin/shipping/book        — Book shipment (AWB) [orders:write]
+GET  /api/admin/shipping/label       — Generate label [orders:read]
+GET  /api/admin/shipping/analytics   — Shipping analytics [analytics:read]
+GET  /api/admin/shipping/intelligence — Shipping intelligence [analytics:read]
+GET  /api/admin/shipping/profitability — Shipping cost analysis [profit:read]
+GET  /api/admin/settings/shipping    — Shipping rate settings [settings:read]
+PATCH /api/admin/settings/shipping   — Update shipping rates [settings:write]
+GET  /api/admin/settings/shipping/integrations — Courier API configs [settings:read]
+PATCH /api/admin/settings/shipping/integrations — Update courier credentials [settings:write]
+GET  /api/admin/settings/shiprocket  — Shiprocket config [settings:read]
+
+FINANCE & PROFIT
+GET  /api/admin/finance              — Financial dashboard [finance:read]
+GET  /api/admin/profit               — Profit analysis [profit:read]
+GET  /api/admin/reports/kpi          — KPI dashboard [analytics:read]
+GET  /api/admin/reports/sales        — Sales report [analytics:read]
+GET  /api/admin/reports/profit       — Profit report [profit:read]
+GET  /api/admin/reports/suppliers    — Supplier report [suppliers:read]
+GET  /api/admin/reports/inventory-alerts — Low stock alerts [inventory:read]
+
+MARKETING & CAMPAIGNS
+GET  /api/admin/campaigns            — Campaign list [marketing:read]
+POST /api/admin/campaigns            — Create campaign [marketing:write]
+GET  /api/admin/abandoned-cart       — Abandoned cart recovery [marketing:read]
+GET  /api/admin/coupons              — Coupon list [coupons:read]
+POST /api/admin/coupons              — Create coupon [coupons:write]
+PATCH /api/admin/coupons/[id]        — Update coupon [coupons:write]
+DELETE /api/admin/coupons/[id]       — Delete coupon [coupons:delete]
+
+CONTENT & MEDIA
+GET  /api/admin/content              — Content overview [content:read]
+GET  /api/admin/content/blocks       — Content blocks list [content:read]
+POST /api/admin/content/blocks       — Create block [content:write]
+PATCH /api/admin/content/blocks/[id] — Update block [content:write]
+DELETE /api/admin/content/blocks/[id] — Delete block [content:delete]
+GET  /api/admin/announcements        — Announcement messages [content:read]
+POST /api/admin/announcements        — Create announcement [content:write]
+PATCH /api/admin/announcements/[id]  — Update announcement [content:write]
+DELETE /api/admin/announcements/[id] — Delete announcement [content:delete]
+GET  /api/admin/media                — Media library [media:read]
+POST /api/admin/upload               — Upload asset to Cloudinary [media:write]
+DELETE /api/admin/media/[id]         — Delete asset [media:delete]
+GET  /api/admin/seo                  — SEO settings [seo:read]
+PATCH /api/admin/seo                 — Update SEO settings [seo:write]
+
+FRAUD & SECURITY
+GET  /api/admin/fraud/dashboard      — Fraud overview [settings:read]
+GET  /api/admin/fraud/customers      — At-risk customers [customers:read]
+GET  /api/admin/fraud/customers/[id] — Customer risk detail [customers:read]
+PATCH /api/admin/fraud/customers/[id] — Update risk profile [customers:write]
+GET  /api/admin/fraud/orders         — Flagged orders [orders:read]
+GET  /api/admin/fraud/cod            — COD abuse tracking [settings:read]
+PATCH /api/admin/fraud/cod           — Update COD settings [settings:write]
+GET  /api/admin/fraud/cod/rules      — COD block rules [settings:read]
+POST /api/admin/fraud/cod/rules      — Create COD rule [settings:write]
+GET  /api/admin/fraud/blacklist      — Blacklist entries [settings:read]
+POST /api/admin/fraud/blacklist      — Add to blacklist [settings:write]
+DELETE /api/admin/fraud/blacklist/[id] — Remove from blacklist [settings:write]
+GET  /api/admin/fraud/refunds        — Refund fraud tracking [returns:read]
+GET  /api/admin/fraud/suppliers      — Supplier fraud tracking [suppliers:read]
+
+SYSTEM & SETTINGS
+GET  /api/admin/feature-flags        — Feature flags list [settings:read]
+POST /api/admin/feature-flags        — Toggle feature flag [settings:write]
+GET  /api/admin/maintenance          — Maintenance config [settings:read]
+PATCH /api/admin/maintenance         — Update maintenance [settings:write]
+GET  /api/admin/jobs                 — Background job list [settings:read]
+POST /api/admin/jobs                 — Trigger/create job [settings:write]
+GET  /api/admin/system               — System status [settings:read]
+POST /api/admin/system/verify        — Verify system services [settings:read]
+GET  /api/admin/export               — Data export [settings:read]
+GET  /api/admin/business             — Business settings [settings:read]
+PATCH /api/admin/business            — Update business settings [settings:write]
+GET  /api/admin/platform-audit       — Platform audit summary [audit:read]
+GET  /api/admin/catalog              — Catalog management [products:read]
+POST /api/admin/catalog              — Catalog operations [products:write]
+
+NOTIFICATIONS
+GET  /api/admin/notifications        — Notification list/templates [settings:read]
+POST /api/admin/notifications        — Send notification broadcast [marketing:write]
+
+AUDIT (SUPER_ADMIN only)
+GET  /api/admin/audit                — Audit log [audit:read, SUPER_ADMIN]
+GET  /api/admin/audit/login-history  — Login history [audit:read, SUPER_ADMIN]
+
+TEAM (SUPER_ADMIN only)
+GET  /api/admin/team                 — Admin list [team:read, SUPER_ADMIN]
+POST /api/admin/team                 — Create admin [team:write, SUPER_ADMIN]
+PATCH /api/admin/team/[id]           — Update admin [team:write, SUPER_ADMIN]
+DELETE /api/admin/team/[id]          — Remove admin [team:write, SUPER_ADMIN]
+
+SESSIONS (SUPER_ADMIN only)
+GET  /api/admin/sessions             — Active sessions [sessions:read, SUPER_ADMIN]
+DELETE /api/admin/sessions/[id]      — Force logout session [sessions:write, SUPER_ADMIN]
+
+TICKETS
+GET  /api/admin/tickets              — Support tickets [orders:read]
+GET  /api/admin/tickets/[id]         — Ticket detail [orders:read]
+PATCH /api/admin/tickets/[id]        — Update ticket [orders:write]
+
+SUPER ADMIN
+GET  /api/admin/super                — Super admin panel data [SUPER_ADMIN]
+GET  /api/admin/security             — Security dashboard [SUPER_ADMIN]
+GET  /api/admin/session              — Current session info [SUPER_ADMIN]
+
+SUPPLIER PORTAL APIs (/api/supplier/*) — All require UserRole.SUPPLIER
+-----------------------------------------------------------------------
+GET  /api/supplier/me                — Supplier profile [Supplier auth]
+GET  /api/supplier/apply             — Application form data [Public]
+POST /api/supplier/apply             — Submit application [Public]
+GET  /api/supplier/profile           — Profile details [Supplier]
+PATCH /api/supplier/profile          — Update profile [Supplier]
+GET  /api/supplier/documents         — Document list [Supplier]
+POST /api/supplier/documents         — Upload document [Supplier]
+GET  /api/supplier/agreements        — Agreement list [Supplier]
+POST /api/supplier/agreements/sign   — Sign agreement [Supplier]
+GET  /api/supplier/orders            — Supplier order queue [Supplier]
+PATCH /api/supplier/orders/[id]      — Update order status [Supplier]
+GET  /api/supplier/products          — Supplier product list [Supplier]
+PATCH /api/supplier/products/[id]    — Update product stock [Supplier]
+GET  /api/supplier/analytics         — Performance analytics [Supplier]
+GET  /api/supplier/reports           — Financial reports [Supplier]
+GET  /api/supplier/ledger            — Transaction ledger [Supplier]
+GET  /api/supplier/wallet            — Wallet balances [Supplier]
+GET  /api/supplier/payouts           — Payout history [Supplier]
+POST /api/supplier/payouts           — Request payout [Supplier]
+GET  /api/supplier/sla               — SLA records [Supplier]
+GET  /api/supplier/activity          — Activity log [Supplier]
+GET  /api/supplier/disputes          — Settlement disputes [Supplier]
+POST /api/supplier/disputes          — Raise dispute [Supplier]
+GET  /api/supplier/notifications     — Notifications [Supplier]
+GET  /api/supplier/tickets           — Support tickets [Supplier]
+POST /api/supplier/tickets           — Create ticket [Supplier]
+GET  /api/supplier/tickets/[id]      — Ticket detail [Supplier]
+POST /api/supplier/tickets/[id]      — Reply to ticket [Supplier]
+
+
+=================================================
+9. BUSINESS WORKFLOWS
+=================================================
+
+--- ORDER PLACEMENT FLOW ---
+
+Step 1: Customer browses and adds to cart
+  → CartItem created with userId + variantId + quantity
+  → CartItem quantity stored in DB (persists across sessions)
+
+Step 2: Customer proceeds to checkout (/checkout)
+  → POST /api/checkout called with: addressId, couponCode, paymentMethod
+  → Server validates:
+    a. Cart is not empty
+    b. All variant stocks are available (variant.stock >= quantity)
+    c. Pincode is serviceable (not in restricted list)
+    d. Coupon is valid: active, in date range, not exceeded usage limit,
+       per-user limit not reached, minimum order amount met
+    e. Fraud checks: customer risk level, COD restrictions, blacklist
+
+Step 3: Order created in DB (within Prisma transaction)
+  → Order record created (status: PENDING)
+  → OrderItem records created for each cart item
+  → ProductVariant.stock decremented (reserved stock incremented)
+  → Product.soldCount / soldToday / soldThisWeek incremented
+  → Coupon.usageCount incremented
+  → CartItem records deleted
+  → OrderFulfillmentAllocation created (warehouse reservation)
+  → SupplierSLA record created (timer starts)
+
+Step 4: Payment processing
+  → ONLINE: Razorpay order created, payment modal shown to customer
+    → Customer completes payment via card/UPI/netbanking
+    → Razorpay sends webhook: payment.captured
+    → Webhook handler: Payment.status → CAPTURED, Order.status → CONFIRMED
+    → OrderStatusHistory entry created
+    → Customer notified (email + in-app)
+  → COD: Order immediately set to CONFIRMED (no payment webhook)
+    → COD eligibility checked (risk level, order amount limits)
+
+Step 5: Order flows to supplier
+  → Order appears in supplier dashboard (status: CONFIRMED)
+  → Supplier receives notification (in-app + email)
+  → SLA timer: Supplier must accept within 4 hours
+
+Step 6: Supplier processes order
+  → Supplier accepts order (SLA: acceptedAt recorded)
+  → Supplier packs order (status: PROCESSING)
+  → SLA timer: Must ship within 48 hours of creation
+  → Supplier marks as shipped: enters AWB code or triggers Shiprocket
+
+Step 7: Shipping
+  → If Shiprocket auto AWB enabled: Shiprocket creates shipment automatically
+  → AWB code assigned, tracking URL generated
+  → Shipment record created in DB
+  → Courier picks up parcel
+  → Shiprocket webhooks arrive as order moves through transit:
+    PICKED_UP → IN_TRANSIT → OUT_FOR_DELIVERY → DELIVERED
+
+Step 8: Delivery
+  → DELIVERED webhook received from Shiprocket
+  → Shipment.status → DELIVERED, deliveredAt = timestamp
+  → Order.status → DELIVERED
+  → ShipmentEvent created with final delivery details
+  → Customer notification: "Your order has been delivered!"
+  → Loyalty points credited to customer (EARN_ORDER)
+
+Step 9: Settlement creation
+  → On DELIVERED status:
+    a. Commission calculated (CommissionRule lookup: SUPPLIER → CATEGORY → GLOBAL)
+    b. GST on commission calculated (18%)
+    c. Net supplier earning = order amount - commission - GST - shipping deduct
+    d. SupplierSettlement created with status=HOLDING, holdUntil = now + 7 days
+    e. SupplierLedger entry created: ORDER_EARNING (credit)
+    f. SupplierLedger entry created: COMMISSION_DEDUCTION (debit)
+    g. SupplierLedger entry created: GST_DEDUCTION (debit)
+    h. Supplier.pendingBalance updated
+
+Step 10: Settlement release (after 7-day hold)
+  → Cron job: releaseMaturedSettlements() runs periodically
+  → Settlements with holdUntil <= now and status=HOLDING updated to AVAILABLE
+  → Supplier.pendingBalance decremented, Supplier.availableBalance incremented
+  → Supplier notification: "₹X is now available for withdrawal"
+
+--- RETURN FLOW ---
+
+Step 1: Customer requests return
+  → Customer in /account/orders/[id] clicks "Return Items"
+  → POST /api/returns (or checkout API)
+  → ReturnRequest created (status: PENDING)
+  → Customer selects items, quantities, and reason
+  → Customer uploads photos (via Cloudinary)
+
+Step 2: Admin reviews return
+  → Admin sees return in /admin/returns
+  → Checks return reason, photos, order eligibility
+  → Admin approves or rejects
+
+Step 3a: Return approved
+  → ReturnRequest.status → APPROVED
+  → Return pickup scheduled (via courier)
+  → Customer notified: return pickup scheduled
+
+Step 4: Item received and verified
+  → Admin marks item received and condition verified
+  → ReturnRequest.status → COMPLETED
+
+Step 5: Refund issued
+  → POST /api/admin/payments/[id]/refund
+  → Razorpay refund API called with order's payment ID
+  → Payment.refundedAmount updated
+  → If full refund: Order.status → REFUNDED
+  → If partial: Order.status stays, refundedAmount tracked
+  → Customer notified: "Refund of ₹X has been initiated"
+
+Step 6: Supplier deduction
+  → applyReturnDeduction() called with orderId
+  → SupplierLedger entry created: REFUND_DEDUCTION (debit)
+  → Supplier.pendingBalance or availableBalance decremented
+  → SupplierSettlement for this order updated (amount reduced)
+
+Step 3b: Return rejected
+  → ReturnRequest.status → REJECTED
+  → Customer notified with rejection reason
+
+--- SUPPLIER SETTLEMENT FLOW ---
+
+Step 1: Order delivered
+  → createOrderSettlement() called (idempotent)
+  → SupplierSettlement created: status=HOLDING, holdUntil = deliveredAt + holdDays
+
+Step 2: Ledger entries created
+  → ORDER_EARNING: grossAmount = orderAmount in paise
+  → COMMISSION_DEDUCTION: commissionAmt in paise
+  → GST_DEDUCTION: gstOnCommission in paise
+  → net = grossAmount - commissionAmt - gstOnCommission - shippingDeduct
+  → Each entry has runningBalance snapshot
+
+Step 3: Holding period
+  → Default: 7 days from delivery
+  → SettlementDispute can extend hold if raised
+
+Step 4: Hold release
+  → releaseMaturedSettlements() finds HOLDING settlements past holdUntil
+  → Updates: status=AVAILABLE
+  → Updates Supplier.availableBalance (Prisma transaction)
+  → HOLDING_CREDIT ledger entry created
+
+Step 5: Supplier requests payout
+  → Supplier clicks "Request Payout" in portal
+  → Payout record created: status=PENDING, amount in paise
+  → Admin sees in /admin/payouts queue
+
+Step 6: Admin approves payout
+  → Admin reviews and clicks Approve
+  → Payout.status → APPROVED
+
+Step 7: Admin processes payout
+  → Transfers funds via bank (manual process)
+  → Admin enters UTR number
+  → Payout.status → PROCESSED
+  → recordPayoutDebit() called:
+    → PAYOUT_DEBIT ledger entry created
+    → Supplier.availableBalance decremented
+    → Supplier.processingBalance adjusted
+
+--- INVENTORY SYNC FLOW ---
+
+Step 1: Sync profile configured
+  → SupplierSyncProfile: supplierId, frequency, marginPct, bufferStockPct
+  → SupplierSkuMap: supplierSku → variantId mapping set up by admin
+
+Step 2: Sync triggered (scheduled or manual)
+  → syncSingleSupplier(supplierId) called
+  → New syncSessionId generated (UUID)
+
+Step 3: Stock sync (syncSupplierInventory)
+  → For each SupplierSkuMap entry for this supplier:
+    a. Look up supplier's reported stock quantity
+    b. Apply buffer: finalQty = supplierQty × (1 - bufferStockPct/100)
+    c. If isIgnored: skip (log: SKIPPED)
+    d. If NO mapping found: log (NO_MAPPING)
+    e. Update ProductVariant.stock = finalQty
+    f. If stock = 0 and autoHideOnZero: set Product.isHidden = true
+    g. If stock > 0 and product was hidden: set Product.isHidden = false
+    h. Create StockSyncLog entry (status: SUCCESS/FAILED)
+
+Step 4: Price sync (syncSupplierPrices)
+  → For each SupplierSkuMap with new costPrice:
+    a. If isPriceOverride: skip
+    b. Calculate new selling price:
+       sellingPrice = max(costPrice × (1 + marginPct/100), costPrice + minProfitAmt)
+    c. Update ProductVariant.price
+    d. Create PriceSyncLog (oldCostPrice, newCostPrice, oldSellingPrice, newSellingPrice)
+
+Step 5: Session summary
+  → syncSingleSupplier returns: total, success, failed, noMapping counts
+  → StockSyncLog entries queryable by syncSessionId
+
+--- SHIPPING FLOW ---
+
+Step 1: Order confirmed
+  → Order.status = CONFIRMED
+  → If shiprocket_auto_awb feature flag enabled:
+    → Shiprocket API called automatically
+
+Step 2: Shiprocket shipment creation
+  → createShipment(order, supplier) called
+  → Payload sent to Shiprocket: order details, pickup location, items, weight
+  → Shiprocket returns: shipment_id, awb_code, assigned_courier, label_url
+  → Shipment record created in DB: awbCode, courier, shipmentId, labelUrl
+  → Order.status → PROCESSING (if auto)
+
+Step 3: Label generation
+  → Admin accesses /admin/shipping/labels
+  → generateLabel(shipmentId) or generateBulkLabel([ids])
+  → PDF label returned for printing
+
+Step 4: Pickup
+  → schedulePickup() called for warehouse pincode
+  → Courier collects from warehouse/supplier
+
+Step 5: In-transit webhook events
+  → Shiprocket sends webhook: POST /api/webhooks/shiprocket
+  → Webhook verified (HMAC-SHA256 signature)
+  → AWB code matched to Shipment record
+  → Status mapped: Shiprocket status → ShipmentStatus enum
+  → ShipmentEvent created (location, timestamp, description)
+  → Order.status updated (PROCESSING → SHIPPED → DELIVERED etc.)
+  → Customer notified at OUT_FOR_DELIVERY and DELIVERED milestones
+
+Step 6: Delivery confirmed
+  → DELIVERED webhook → Order.status = DELIVERED
+  → Shipment.deliveredAt = timestamp
+  → Settlement created (7-day hold starts)
+  → Loyalty points credited to customer
+  → Customer email sent: "Your order has been delivered"
+
+Step 7: RTO (Return to Origin)
+  → If undeliverable, Shiprocket sends RTO status events
+  → Order.status → RETURNED
+  → Shipment.rtoInitiatedAt, rtoDeliveredAt tracked
+  → Admin notified for manual resolution
+  → Settlement may be voided or adjusted
+
+
+=================================================
+10. EXTERNAL SERVICES
+=================================================
+
+--- CLOUDINARY (Image CDN) ---
+Purpose: Host and serve all product images, supplier documents, media assets
+Credentials Required:
+  CLOUDINARY_CLOUD_NAME       (public + private)
+  CLOUDINARY_API_KEY          (private, server-side uploads)
+  CLOUDINARY_API_SECRET       (private, signature generation)
+  NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME (public, client-side image URLs)
+Related Files:
+  store/lib/cloudinary.ts     (upload, signature generation)
+  store/app/api/admin/upload/route.ts (upload endpoint)
+  store/app/api/admin/media/route.ts  (media library CRUD)
+Related APIs: /api/admin/upload, /api/admin/media
+Used For:
+  - Product images (organized by product ID)
+  - Supplier documents (GST, PAN, etc.)
+  - Content block images (banners, category grids)
+  - Admin-uploaded assets (media library)
+Image Transformations: Width/height resize, format optimization (WebP/AVIF)
+Folder Structure: /products/, /suppliers/, /content/, /media/
+
+--- RAZORPAY (Payment Gateway) ---
+Purpose: Process online payments from customers (UPI, card, netbanking)
+Credentials Required:
+  RAZORPAY_KEY_ID             (private, create orders)
+  RAZORPAY_KEY_SECRET         (private, server-side)
+  NEXT_PUBLIC_RAZORPAY_KEY_ID (public, Razorpay checkout.js)
+  RAZORPAY_WEBHOOK_SECRET     (HMAC verification of webhooks)
+Related Files:
+  store/lib/ (Razorpay SDK usage in checkout)
+  store/app/api/checkout/route.ts (create Razorpay order)
+  store/app/api/webhooks/razorpay/route.ts (webhook handler)
+  store/app/api/admin/payments/[id]/refund/route.ts (refund API)
+Related APIs: /api/checkout (POST), /api/webhooks/razorpay (POST)
+Related Models: Payment, Order, WebhookEvent
+Webhook Events Handled:
+  payment.captured → Order confirmed
+  payment.failed   → Order cancelled
+  order.paid       → Alternative capture signal
+  refund.created   → Refund tracking
+  refund.processed → Refund completed
+Test Mode: Use Razorpay test credentials and test card numbers in development
+Live Mode: Switch credentials in production environment
+
+--- RESEND (Email Service) ---
+Purpose: Transactional emails to customers, suppliers, and admins
+Credentials Required:
+  RESEND_API_KEY          (private)
+  RESEND_FROM_EMAIL       (sender address, e.g. orders@tryby.in)
+Related Files:
+  store/lib/email.ts      (email sending functions and templates)
+Related APIs: Used internally by notifications, checkout, returns
+Email Types Sent:
+  - Order confirmation (customer)
+  - Shipment tracking update (customer)
+  - Delivery confirmation (customer)
+  - Return status updates (customer)
+  - Password reset / email verification (customer + admin)
+  - New order alert (supplier)
+  - Payout processed (supplier)
+  - Admin alerts (system)
+Template format: HTML emails built inline in lib/email.ts
+
+--- GOOGLE OAUTH ---
+Purpose: Customer sign-in with Google account
+Credentials Required:
+  GOOGLE_CLIENT_ID        (OAuth app client ID)
+  GOOGLE_CLIENT_SECRET    (OAuth app client secret)
+Related Files:
+  store/lib/auth.config.ts (Google provider configuration)
+  store/app/api/auth/* (NextAuth.js route handlers)
+Feature Flag: google_oauth_enabled (can be toggled off)
+Authorized Redirect URIs: Must add {NEXT_PUBLIC_APP_URL}/api/auth/callback/google
+                          in Google Cloud Console for each environment
+Note: Google OAuth is for CUSTOMERS only. Admins use email+password.
+
+--- SHIPROCKET (Primary Shipping Partner) ---
+Purpose: AWB generation, label printing, tracking, courier management
+Credentials Required:
+  SHIPROCKET_EMAIL        (Shiprocket account email)
+  SHIPROCKET_PASSWORD     (Shiprocket account password)
+  SHIPROCKET_WEBHOOK_SECRET (HMAC signature verification)
+  STORE_PINCODE           (default pickup/origin pincode)
+Related Files:
+  store/lib/shipping/shiprocket.ts (full Shiprocket API client)
+  store/lib/shipping/index.ts      (shipping service factory)
+  store/app/api/webhooks/shiprocket/route.ts (webhook handler)
+  store/app/api/admin/shipping/* (admin shipping management)
+Token Management: JWT token with 23h TTL, auto-refreshed, cached in DB settings
+Feature Flag: shiprocket_auto_awb (auto-generate AWB on order confirm)
+API Operations:
+  - checkServiceability: Validate delivery route + courier quotes
+  - createShipment: Create order in Shiprocket, assign courier, get AWB
+  - trackShipment: Fetch tracking events
+  - generateLabel / generateBulkLabel: PDF label download
+  - cancelShipment: Cancel before pickup
+  - requestManifest: Create manifest for pickup
+  - schedulePickup: Book courier pickup
+
+--- DELHIVERY (Secondary Shipping Partner) ---
+Purpose: Alternative courier option for certain routes
+Credentials Required:
+  DELHIVERY_API_KEY       (private)
+  DELHIVERY_API_BASE      (API base URL, sandbox vs production)
+  DELHIVERY_WEBHOOK_SECRET (HMAC verification)
+Related Files:
+  store/lib/shipping/delhivery.ts
+  store/app/api/webhooks/delhivery/route.ts
+
+--- DTDC (Optional Third Courier) ---
+Credentials Required:
+  DTDC_API_KEY
+  DTDC_CUSTOMER_CODE
+Status: Configured in env but integration may be partial
+
+--- SENTRY (Error Tracking) ---
+Purpose: Real-time error monitoring across frontend, backend, edge
+Setup: Automatic via @sentry/nextjs
+Related Files:
+  store/sentry.client.config.ts
+  store/sentry.server.config.ts
+  store/sentry.edge.config.ts
+  store/instrumentation.ts
+No credentials needed in env (DSN baked into config or set via SENTRY_DSN)
+Coverage: Client-side JavaScript errors, server API errors, edge middleware errors
+
+
+=================================================
+11. FEATURE FLAGS
+=================================================
+
+Feature flags are database-backed toggles stored in the FeatureFlag model.
+Checked via lib/feature-flags.ts which caches values for 60 seconds.
+Managed via /admin/system/feature-flags (SUPER_ADMIN only).
+On first boot, seedDefaultFlags() creates all flags with default values.
+
+FLAG KEY                     | DEFAULT | PURPOSE
+-----------------------------|---------|------------------------------------------
+loyalty_enabled              | false   | Enable loyalty points earning and redemption
+referral_enabled             | false   | Enable customer referral program
+supplier_marketplace_enabled | false   | Show public supplier profiles at /suppliers
+reviews_enabled              | true    | Allow customers to submit product reviews
+community_enabled            | false   | Enable /community social feed page
+google_oauth_enabled         | true    | Show Google Sign-In button on auth pages
+whatsapp_notifications       | false   | Send WhatsApp messages via configured provider
+cod_enabled                  | true    | Allow Cash on Delivery payment option
+coupons_enabled              | true    | Allow coupon code entry at checkout
+wishlist_enabled             | true    | Allow add-to-wishlist on products
+maintenance_bypass_admins    | true    | Admins can access site during maintenance
+prelaunch_mode               | false   | Show splash page (/splash) instead of homepage
+shiprocket_auto_awb          | false   | Auto-generate AWB via Shiprocket on order confirm
+
+Implementation Notes:
+  - Flags are checked with isEnabled(key) which returns false on DB error (fail-safe)
+  - Cache TTL: 60 seconds (invalidated immediately when flag is toggled)
+  - If flag doesn't exist in DB, seedDefaultFlags() creates it with default value
+  - Front-end checks flags server-side in Server Components
+  - Dependencies: whatsapp_notifications requires WhatsApp provider credentials
+  - Dependencies: shiprocket_auto_awb requires valid Shiprocket credentials
+
+
+=================================================
+12. CRON JOBS & BACKGROUND JOBS
+=================================================
+
+Background job infrastructure uses the SystemJob model for tracking.
+Job types tracked: PENDING, RUNNING, COMPLETED, FAILED, CANCELLED
+Max retry attempts: 3 (configurable per job)
+
+NOTE: The platform has the INFRASTRUCTURE for scheduled jobs (SystemJob model,
+lib functions) but the actual scheduler/cron runner is not yet implemented
+via a cron service. Currently jobs may be triggered manually or via API.
+A production deployment would need a cron service (Vercel Cron, pg_cron,
+or external scheduler) to call the trigger APIs on schedule.
+
+PLANNED/REQUIRED SCHEDULED JOBS:
+----------------------------------
+
+JOB: Supplier Inventory Sync
+  Trigger: Per-supplier schedule (15m / 30m / 1h / 6h / 24h)
+  Function: syncAllSuppliers() or syncSingleSupplier(supplierId)
+  File: lib/supplier-sync.ts
+  Effect: Updates ProductVariant.stock, hides/shows products, logs to StockSyncLog
+
+JOB: Supplier Price Sync
+  Trigger: Tied to inventory sync schedule
+  Function: syncSupplierPrices() within syncSingleSupplier()
+  File: lib/supplier-sync.ts
+  Effect: Recalculates selling prices based on margin, logs to PriceSyncLog
+
+JOB: Release Matured Settlements
+  Trigger: Daily (recommend 12:00 AM IST)
+  Function: releaseMaturedSettlements()
+  File: lib/finance.ts
+  Effect: Moves settlements from HOLDING → AVAILABLE when holdUntil has passed
+  Impact: Updates Supplier.pendingBalance and Supplier.availableBalance
+
+JOB: SLA Breach Monitoring
+  Trigger: Every 30 minutes
+  Function: refreshOpenSLAs()
+  File: lib/sla.ts
+  Effect: Flips SLA status ON_TIME → AT_RISK → BREACHED as time passes
+  Impact: Alerts sent when BREACHED, supplier score recomputed
+
+JOB: Customer Segmentation Update
+  Trigger: Daily
+  Function: Recompute CustomerSegment tags for all users
+  Effect: Updates NEW_CUSTOMER, LOYAL, VIP, AT_RISK, CHURNED, etc.
+  Impact: Used for targeted marketing campaigns
+
+JOB: Abandoned Cart Recovery
+  Trigger: Every 1 hour
+  Function: Find carts abandoned for 1+ hour, send recovery emails
+  File: lib/notifications.ts, AbandonedCart model
+  Effect: Sends email/WhatsApp with cart contents and incentive
+
+JOB: Loyalty Points Expiration
+  Trigger: Daily
+  Function: Find LoyaltyPoints with expiresAt <= today, create EXPIRE entries
+  Effect: Reduces effective loyalty balance
+
+JOB: Fraud Risk Score Refresh
+  Trigger: Daily
+  Function: recomputeCustomerRisk() for all customers with recent order activity
+  File: lib/fraud.ts
+  Effect: Updates CustomerRiskProfile.riskScore and riskLevel
+
+JOB: Supplier Scorecard Recompute
+  Trigger: Daily
+  Function: Recompute all supplier performance/fulfillment/quality/trust scores
+  Effect: Updates Supplier composite scores, SLA scores
+
+API TRIGGER ENDPOINTS:
+  POST /api/admin/supplier-sync/run    → Manual sync trigger
+  GET  /api/admin/jobs                 → View job status
+  POST /api/admin/jobs                 → Create/trigger background job
+
+
+=================================================
+13. DEPLOYMENT GUIDE
+=================================================
+
+PREREQUISITES
+-------------
+  - Node.js 18+ (LTS)
+  - PostgreSQL database (Neon recommended, or local PostgreSQL)
+  - npm or pnpm package manager
+  - Git
+
+LOCAL SETUP
+-----------
+1. Clone the repository
+   git clone [repo-url]
+   cd Dropshipping/store
+
+2. Install dependencies
+   npm install
+
+3. Set up environment variables
+   cp .env.example .env.local
+   # Edit .env.local with your credentials (see Environment Variables section below)
+
+4. Set up the database
+   npm run db:push           # Push schema to DB (first time, non-destructive)
+   # OR for production-style:
+   npm run db:migrate        # Run migrations (creates migration history)
+
+5. Seed the database
+   npm run db:seed           # Creates sample data, admin user, categories, etc.
+
+6. Set up super admin account
+   npx tsx scripts/setup-super-admin.ts admin@yourdomain.com yourpassword
+
+7. Generate Prisma client
+   npx prisma generate       # (also runs automatically in npm run build)
+
+8. Start development server
+   npm run dev
+
+9. Access the app
+   Storefront: http://localhost:3000
+   Admin:      http://localhost:3000/admin
+   Supplier:   http://localhost:3000/supplier
+
+ENVIRONMENT VARIABLES (REQUIRED)
+----------------------------------
+Copy these to .env.local and fill in values:
+
+# Database
+DATABASE_URL="postgresql://user:password@host/dbname?sslmode=require"
+
+# Auth
+AUTH_SECRET="[generate with: openssl rand -base64 32]"
+AUTH_URL="http://localhost:3000"          # or your production URL
+AUTH_TRUST_HOST="true"
+
+# Google OAuth (get from console.cloud.google.com)
+GOOGLE_CLIENT_ID=""
+GOOGLE_CLIENT_SECRET=""
+
+# Razorpay (get from dashboard.razorpay.com)
+RAZORPAY_KEY_ID=""
+RAZORPAY_KEY_SECRET=""
+NEXT_PUBLIC_RAZORPAY_KEY_ID=""           # same as RAZORPAY_KEY_ID (public)
+RAZORPAY_WEBHOOK_SECRET=""
+
+# Shiprocket (get from app.shiprocket.in)
+SHIPROCKET_EMAIL=""
+SHIPROCKET_PASSWORD=""
+SHIPROCKET_WEBHOOK_SECRET=""
+STORE_PINCODE="400001"                   # Your warehouse/origin pincode
+
+# Delhivery (optional, secondary courier)
+DELHIVERY_API_KEY=""
+DELHIVERY_API_BASE="https://track.delhivery.com"
+DELHIVERY_WEBHOOK_SECRET=""
+
+# Cloudinary (get from cloudinary.com/console)
+CLOUDINARY_CLOUD_NAME=""
+CLOUDINARY_API_KEY=""
+CLOUDINARY_API_SECRET=""
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=""     # same as CLOUDINARY_CLOUD_NAME
+
+# Email (get from resend.com)
+RESEND_API_KEY=""
+RESEND_FROM_EMAIL="orders@yourdomain.com"
+
+# App URL
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+
+DATABASE MIGRATION PROCESS
+---------------------------
+Development (schema changes):
+  1. Edit store/prisma/schema.prisma
+  2. Run: npm run db:push           # Push without migration file (dev only)
+     OR: npm run db:migrate         # Create migration file + apply
+
+Production (always use migrations):
+  1. Edit prisma/schema.prisma
+  2. Run: npx prisma migrate dev --name describe_change
+  3. Commit migration file (prisma/migrations/[timestamp]_[name]/)
+  4. In production: npx prisma migrate deploy (non-interactive, safe for CI/CD)
+
+Current migrations:
+  20260604182333_init                    → Initial schema
+  20260605000001_add_category_seo_fields → SEO fields on Category
+  20260605000002_inventory_system        → Inventory warehouse system
+
+Reset database (DESTRUCTIVE - dev only):
+  npm run db:reset
+
+PRODUCTION DEPLOYMENT (Vercel)
+--------------------------------
+1. Connect GitHub repository to Vercel
+2. Set all environment variables in Vercel project settings (Production + Preview)
+3. Configure build command: npm run build
+4. Build runs: npx prisma generate && next build
+5. Set NODE_ENV=production
+
+Pre-deployment checklist:
+  - [ ] All env variables set in Vercel
+  - [ ] Database URL points to production DB
+  - [ ] AUTH_URL set to production domain
+  - [ ] Google OAuth: add production URL to authorized redirect URIs
+  - [ ] Razorpay: switch to live credentials
+  - [ ] Shiprocket: verify live credentials
+  - [ ] Cloudinary: verify cloud name matches
+  - [ ] Resend: verify sending domain is verified
+  - [ ] Run: npx prisma migrate deploy
+  - [ ] Run: npx tsx scripts/setup-super-admin.ts (production admin)
+  - [ ] Check /admin/system/launch-checklist in admin panel
+  - [ ] Verify webhook endpoints in Razorpay dashboard
+  - [ ] Verify webhook endpoints in Shiprocket dashboard
+  - [ ] Seed feature flags: POST /api/admin/feature-flags with defaults
+
+NPM SCRIPTS REFERENCE
+----------------------
+npm run dev           → Start development server (port 3000)
+npm run build         → Build for production (runs prisma generate first)
+npm run start         → Start production server
+npm run lint          → ESLint check
+npm run db:migrate    → Create and apply new migration
+npm run db:push       → Push schema without migration (dev only)
+npm run db:seed       → Run prisma/seed.ts (sample data)
+npm run db:studio     → Open Prisma Studio (DB GUI at localhost:5555)
+npm run db:reset      → Drop all tables and re-run migrations + seed
+
+
+=================================================
+14. TROUBLESHOOTING GUIDE
+=================================================
+
+COMMON ISSUES & FIXES
+---------------------
+
+ISSUE: Admin login fails / "Invalid credentials"
+FIX:
+  1. Check AdminProfile exists for this email:
+     npx prisma studio → AdminProfile table
+  2. Verify password hash is set (not null)
+  3. Re-run setup script: npx tsx scripts/setup-super-admin.ts
+  4. Check if account is disabled: AdminProfile.isDisabled = false
+  5. Check login attempt lockout: LoginAttempt records
+
+ISSUE: Google OAuth not working
+FIX:
+  1. Verify GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET are correct
+  2. Check google_oauth_enabled feature flag is ON
+  3. Verify redirect URI in Google Console: {APP_URL}/api/auth/callback/google
+  4. Check AUTH_URL matches the actual deployment URL
+
+ISSUE: Payments not processing / Razorpay errors
+FIX:
+  1. Verify RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET are correct
+  2. Check if using test vs live credentials (test: rzp_test_*, live: rzp_live_*)
+  3. Verify NEXT_PUBLIC_RAZORPAY_KEY_ID matches RAZORPAY_KEY_ID
+  4. Check Razorpay dashboard for failed payment logs
+  5. Webhook not arriving: verify webhook URL in Razorpay dashboard
+  6. Webhook signature mismatch: verify RAZORPAY_WEBHOOK_SECRET
+
+ISSUE: Orders stuck in PENDING (payment captured but order not confirmed)
+FIX:
+  1. Check WebhookEvent table: did payment.captured arrive?
+  2. Check Razorpay webhook logs for delivery failures
+  3. Manually update order status in /admin/orders if needed
+  4. Verify webhook endpoint: {APP_URL}/api/webhooks/razorpay is accessible
+
+ISSUE: Shiprocket AWB not generating
+FIX:
+  1. Check shiprocket_auto_awb feature flag is enabled
+  2. Verify SHIPROCKET_EMAIL and SHIPROCKET_PASSWORD are correct
+  3. Check if Shiprocket token is expired (re-login happens automatically)
+  4. Check order address is complete (pincode, address, city, state)
+  5. Check STORE_PINCODE is set to a valid pickup pincode
+  6. Test serviceability: /api/shipping/serviceability?pincode=XXXXX
+
+ISSUE: Product images not uploading
+FIX:
+  1. Verify Cloudinary credentials (CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET)
+  2. Check CLOUDINARY_CLOUD_NAME matches the Cloudinary account
+  3. Check upload API: POST /api/admin/upload
+  4. Verify Cloudinary account is not at storage limit
+  5. Check browser console for CORS errors
+
+ISSUE: Emails not sending
+FIX:
+  1. Verify RESEND_API_KEY is valid
+  2. Check RESEND_FROM_EMAIL domain is verified in Resend dashboard
+  3. Check spam folder for test emails
+  4. Review Resend dashboard logs for bounces/failures
+  5. Test by sending a manual notification from admin panel
+
+ISSUE: Database connection errors
+FIX:
+  1. Verify DATABASE_URL is correct and database is running
+  2. For Neon: check if connection pooling mode is correct
+  3. Try: npx tsx scripts/verify-db.ts
+  4. Check Neon dashboard for connection limit issues
+  5. For local PG: ensure PostgreSQL service is running
+
+ISSUE: Supplier stock sync not working
+FIX:
+  1. Check SupplierSyncProfile.isEnabled = true
+  2. Verify SupplierSkuMap entries exist for this supplier
+  3. Check StockSyncLog for last sync session and errors
+  4. Manually trigger: POST /api/admin/supplier-sync/run {supplierId}
+  5. Verify sync is being triggered (check SystemJob table)
+
+ISSUE: Settlements not releasing
+FIX:
+  1. Check SupplierSettlement where status=HOLDING and holdUntil <= now
+  2. Manually trigger: releaseMaturedSettlements() via admin job API
+  3. Verify no DISPUTED settlements blocking release
+  4. Check cron job is actually running (SystemJob table)
+
+ISSUE: Feature flag changes not taking effect immediately
+FIX:
+  - Flags are cached for 60 seconds
+  - Call invalidateCache(key) or wait 60 seconds
+  - In development, restart dev server if cache doesn't clear
+
+ISSUE: Rate limit errors (429 Too Many Requests)
+FIX:
+  - Rate limits are per IP:route, sliding window
+  - Check RateLimitEntry table for IP and route
+  - Webhook rate limits: 200/min (Razorpay), standard for others
+  - Development: disable rate limiting or use different IPs
+
+DEBUGGING TOOLS
+---------------
+Prisma Studio (DB browser):
+  npm run db:studio → http://localhost:5555
+
+API Testing:
+  Use browser DevTools → Network tab for admin/supplier portal APIs
+  Or Postman/Insomnia with session cookie from logged-in browser
+
+Sentry Error Dashboard:
+  All runtime errors automatically captured
+  Access at: sentry.io (your project)
+
+Audit Logs:
+  /admin/audit → Full admin action history (SUPER_ADMIN only)
+  AuditLog table in Prisma Studio
+
+Webhook Event Log:
+  WebhookEvent table → All incoming webhooks with payload
+  Also in: /admin/payments/audit
+
+Background Job Status:
+  /admin/system/jobs → SystemJob table viewer
+
+LOG LOCATIONS
+-------------
+Development:
+  - Console output in terminal running `npm run dev`
+  - Browser DevTools → Console for client-side errors
+  - Sentry captures all unhandled errors automatically
+
+Production (Vercel):
+  - Vercel Dashboard → Functions tab → per-request logs
+  - Sentry Dashboard → real-time error stream
+  - Database logs: Neon dashboard → Query history
+
+
+=================================================
+15. CURRENT COMPLETION STATUS
+=================================================
+
+Estimation based on codebase analysis. Percentages reflect implemented
+functionality vs. full planned feature set.
+
+CUSTOMER WEBSITE
+----------------
+  Homepage & CMS               ████████░░  80%
+    - Content blocks: DONE
+    - Announcement bar: DONE
+    - Social proof ticker: DONE
+    - Instagram feed: PARTIAL (model exists, UI partial)
+
+  Product Catalog (PLP)        ████████░░  80%
+    - Product listing: DONE
+    - Filters and sorting: DONE
+    - Search: DONE
+    - Infinite scroll/pagination: PARTIAL
+
+  Product Detail Page (PDP)    ████████░░  85%
+    - Variant selection: DONE
+    - Add to cart/wishlist: DONE
+    - Pincode check: DONE
+    - Reviews display: DONE
+    - Related products: PARTIAL
+
+  Cart & Checkout              ████████░░  85%
+    - Cart management: DONE
+    - Address selection: DONE
+    - Coupon codes: DONE
+    - Razorpay integration: DONE
+    - COD flow: DONE
+    - Fraud checks at checkout: DONE
+
+  Order Management (Customer)  ███████░░░  75%
+    - Order history: DONE
+    - Order detail: DONE
+    - Live tracking: DONE
+    - Return request: PARTIAL
+
+  Account & Profile            ███████░░░  70%
+    - Profile management: DONE
+    - Order history: DONE
+    - Loyalty points display: PARTIAL
+    - Referral code: PARTIAL
+
+  Loyalty & Referral           ████░░░░░░  40%
+    - Models and ledger: DONE
+    - Points earning on delivery: DONE
+    - Points display: PARTIAL
+    - Referral tracking: DONE
+    - Redemption at checkout: NOT STARTED
+
+  Community                    ██░░░░░░░░  20%
+    - Model exists: DONE
+    - UI page: PARTIAL
+    - Feature flagged: DONE
+
+  Notifications (In-app)       ████████░░  80%
+    - Notification model: DONE
+    - Multi-channel dispatch: DONE
+    - Notification page: DONE
+    - Email delivery: DONE
+    - WhatsApp: CONFIGURED, not active
+
+OVERALL CUSTOMER WEBSITE: ~75%
+
+ADMIN PANEL
+-----------
+  Dashboard                    ████████░░  80%
+  Order Management             █████████░  90%
+  Product Management           █████████░  90%
+  Category Management          █████████░  90%
+  Customer Management          ███████░░░  75%
+  Returns Management           ████████░░  80%
+  Reviews Moderation           ████████░░  80%
+  Marketing & Coupons          ███████░░░  70%
+  Inventory Management         ████████░░  80%
+  Warehouse Management         ███████░░░  70%
+  Shipping Management          ████████░░  80%
+  Supplier Management          █████████░  90%
+  Finance & Payouts            ████████░░  85%
+  Profit Analysis              ████████░░  80%
+  Business Intelligence        ███████░░░  70%
+  Content (CMS)                ████████░░  80%
+  Media Library                ████████░░  80%
+  SEO Management               ███████░░░  70%
+  Security & Fraud             ████████░░  85%
+  System Settings              ████████░░  80%
+  Audit Logs                   █████████░  95%
+  Feature Flags                █████████░  95%
+  Maintenance Mode             █████████░  95%
+
+OVERALL ADMIN PANEL: ~82%
+
+SUPPLIER PANEL
+--------------
+  Onboarding / Apply           ████████░░  80%
+  Dashboard                    ████████░░  80%
+  Order Management             ████████░░  80%
+  Product Management           ████████░░  80%
+  Wallet & Balance             ████████░░  85%
+  Ledger                       ████████░░  85%
+  Settlements                  ████████░░  85%
+  Payouts                      ████████░░  80%
+  Reports & Analytics          ███████░░░  70%
+  Disputes                     ██████░░░░  60%
+  Support Tickets              ████████░░  80%
+  Profile & Documents          ████████░░  80%
+  Agreements                   ███████░░░  75%
+  Notifications                ████████░░  80%
+  Sync Profile Config          ████████░░  80%
+
+OVERALL SUPPLIER PANEL: ~79%
+
+SUPER ADMIN
+-----------
+  Team Management (Roles)      █████████░  90%
+  Session Management           █████████░  90%
+  Audit Logs Access            █████████░  95%
+  Security Settings            ████████░░  85%
+  Feature Flags                █████████░  95%
+  System Health                ████████░░  80%
+
+OVERALL SUPER ADMIN: ~89%
+
+SHIPPING SYSTEM
+---------------
+  Shiprocket Integration       ████████░░  85%
+  Delhivery Integration        ██████░░░░  60%
+  DTDC Integration             ████░░░░░░  40%
+  Webhook Processing           █████████░  90%
+  Label Generation             ████████░░  80%
+  Tracking Display             ████████░░  85%
+  RTO Handling                 ███████░░░  75%
+
+OVERALL SHIPPING: ~74%
+
+FINANCE SYSTEM
+--------------
+  Commission Engine            █████████░  95%
+  Settlement System            █████████░  95%
+  Supplier Ledger              █████████░  95%
+  Payout Processing            ████████░░  85%
+  GST Reporting                ████████░░  85%
+  Profit Analysis              ████████░░  80%
+  Reconciliation               ███████░░░  70%
+
+OVERALL FINANCE: ~86%
+
+MARKETING SYSTEM
+----------------
+  Coupon System                █████████░  90%
+  Campaign Management          ██████░░░░  60%
+  Abandoned Cart Recovery      ████░░░░░░  40%
+  Email Marketing              ████░░░░░░  40%
+  WhatsApp Marketing           ██░░░░░░░░  20%
+  Newsletter Management        ████░░░░░░  40%
+
+OVERALL MARKETING: ~48%
+
+INVENTORY SYSTEM
+----------------
+  Warehouse Management         ████████░░  80%
+  Stock Tracking               █████████░  90%
+  Supplier Sync Engine         █████████░  90%
+  SKU Mapping                  █████████░  90%
+  Purchase Orders              ███████░░░  70%
+  Stock Transfers              ███████░░░  70%
+  Inventory Logs               █████████░  95%
+
+OVERALL INVENTORY: ~84%
+
+PLATFORM OVERALL COMPLETION: ~78%
+
+WHAT'S WORKING (Production Ready):
+  - Complete checkout flow with Razorpay payments
+  - Shiprocket shipping integration with webhook tracking
+  - Supplier settlement and payout system
+  - Double-entry ledger for supplier finances
+  - Multi-warehouse inventory system
+  - Supplier auto-sync (inventory + price)
+  - RBAC with 10 admin roles and 42 permissions
+  - Feature flag system
+  - Fraud detection and risk scoring
+  - Maintenance mode
+  - Admin audit logs
+
+WHAT NEEDS COMPLETION:
+  - Loyalty points redemption at checkout
+  - Full marketing campaign execution
+  - Abandoned cart email automation
+  - WhatsApp notifications (provider integration)
+  - Community social feed
+  - DTDC courier integration
+  - Cron job scheduler setup
+  - Advanced analytics dashboards
+
+
+=================================================
+16. FUTURE ROADMAP
+=================================================
+
+IMMEDIATE PRIORITIES (Launch Blockers)
+--------------------------------------
+1. Cron Job Scheduler
+   - Set up Vercel Cron or pg_cron for scheduled tasks
+   - Implement: settlement release, SLA monitoring, sync triggers
+   - Priority: CRITICAL (settlements won't auto-release without this)
+
+2. Loyalty Points Redemption at Checkout
+   - Allow customers to apply points for discount at checkout
+   - Update checkout API to handle point redemption
+   - Priority: HIGH (loyalty_enabled flag exists but redemption not wired)
+
+3. Abandoned Cart Recovery
+   - Complete cron job to find abandoned carts
+   - Send recovery email/WhatsApp
+   - Track recovery conversions in AbandonedCart model
+   - Priority: HIGH (revenue recovery)
+
+4. Return Request Flow Completion
+   - Complete customer-facing return form
+   - Add return pickup scheduling
+   - Complete refund automation
+   - Priority: HIGH (customer experience)
+
+SHORT-TERM (1-3 months post-launch)
+--------------------------------------
+5. Marketing Campaign Execution
+   - Email campaign sending via Resend batch
+   - Campaign event tracking (open, click, convert)
+   - Campaign analytics dashboard
+   - Customer segment-based targeting
+
+6. WhatsApp Notifications
+   - Integrate WhatsApp Business API provider
+   - Order status updates via WhatsApp
+   - Abandoned cart recovery via WhatsApp
+   - whatsapp_notifications feature flag ready
+
+7. Advanced Analytics Dashboard
+   - Cohort analysis
+   - Customer LTV calculation
+   - Retention curves
+   - Revenue attribution
+
+8. Mobile App API
+   - /api/v1/* endpoints for mobile
+   - MobileDevice registration
+   - MobileApiToken refresh flow
+   - Push notifications (Firebase)
+
+9. Community Social Feed
+   - User-generated content feed at /community
+   - Photo submission from verified buyers
+   - Moderation queue for UGC
+
+MEDIUM-TERM (3-6 months)
+--------------------------
+10. Multi-Supplier Orders
+    - Single customer order with products from multiple suppliers
+    - Split order into supplier-specific sub-orders
+    - Independent fulfillment and settlement per supplier
+
+11. Supplier Self-Service Product Upload
+    - Supplier uploads CSV or connects API feed
+    - Admin approval workflow for new products
+    - Auto-mapping suggestions based on similar SKUs
+
+12. Advanced Pricing Engine
+    - Dynamic pricing based on demand
+    - Competitor price monitoring
+    - Automated promotional discounts
+
+13. Customer Segmentation Automation
+    - Automated segment recalculation (cron)
+    - Segment-triggered campaigns
+    - Personalized homepage per segment
+
+14. SEO & Performance Optimization
+    - Dynamic sitemap generation
+    - Structured data (Product schema, BreadcrumbList)
+    - Image optimization pipeline
+    - Core Web Vitals optimization
+
+15. B2B / Wholesale Channel
+    - B2B customer tier (different pricing)
+    - Bulk order discounts
+    - Net-30 payment terms
+
+LONG-TERM (6-12 months)
+------------------------
+16. Own Fulfillment Warehouse
+    - Full WMS (Warehouse Management System)
+    - Own inventory sourcing
+    - Hybrid dropship + owned inventory
+
+17. Supplier Marketplace (Public)
+    - supplier_marketplace_enabled flag is ready
+    - Public supplier profiles
+    - Supplier-to-supplier network effects
+
+18. International Expansion
+    - Multi-currency support
+    - International shipping integrations
+    - Tax calculation for international orders
+
+19. AI-Powered Features
+    - AI product descriptions
+    - AI-driven demand forecasting
+    - Personalized product recommendations
+    - AI customer support chatbot
+
+20. Native Mobile Apps
+    - iOS and Android apps
+    - Push notifications via Firebase
+    - MobileDevice and MobileApiToken models ready
+    - Biometric auth support
+
+=================================================
+END OF DOCUMENTATION
+=================================================
+
+Document prepared by: AI Documentation Generator
+Codebase analyzed: c:\Users\anjel\Desktop\Dropshipping
+Date: 2026-06-05
+Version: 1.0
+
+For questions or updates, refer to individual source files or
+architecture documentation in the project root.

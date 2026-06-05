@@ -1,0 +1,438 @@
+=========================================================
+TRYBY MASTER VISION DOCUMENT
+Version: 1.0
+Founder: Abin John
+Brand: TRYBY
+Website: https://www.tryby.in
+=========================================================
+
+MISSION
+---------------------------------------------------------
+Build India's modern sports commerce platform that combines
+premium sportswear, jerseys, fan culture, and a powerful
+Shopify-level admin experience.
+
+TRYBY should feel like:
+- Nike
+- Adidas
+- Fanatics
+- Shopify
+
+But designed specifically for Indian sports fans.
+
+=========================================================
+BRAND IDENTITY
+=========================================================
+
+Brand Name:
+TRYBY
+
+Primary Audience:
+- Football Fans
+- Cricket Fans
+- Sports Enthusiasts
+- College Students
+- Young Athletes
+- Jersey Collectors
+
+Brand Personality:
+- Modern
+- Premium
+- Fast
+- Energetic
+- Trustworthy
+
+Primary Colors:
+- TRYBY Yellow (#F5C518)
+- Black (#0D0D0D)
+- Dark Navy (#1A1A2E)
+- White (#FFFFFF)
+
+Logo System:
+1. Full TRYBY Logo
+2. T Shield Logo
+3. White Version
+4. Black Version
+5. Favicon Version
+
+=========================================================
+CUSTOMER WEBSITE VISION
+=========================================================
+
+Homepage
+---------------------------------------------------------
+- Premium Hero Banner
+- Sports-focused imagery
+- Mobile-first design
+- Trending Products
+- Categories
+- Trust Bar
+- Footer
+
+Product Listing Page (PLP)
+---------------------------------------------------------
+- Advanced filtering
+- Sorting
+- Category filters
+- Price filters
+- Responsive grid
+
+Product Detail Page (PDP)
+---------------------------------------------------------
+- Product gallery
+- Variant images
+- Size selection
+- Quantity selector
+- Related products
+- Product details accordion
+
+Cart
+---------------------------------------------------------
+- Modern cart UI
+- Coupon system
+- Shipping progress
+- Trust indicators
+
+Checkout
+---------------------------------------------------------
+- Mobile-first checkout
+- Multiple payment methods
+- Order summary
+- Validation
+- Professional UX
+
+=========================================================
+ADMIN PANEL MASTER VISION
+=========================================================
+
+IMPORTANT:
+
+The TRYBY Admin Panel should NOT be a simple dashboard.
+
+The goal is:
+
+"Anything visible on the website should be editable
+without touching code."
+
+The admin panel should function as:
+
+Shopify + CMS + Ecommerce Management Platform
+
+=========================================================
+CONTENT MANAGEMENT SYSTEM (CMS)
+=========================================================
+
+Admin can edit:
+
+Homepage:
+- Hero Heading
+- Hero Subheading
+- Hero Buttons
+- Hero Badge
+- Trust Cards
+- Categories
+- Trending Section
+- Footer
+
+Website Content:
+- Text
+- Headings
+- Paragraphs
+- Buttons
+- Labels
+
+Marketing Content:
+- Announcements
+- Updates
+- Promotions
+- Festival Offers
+- Flash Sales
+
+Maintenance Content:
+- Maintenance Messages
+- Coming Soon Pages
+- Launch Notices
+
+Splash Screen:
+- Logo
+- Animation Text
+- Welcome Messages
+
+=========================================================
+ADVANCED IMAGE MANAGEMENT
+=========================================================
+
+Admin should be able to:
+
+Upload Images
+
+Edit Images:
+- Crop
+- Resize
+- Rotate
+- Zoom
+- Reposition
+
+Responsive Controls:
+- Desktop Image Position
+- Tablet Image Position
+- Mobile Image Position
+
+Aspect Ratio Controls:
+- 1:1
+- 4:5
+- 16:9
+- Custom
+
+Advanced Controls:
+- Image Height
+- Image Width
+- Object Position
+- Overlay Settings
+
+Preview:
+- Desktop Preview
+- Tablet Preview
+- Mobile Preview
+
+Future:
+- Background Removal
+- AI Image Enhancement
+
+=========================================================
+PRODUCT MANAGEMENT
+=========================================================
+
+Product Controls:
+- Add Product
+- Edit Product
+- Delete Product
+
+Product Data:
+- Name
+- Description
+- Category
+- Brand
+- SKU
+
+Pricing:
+- Cost Price
+- Selling Price
+- Profit Price
+- Margin Percentage
+- Discount Price
+
+Inventory:
+- Stock
+- Low Stock Alert
+- Out of Stock Alert
+
+Variants:
+- Size Variants
+- Color Variants
+- Custom Variants
+
+Variant Images:
+- Different image for each variant
+
+Bulk Operations:
+- Bulk Price Update
+- Bulk Stock Update
+- Bulk Product Import
+
+=========================================================
+HOMEPAGE BUILDER
+=========================================================
+
+Drag and Drop Sections
+
+Admin can:
+
+- Reorder Sections
+- Hide Sections
+- Show Sections
+- Duplicate Sections
+- Delete Sections
+
+Example:
+
+Hero
+↓
+Categories
+↓
+Trending Products
+↓
+Trust Section
+↓
+Footer
+
+No coding required.
+
+=========================================================
+PRODUCT PROFIT SYSTEM
+=========================================================
+
+Example:
+
+Cost Price:      ₹400
+Selling Price:   ₹899
+Shipping Cost:   ₹80
+
+Profit:          ₹419
+Margin:          46.6%
+
+Automatically calculated.
+
+=========================================================
+ORDER MANAGEMENT
+=========================================================
+
+Order Status:
+- Pending
+- Processing
+- Shipped
+- Delivered
+- Cancelled
+
+Features:
+- Tracking Number
+- Invoice Generation
+- Status Updates
+
+=========================================================
+CUSTOMER MANAGEMENT
+=========================================================
+
+Customer Profiles:
+- Orders
+- Spending
+- Addresses
+- Activity
+
+=========================================================
+COUPON SYSTEM
+=========================================================
+
+Coupon Types:
+- Percentage Discount
+- Fixed Discount
+- Free Shipping
+
+Controls:
+- Expiry Date
+- Usage Limits
+- Minimum Order
+
+=========================================================
+SEO MANAGEMENT
+=========================================================
+
+Editable:
+- Page Title
+- Meta Description
+- Keywords
+
+Open Graph:
+- Social Preview Image
+- Social Title
+
+Technical:
+- Sitemap
+- Robots.txt
+
+=========================================================
+ANALYTICS DASHBOARD
+=========================================================
+
+Track:
+
+Sales
+Orders
+Revenue
+Customers
+
+Traffic:
+- Mobile
+- Tablet
+- Desktop
+
+Product Performance:
+- Top Sellers
+- Low Sellers
+
+=========================================================
+SUPPLIER SYSTEM (FUTURE)
+=========================================================
+
+Supplier Portal
+
+Features:
+- Supplier Login
+- Product Submission
+- Inventory Sync
+- Order Allocation
+
+=========================================================
+MARKETING SYSTEM (FUTURE)
+=========================================================
+
+WhatsApp Marketing
+
+Email Marketing
+
+Push Notifications
+
+Campaign Manager
+
+Festival Campaigns
+
+=========================================================
+TECH STACK VISION
+=========================================================
+
+Frontend:
+- Next.js
+
+Database:
+- PostgreSQL
+
+ORM:
+- Prisma
+
+Authentication:
+- Clerk/Auth.js
+
+Storage:
+- Cloudinary
+
+Payments:
+- Razorpay
+
+Hosting:
+- Vercel
+
+=========================================================
+LONG TERM GOAL
+=========================================================
+
+A founder should be able to:
+
+- Change homepage content
+- Change banners
+- Upload products
+- Edit images
+- Create offers
+- Manage orders
+- Manage customers
+- Manage suppliers
+
+WITHOUT opening VS Code.
+
+TRYBY should become:
+
+"India's Premium Sports Commerce Platform with
+a Shopify-level Admin Experience."
+
+=========================================================
+END OF DOCUMENT
+=========================================================
