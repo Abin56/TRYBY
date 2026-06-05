@@ -64,9 +64,6 @@ export async function GET(req: NextRequest) {
       orderBy: (orderByMap[sortBy] as Record<string, "asc" | "desc">) ?? { ltv: "desc" },
       skip,
       take: limit,
-      include: {
-        // Use raw userId to fetch user separately
-      },
     }),
     prisma.crmProfile.count({ where: profileWhere }),
   ]);

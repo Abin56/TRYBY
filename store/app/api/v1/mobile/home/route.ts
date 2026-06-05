@@ -25,24 +25,24 @@ export async function GET(req: NextRequest) {
 
     // Featured products (in-stock, limit 12)
     prisma.product.findMany({
-      where:   { isActive: true, isFeatured: true, stockCount: { gt: 0 } },
-      orderBy: { sortOrder: "asc" },
+      where:   { isActive: true, isFeatured: true },
+      orderBy: { homepageSortOrder: "asc" },
       take:    12,
       select:  mobilePdpSelect(),
     }).catch(() => []),
 
     // New arrivals (last 30 days)
     prisma.product.findMany({
-      where:   { isActive: true, stockCount: { gt: 0 }, createdAt: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } },
+      where:   { isActive: true, createdAt: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } },
       orderBy: { createdAt: "desc" },
       take:    8,
       select:  mobilePdpSelect(),
     }).catch(() => []),
 
-    // Trending
+    // Trending (top selling)
     prisma.product.findMany({
-      where:   { isActive: true, isTrending: true, stockCount: { gt: 0 } },
-      orderBy: { viewCount: "desc" },
+      where:   { isActive: true },
+      orderBy: { totalSoldCount: "desc" },
       take:    8,
       select:  mobilePdpSelect(),
     }).catch(() => []),
@@ -111,16 +111,13 @@ function mobilePdpSelect() {
     id:          true,
     name:        true,
     slug:        true,
-    price:       true,
-    compareAtPrice: true,
-    images:      true,
     avgRating:   true,
     reviewCount: true,
-    stockCount:  true,
     isFeatured:  true,
-    isTrending:  true,
-    badge:       true,
     sport:       true,
+    images:      { take: 1, select: { url: true, altText: true } },
+    variants:    { where: { isActive: true }, select: { id: true, price: true, mrp: true, stock: true, size: true, color: true }, take: 5 },
+    badges:      { select: { type: true, label: true }, take: 3 },
   } as const;
 }
 

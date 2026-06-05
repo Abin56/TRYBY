@@ -209,7 +209,7 @@ export async function GET(req: NextRequest) {
   });
   if (!order) return NextResponse.json({ error: "Order not found" }, { status: 404 });
 
-  const isCOD = order.payment ? false : false; // load payment separately if needed
+  const isCOD = false; // payment method loaded separately if needed
   const totalWeight = 500; // default; admin can override at booking time
 
   const settingsRow = await prisma.siteSettings.findUnique({ where: { key: "shipping_config" } }).catch(() => null);

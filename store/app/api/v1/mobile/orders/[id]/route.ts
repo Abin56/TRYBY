@@ -18,14 +18,14 @@ export async function GET(
     include: {
       items: {
         include: {
-          product: { select: { id: true, name: true, slug: true, images: true } },
-          variant: { select: { id: true, name: true, attributes: true } },
+          product: { select: { id: true, name: true, slug: true, images: { take: 1, select: { url: true } } } },
+          variant: { select: { id: true, sku: true, size: true, color: true } },
         },
       },
-      address:  true,
+      shippingAddress: true,
       shipment: true,
-      payment:  { select: { id: true, method: true, status: true, amount: true, paidAt: true, razorpayPaymentId: true } },
-      returnRequest: { select: { id: true, status: true, reason: true, createdAt: true } },
+      payment:  { select: { id: true, method: true, status: true, amount: true, capturedAt: true, razorpayPaymentId: true } },
+      returnRequests: { select: { id: true, status: true, reason: true, createdAt: true }, take: 1 },
     },
   });
 

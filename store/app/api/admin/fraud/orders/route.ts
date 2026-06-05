@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
     prisma.orderRiskAssessment.count({ where }),
   ]);
 
-  const orderIds = assessments.map(a => a.orderId);
+  const orderIds = assessments.map((a: any) => a.orderId);
   const orders   = await prisma.order.findMany({
     where:  { id: { in: orderIds } },
     select: {
@@ -44,10 +44,10 @@ export async function GET(req: NextRequest) {
       payment: { select: { method: true, status: true } },
     },
   });
-  const orderMap = Object.fromEntries(orders.map(o => [o.id, o]));
+  const orderMap = Object.fromEntries(orders.map((o: any) => [o.id, o]));
 
   return NextResponse.json({
-    assessments: assessments.map(a => ({ ...a, order: orderMap[a.orderId] ?? null })),
+    assessments: assessments.map((a: any) => ({ ...a, order: orderMap[a.orderId] ?? null })),
     total,
     page,
     limit,

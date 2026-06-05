@@ -14,33 +14,33 @@ export async function GET(req: NextRequest) {
     where:   { userId: session.userId },
     include: {
       product: {
-        select: { id: true, name: true, slug: true, price: true, compareAtPrice: true, images: true, stockCount: true, isActive: true },
+        select: { id: true, name: true, slug: true, isActive: true, images: { take: 1 } },
       },
       variant: {
-        select: { id: true, name: true, price: true, stockCount: true, images: true, attributes: true },
+        select: { id: true, sku: true, price: true, mrp: true, stock: true, size: true, color: true },
       },
     },
     orderBy: { createdAt: "asc" },
   });
 
   // Filter out discontinued items
-  const activeItems = items.filter(i => i.product.isActive && i.product.stockCount > 0);
+  const activeItems = items.filter(i => i.product.isActive && (i.variant ? i.variant.stock > 0 : true));
 
   const subtotal = activeItems.reduce((sum, item) => {
-    const price = Number(item.variant?.price ?? item.product.price);
+    const price = Number(item.variant?.price ?? 0);
     return sum + price * item.quantity;
   }, 0);
 
   const totalItems  = activeItems.reduce((s, i) => s + i.quantity, 0);
   const savings     = activeItems.reduce((sum, item) => {
-    const retail   = Number(item.product.compareAtPrice ?? 0);
-    const actual   = Number(item.variant?.price ?? item.product.price);
+    const retail   = Number(item.variant?.mrp ?? 0);
+    const actual   = Number(item.variant?.price ?? 0);
     return retail > actual ? sum + (retail - actual) * item.quantity : sum;
   }, 0);
 
   return NextResponse.json({
     items:      activeItems,
-    removedItems: items.filter(i => !i.product.isActive || i.product.stockCount === 0).map(i => i.id),
+    removedItems: items.filter(i => !i.product.isActive).map(i => i.id),
     summary: {
       subtotal,
       savings,
@@ -70,11 +70,11 @@ export async function POST(req: NextRequest) {
 
   const { productId, variantId, quantity } = body.data;
 
-  const product = await prisma.product.findUnique({ where: { id: productId }, select: { stockCount: true, isActive: true } });
+  const product = await prisma.product.findUnique({ where: { id: productId }, select: { isActive: true } });
   if (!product?.isActive) return NextResponse.json({ error: "Product not available" }, { status: 400 });
 
   const existing = await prisma.cartItem.findFirst({
-    where: { userId: session.userId, productId, variantId: variantId ?? null },
+    where: { userId: session.userId, productId, ...(variantId && { variantId }) },
   });
 
   if (existing) {
@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
   }
 
   const item = await prisma.cartItem.create({
-    data: { userId: session.userId, productId, variantId: variantId ?? null, quantity },
+    data: { userId: session.userId, productId, variantId: variantId!, quantity },
   });
 
   return NextResponse.json({ item, action: "added" }, { status: 201 });

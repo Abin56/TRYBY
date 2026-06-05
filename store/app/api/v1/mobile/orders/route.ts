@@ -23,23 +23,22 @@ export async function GET(req: NextRequest) {
     orderBy: { createdAt: "desc" },
     take:    limit + 1, // +1 to detect hasMore
     select:  {
-      id:            true,
-      orderNumber:   true,
-      status:        true,
-      paymentStatus: true,
-      total:         true,
-      createdAt:     true,
+      id:          true,
+      orderNumber: true,
+      status:      true,
+      total:       true,
+      createdAt:   true,
       items: {
         take:   1, // First item for thumbnail
         select: {
           id:       true,
           quantity: true,
-          product:  { select: { name: true, images: true, slug: true } },
-          variant:  { select: { name: true } },
+          product:  { select: { name: true, slug: true, images: { take: 1, select: { url: true } } } },
+          variant:  { select: { size: true, color: true } },
         },
       },
       shipment: {
-        select: { status: true, trackingNumber: true, courierName: true, estimatedDelivery: true },
+        select: { status: true, trackingNumber: true, carrierName: true, estimatedAt: true },
       },
     },
   });
@@ -51,7 +50,7 @@ export async function GET(req: NextRequest) {
   // Mobile-friendly thumbnail
   const formatted = pageItems.map(o => ({
     ...o,
-    thumbnail:  (o.items[0]?.product?.images as string[])?.[0] ?? null,
+    thumbnail:  o.items[0]?.product?.images?.[0]?.url ?? null,
     itemCount:  o.items.length,
     firstItem:  o.items[0]?.product?.name ?? null,
   }));

@@ -19,7 +19,7 @@ async function getProduct(slug: string) {
   });
 }
 
-async function getRelated(product: { id: string; sport: string; categoryId: string | null }) {
+async function getRelated(product: { id: string; sport: import("@prisma/client").Sport; categoryId: string | null }) {
   return prisma.product.findMany({
     where: {
       isActive:   true,
@@ -48,5 +48,5 @@ export default async function PDPPage({ params }: Props) {
 
   const related = await getRelated({ id: product.id, sport: product.sport, categoryId: product.categoryId });
 
-  return <PDPClient product={serialize(product)} related={serialize(related)} />;
+  return <PDPClient product={serialize(product) as unknown as import("@/components/pdp/pdp-client").DBProductFull} related={serialize(related) as unknown as import("@/components/pdp/pdp-client").RelatedProduct[]} />;
 }

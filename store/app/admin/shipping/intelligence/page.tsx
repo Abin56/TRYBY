@@ -104,7 +104,7 @@ function RateBar({ value, color }: { value: number; color: string }) {
 function KpiCard({
   icon: Icon, label, value, sub, color = "#E8FF47",
 }: {
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
   label: string;
   value: string | number;
   sub?: string;

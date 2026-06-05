@@ -182,6 +182,7 @@ function JerseyCard({ jersey, index }: { jersey: typeof JERSEYS[0]; index: numbe
     e.preventDefault();
     addItem({
       id: jersey.id,
+      variantId: jersey.id,
       name: jersey.name,
       price: jersey.price,
       image: jersey.image,

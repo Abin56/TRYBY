@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
-import { UserRole } from "@prisma/client";
+import { UserRole, SegmentTag } from "@prisma/client";
 import { sendBulkNotification, type NotificationType } from "@/lib/notifications";
 
 function adminOnly(role?: string) { return role !== UserRole.ADMIN; }
@@ -75,7 +75,7 @@ const sendSchema = z.object({
   actionUrl:    z.string().optional(),
   actionLabel:  z.string().max(50).optional(),
   imageUrl:     z.string().url().optional().or(z.literal("")),
-  data:         z.record(z.unknown()).optional(),
+  data:         z.record(z.string(), z.unknown()).optional(),
 
   // Campaign link
   campaignId:   z.string().optional(),
@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
     targetIds = users.map(u => u.id);
   } else if (segments && segments.length > 0) {
     const segs = await prisma.customerSegment.findMany({
-      where:  { tags: { hasSome: segments } },
+      where:  { tags: { hasSome: segments as SegmentTag[] } },
       select: { userId: true },
     });
     targetIds = [...new Set([...targetIds, ...segs.map(s => s.userId)])];

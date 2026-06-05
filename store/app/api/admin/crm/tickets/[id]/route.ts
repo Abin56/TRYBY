@@ -5,13 +5,14 @@ import { CrmTicketStatus } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { canAccess } from "@/lib/rbac";
 
-export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if (!canAccess(session, "customers:read")) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
+  const { id } = await params;
   const ticket = await prisma.customerTicket.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       replies: { orderBy: { createdAt: "asc" } },
     },
@@ -29,15 +30,16 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   return NextResponse.json({ ticket, user, order });
 }
 
-export async function PATCH(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if (!canAccess(session, "customers:write")) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
+  const { id } = await params;
   const body = await _req.json();
   const { action, message, adminId, assignedTo } = body;
 
-  const ticket = await prisma.customerTicket.findUnique({ where: { id: params.id } });
+  const ticket = await prisma.customerTicket.findUnique({ where: { id } });
   if (!ticket) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   let updatedTicket = ticket;
@@ -45,31 +47,31 @@ export async function PATCH(_req: NextRequest, { params }: { params: { id: strin
   if (action === "reply") {
     if (!message) return NextResponse.json({ error: "message required" }, { status: 400 });
     await prisma.customerTicketReply.create({
-      data: { ticketId: params.id, authorId: adminId ?? "admin", isAdmin: true, message },
+      data: { ticketId: id, authorId: adminId ?? "admin", isAdmin: true, message },
     });
     updatedTicket = await prisma.customerTicket.update({
-      where: { id: params.id },
+      where: { id },
       data: { status: "PENDING", updatedAt: new Date() },
     });
   } else if (action === "resolve") {
     updatedTicket = await prisma.customerTicket.update({
-      where: { id: params.id },
+      where: { id },
       data: { status: "RESOLVED" as CrmTicketStatus, resolvedAt: new Date() },
     });
-    await logActivity({ userId: ticket.userId, type: "TICKET_RESOLVED", metadata: { ticketId: params.id }, performedBy: adminId });
+    await logActivity({ userId: ticket.userId, type: "TICKET_RESOLVED", metadata: { ticketId: id }, performedBy: adminId });
   } else if (action === "close") {
     updatedTicket = await prisma.customerTicket.update({
-      where: { id: params.id },
+      where: { id },
       data: { status: "CLOSED" as CrmTicketStatus, closedAt: new Date() },
     });
   } else if (action === "assign") {
     updatedTicket = await prisma.customerTicket.update({
-      where: { id: params.id },
+      where: { id },
       data: { assignedTo, status: "IN_PROGRESS" as CrmTicketStatus },
     });
   } else if (action === "reopen") {
     updatedTicket = await prisma.customerTicket.update({
-      where: { id: params.id },
+      where: { id },
       data: { status: "OPEN" as CrmTicketStatus, resolvedAt: null, closedAt: null },
     });
   }

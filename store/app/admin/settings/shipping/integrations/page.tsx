@@ -271,7 +271,7 @@ function IntegrationCard({
           )}
           {/* Credentials indicator */}
           {hasCredentials && (
-            <Shield className="h-4 w-4 text-white/25" title="Credentials configured" />
+            <Shield className="h-4 w-4 text-white/25" aria-label="Credentials configured" />
           )}
           {/* Expand toggle */}
           <button

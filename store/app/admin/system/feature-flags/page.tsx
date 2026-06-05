@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Toggle, RefreshCw, Zap, CheckCircle2, XCircle, Info } from "lucide-react";
+import { RefreshCw, Zap, CheckCircle2, XCircle, Info } from "lucide-react";
 
 interface FeatureFlag {
   id:          string;

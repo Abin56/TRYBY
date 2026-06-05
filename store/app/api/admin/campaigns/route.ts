@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
     estimatedAudience = await prisma.user.count({ where: { role: "CUSTOMER", isActive: true } });
   } else if (data.targetSegments.length > 0) {
     estimatedAudience = await prisma.customerSegment.count({
-      where: { tags: { hasSome: data.targetSegments } },
+      where: { tags: { hasSome: data.targetSegments as import("@prisma/client").SegmentTag[] } },
     });
   }
 

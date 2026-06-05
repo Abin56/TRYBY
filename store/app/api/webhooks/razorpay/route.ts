@@ -102,7 +102,7 @@ async function handleDisputeCreated(payload: Record<string, unknown>) {
   // Find the payment and its settlement
   const payment = await prisma.payment.findFirst({
     where:   { razorpayPaymentId },
-    include: { order: { select: { id: true, orderNumber: true, userId: true } } },
+    include: { order: { select: { id: true, orderNumber: true, userId: true, status: true } } },
   });
   if (!payment) return;
 

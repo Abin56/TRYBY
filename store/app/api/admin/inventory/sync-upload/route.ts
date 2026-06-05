@@ -19,11 +19,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { UserRole, SyncStatus } from "@prisma/client";
+import { UserRole, AdminRole, SyncStatus } from "@prisma/client";
 import { randomUUID } from "crypto";
 
 function adminOnly(role?: string) {
-  return role !== UserRole.ADMIN && role !== UserRole.SUPER_ADMIN;
+  return role !== UserRole.ADMIN && role !== AdminRole.SUPER_ADMIN;
 }
 
 interface FeedRow {
@@ -165,7 +165,8 @@ async function applySync(
   const mapBySupplierSku = new Map(maps.map(m => [m.supplierSku, m]));
 
   let success = 0, skipped = 0, noMapping = 0, failed = 0, overridden = 0;
-  const logRows: Parameters<typeof prisma.stockSyncLog.create>[0]["data"][] = [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const logRows: any[] = [];
   const variantUpdates: { id: string; newStock: number; oldStock: number; productId: string; buffer: number; supplierStock: number }[] = [];
 
   for (const row of rows) {

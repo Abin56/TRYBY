@@ -32,6 +32,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
     e.preventDefault();
     addItem({
       id: product.id,
+      variantId: product.id,
       name: product.name,
       slug: product.slug,
       price: product.price,

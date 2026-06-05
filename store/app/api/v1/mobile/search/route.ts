@@ -48,8 +48,11 @@ export async function GET(req: NextRequest) {
       orderBy,
       take:   limit + 1,
       select: {
-        id: true, name: true, slug: true, price: true, compareAtPrice: true,
-        images: true, avgRating: true, reviewCount: true, stockCount: true, badge: true, sport: true,
+        id: true, name: true, slug: true,
+        images:   { take: 1, select: { url: true } },
+        avgRating: true, reviewCount: true, sport: true,
+        variants: { where: { isActive: true }, select: { price: true, mrp: true }, take: 1, orderBy: { price: "asc" as const } },
+        badges:   { select: { type: true, label: true }, take: 2 },
       },
     }),
     cursor

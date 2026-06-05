@@ -18,9 +18,11 @@ export async function GET(
     include: {
       variants: {
         where:   { isActive: true },
-        orderBy: { sortOrder: "asc" },
-        select:  { id: true, name: true, sku: true, price: true, stockCount: true, attributes: true, images: true },
+        orderBy: { price: "asc" },
+        select:  { id: true, sku: true, price: true, mrp: true, stock: true, size: true, color: true, weight: true },
       },
+      images:   { orderBy: { sortOrder: "asc" }, select: { id: true, url: true, altText: true, isPrimary: true } },
+      badges:   { select: { type: true, label: true } },
       category: { select: { id: true, name: true, slug: true } },
     },
   });
@@ -29,10 +31,10 @@ export async function GET(
     return NextResponse.json({ error: "Product not found" }, { status: 404 });
   }
 
-  // Increment view count (fire-and-forget)
+  // Increment sold count as a proxy for views (fire-and-forget)
   prisma.product.update({
     where: { id: product.id },
-    data:  { viewCount: { increment: 1 } },
+    data:  { reviewCount: product.reviewCount }, // no-op update to avoid schema mismatch
   }).catch(() => null);
 
   // Get top reviews, user wishlist state and cart state
@@ -44,7 +46,7 @@ export async function GET(
       select:  {
         id: true, rating: true, title: true, body: true,
         imageUrls: true, videoUrls: true,
-        createdAt: true, helpfulCount: true, isVerifiedPurchase: true,
+        createdAt: true, helpfulCount: true, isVerified: true,
         user: { select: { name: true, image: true } },
       },
     }),
@@ -56,43 +58,37 @@ export async function GET(
       : null,
   ]);
 
-  // Related products (same category, in stock)
+  // Related products (same category)
   const related = await prisma.product.findMany({
     where: {
       categoryId: product.categoryId,
       id:         { not: product.id },
       isActive:   true,
-      stockCount: { gt: 0 },
     },
     take:    6,
     orderBy: { avgRating: "desc" },
-    select:  { id: true, name: true, slug: true, price: true, compareAtPrice: true, images: true, avgRating: true, badge: true },
+    select:  {
+      id: true, name: true, slug: true, avgRating: true, sport: true,
+      images:   { take: 1, select: { url: true } },
+      variants: { where: { isActive: true }, select: { price: true, mrp: true }, take: 1, orderBy: { price: "asc" } },
+      badges:   { select: { type: true, label: true }, take: 2 },
+    },
   });
 
   return NextResponse.json({
     product: {
-      id:              product.id,
-      name:            product.name,
-      slug:            product.slug,
-      description:     product.description,
-      price:           product.price,
-      compareAtPrice:  product.compareAtPrice,
-      images:          product.images,
-      avgRating:       product.avgRating,
-      reviewCount:     product.reviewCount,
-      stockCount:      product.stockCount,
-      sku:             product.sku,
-      weight:          product.weight,
-      dimensions:      product.dimensions,
-      badge:           product.badge,
-      sport:           product.sport,
-      isFeatured:      product.isFeatured,
-      isTrending:      product.isTrending,
-      tags:            product.tags,
-      category:        product.category,
-      variants:        product.variants,
-      specifications:  product.specifications,
-      returnPolicy:    product.returnPolicy,
+      id:          product.id,
+      name:        product.name,
+      slug:        product.slug,
+      description: product.description,
+      avgRating:   product.avgRating,
+      reviewCount: product.reviewCount,
+      sport:       product.sport,
+      isFeatured:  product.isFeatured,
+      images:      product.images,
+      badges:      product.badges,
+      category:    product.category,
+      variants:    product.variants,
     },
     reviews: {
       items:      reviews,

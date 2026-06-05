@@ -149,7 +149,7 @@ export default function TicketsPage() {
         {/* Ticket list */}
         <div className="w-[380px] shrink-0 rounded-xl overflow-hidden flex flex-col"
           style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.06)" }}>
-          <div className="flex-1 overflow-y-auto divide-y" style={{ divideColor: "rgba(255,255,255,0.04)" }}>
+          <div className="flex-1 overflow-y-auto divide-y">
             {loading && <p className="text-center py-10 text-white/30">Loading…</p>}
             {!loading && tickets.length === 0 && <p className="text-center py-10 text-white/30">No tickets</p>}
             {!loading && tickets.map((t) => (

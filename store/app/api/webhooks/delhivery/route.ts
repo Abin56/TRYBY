@@ -75,9 +75,11 @@ export async function POST(req: NextRequest) {
     const awb     = s.AWB ?? s.Waybill ?? s.waybill;
     const scans   = (s.Scans ?? []) as Record<string, unknown>[];
     const latestScan = scans[0];
-    const statusRaw  = String(latestScan?.ScanDetail?.ScanType ?? s.Status?.Status ?? "");
-    const location   = String(latestScan?.ScanDetail?.ScannedLocation ?? "");
-    const eventDate  = String(latestScan?.ScanDetail?.ScanDateTime ?? new Date().toISOString());
+    const scanDetail = latestScan?.ScanDetail as Record<string, unknown> | undefined;
+    const statusObj  = s.Status as Record<string, unknown> | undefined;
+    const statusRaw  = String(scanDetail?.ScanType ?? statusObj?.Status ?? "");
+    const location   = String(scanDetail?.ScannedLocation ?? "");
+    const eventDate  = String(scanDetail?.ScanDateTime ?? new Date().toISOString());
 
     if (!awb) continue;
 
@@ -96,9 +98,9 @@ export async function POST(req: NextRequest) {
         shipmentId:  shipment.id,
         status:      statusRaw,
         location:    location || null,
-        description: String(latestScan?.ScanDetail?.Instructions ?? statusRaw),
+        description: String(scanDetail?.Instructions ?? statusRaw),
         source:      "delhivery",
-        rawPayload:  entry,
+        rawPayload:  entry as import("@prisma/client").Prisma.InputJsonValue,
         eventAt:     new Date(eventDate),
       },
     });

@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { UserRole, PaymentStatus, OrderStatus } from "@prisma/client";
+import { UserRole, AdminRole, PaymentStatus, OrderStatus } from "@prisma/client";
 
 const GATEWAY_FEE = 0.02;
 
 function adminOnly(role?: string) {
-  return role !== UserRole.ADMIN && role !== UserRole.SUPER_ADMIN;
+  return role !== UserRole.ADMIN && role !== AdminRole.SUPER_ADMIN;
 }
 
 function n(v: unknown): number {

@@ -4,6 +4,7 @@
  */
 
 import { prisma } from "@/lib/db";
+import { Prisma } from "@prisma/client";
 
 // ── Default flags seeded on first boot ─────────────────────────────────────
 
@@ -75,8 +76,8 @@ export async function setFlag(
 ): Promise<boolean> {
   const flag = await prisma.featureFlag.upsert({
     where:  { key },
-    create: { key, name: key, enabled, updatedBy, ...(metadata && { metadata }) },
-    update: { enabled, updatedBy, ...(metadata && { metadata }) },
+    create: { key, name: key, enabled, updatedBy, ...(metadata && { metadata: metadata as Prisma.InputJsonValue }) },
+    update: { enabled, updatedBy, ...(metadata && { metadata: metadata as Prisma.InputJsonValue }) },
   });
   invalidateCache(key);
   return flag.enabled;

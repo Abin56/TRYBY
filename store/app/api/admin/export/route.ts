@@ -89,8 +89,7 @@ const EXPORT_CONFIGS: Record<string, {
     fetch: async (limit) => {
       const rows = await prisma.supplier.findMany({
         select: {
-          id: true, companyName: true, contactName: true, email: true, phone: true,
-          status: true, tier: true, slaScore: true, totalOrders: true, createdAt: true,
+          id: true, companyName: true, status: true, tier: true, slaScore: true, totalOrders: true, createdAt: true,
         },
         orderBy: { createdAt: "desc" },
         take: limit,

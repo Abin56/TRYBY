@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
       ]},
       select: { id: true },
     });
-    const ids = users.map(u => u.id);
+    const ids = users.map((u: any) => u.id);
     if (!ids.length) return NextResponse.json({ profiles: [], total: 0, page, limit });
     where.userId = { in: ids };
   }
@@ -56,15 +56,15 @@ export async function GET(req: NextRequest) {
   ]);
 
   // Batch-fetch users
-  const userIds  = profiles.map(p => p.userId);
+  const userIds  = profiles.map((p: any) => p.userId);
   const users    = await prisma.user.findMany({
     where:  { id: { in: userIds } },
     select: { id: true, name: true, email: true, phone: true, createdAt: true },
   });
-  const userMap  = Object.fromEntries(users.map(u => [u.id, u]));
+  const userMap  = Object.fromEntries(users.map((u: any) => [u.id, u]));
 
   return NextResponse.json({
-    profiles: profiles.map(p => ({ ...p, user: userMap[p.userId] ?? null })),
+    profiles: profiles.map((p: any) => ({ ...p, user: userMap[p.userId] ?? null })),
     total,
     page,
     limit,

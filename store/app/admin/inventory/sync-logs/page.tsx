@@ -154,7 +154,6 @@ export default function SyncLogsPage() {
                 style={{
                   background: `${meta.color}15`,
                   color: meta.color,
-                  ringColor: meta.color,
                 }}>
                 {cnt} {meta.label}
               </button>

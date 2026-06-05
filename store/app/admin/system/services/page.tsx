@@ -16,7 +16,7 @@ interface ServiceResult {
   latencyMs:  number;
   message:    string;
   action?:    string;
-  detail?:    unknown;
+  detail?:    string;
 }
 
 interface VerifyResponse {

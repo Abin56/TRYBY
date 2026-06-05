@@ -4,7 +4,7 @@ import { canAccess } from "@/lib/rbac";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
 import { logAudit, getAdminProfileId } from "@/lib/audit";
-import { JobStatus } from "@prisma/client";
+import { JobStatus, Prisma } from "@prisma/client";
 
 const actionSchema = z.object({
   jobId:  z.string(),
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
     updated = await prisma.systemJob.create({
       data: {
         type: job.type, name: `${job.name} (manual)`,
-        status: "PENDING", payload: job.payload,
+        status: "PENDING", payload: job.payload ?? Prisma.DbNull,
         triggeredBy: session!.user.id,
       },
     });

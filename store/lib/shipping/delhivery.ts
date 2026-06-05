@@ -174,7 +174,7 @@ export class DelhiveryProvider implements ShippingProvider {
       const pkg    = data.ShipmentData?.[0]?.Shipment;
       if (!pkg) return { success: false, events: [], error: "Shipment not found" };
 
-      const events = (pkg.Scans ?? []).map((s: Record<string, string>) => ({
+      const events = (pkg.Scans ?? []).map((s: Record<string, any>) => ({
         status:      s.ScanDetail?.Instructions ?? s.ScanType ?? "",
         location:    s.ScanDetail?.ScannedLocation ?? "",
         description: s.ScanDetail?.Instructions ?? "",

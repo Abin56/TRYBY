@@ -114,15 +114,15 @@ export async function GET() {
   ]);
 
   // Enrich top risky customers with user info
-  const userIds      = topRiskyCustomers.map(p => p.userId);
+  const userIds      = topRiskyCustomers.map((p: any) => p.userId);
   const users        = await prisma.user.findMany({
     where:  { id: { in: userIds } },
     select: { id: true, name: true, email: true, phone: true },
   });
-  const userMap      = Object.fromEntries(users.map(u => [u.id, u]));
+  const userMap      = Object.fromEntries(users.map((u: any) => [u.id, u]));
 
   // Enrich suspicious orders with order+user info
-  const orderIds     = suspiciousOrders.map(o => o.orderId);
+  const orderIds     = suspiciousOrders.map((o: any) => o.orderId);
   const orders       = await prisma.order.findMany({
     where:   { id: { in: orderIds } },
     select:  {
@@ -131,10 +131,10 @@ export async function GET() {
       payment: { select: { method: true } },
     },
   });
-  const orderMap     = Object.fromEntries(orders.map(o => [o.id, o]));
+  const orderMap     = Object.fromEntries(orders.map((o: any) => [o.id, o]));
 
   // Supplier risk scoring
-  const supplierRiskScored = supplierRisk.map(s => {
+  const supplierRiskScored = supplierRisk.map((s: any) => {
     const cancRisk  = Math.min(Number(s.cancellationRate) * 200, 40);
     const retRisk   = Math.min(Number(s.returnRate)       * 150, 30);
     const perfRisk  = Math.max(0, (100 - Number(s.performanceScore)) * 0.3);
@@ -145,8 +145,8 @@ export async function GET() {
 
   return NextResponse.json({
     kpis: {
-      criticalCustomers:    customerRiskDist.find(r => r.riskLevel === "CRITICAL")?._count.riskLevel ?? 0,
-      highRiskCustomers:    customerRiskDist.find(r => r.riskLevel === "HIGH")?._count.riskLevel     ?? 0,
+      criticalCustomers:    customerRiskDist.find((r: any) => r.riskLevel === "CRITICAL")?._count.riskLevel ?? 0,
+      highRiskCustomers:    customerRiskDist.find((r: any) => r.riskLevel === "HIGH")?._count.riskLevel     ?? 0,
       codBlockedCount,
       blacklistTotal,
       refundAbuseCount,
@@ -160,8 +160,8 @@ export async function GET() {
     customerRiskDist,
     orderRiskDist,
     blacklistCounts,
-    topRiskyCustomers: topRiskyCustomers.map(p => ({ ...p, user: userMap[p.userId] ?? null })),
-    suspiciousOrders:  suspiciousOrders.map(o => ({ ...o, order: orderMap[o.orderId] ?? null })),
+    topRiskyCustomers: topRiskyCustomers.map((p: any) => ({ ...p, user: userMap[p.userId] ?? null })),
+    suspiciousOrders:  suspiciousOrders.map((o: any) => ({ ...o, order: orderMap[o.orderId] ?? null })),
     supplierRisk:      supplierRiskScored,
     recentAuditLogs,
     codKpis: {

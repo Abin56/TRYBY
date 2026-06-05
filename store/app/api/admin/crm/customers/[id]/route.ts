@@ -4,12 +4,12 @@ import { recomputeCrmProfile, logActivity } from "@/lib/crm";
 import { auth } from "@/lib/auth";
 import { canAccess } from "@/lib/rbac";
 
-export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if (!canAccess(session, "customers:read")) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
-  const userId = params.id;
+  const { id: userId } = await params;
 
   const [user, crmProfile, riskProfile, orders, returns, reviews, tickets, notes, tagAssignments, activity, loyaltyPoints, notifications] = await Promise.all([
     prisma.user.findUnique({
@@ -84,12 +84,12 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
 }
 
 // PATCH: block/unblock customer, update profile
-export async function PATCH(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if (!canAccess(session, "customers:write")) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
-  const userId = params.id;
+  const { id: userId } = await params;
   const body = await _req.json();
   const { action, performedBy, reason } = body;
 

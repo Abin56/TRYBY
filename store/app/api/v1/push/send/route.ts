@@ -10,7 +10,7 @@ const schema = z.object({
   userId:   z.string().min(1),
   title:    z.string().min(1).max(100),
   body:     z.string().min(1).max(500),
-  data:     z.record(z.string()).optional(),
+  data:     z.record(z.string(), z.string()).optional(),
   imageUrl: z.string().url().optional(),
   badge:    z.number().int().min(0).optional(),
 });
@@ -38,7 +38,7 @@ const broadcastSchema = z.object({
   userIds:  z.array(z.string()).min(1).max(1000),
   title:    z.string().min(1).max(100),
   body:     z.string().min(1).max(500),
-  data:     z.record(z.string()).optional(),
+  data:     z.record(z.string(), z.string()).optional(),
   imageUrl: z.string().url().optional(),
 });
 

@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
     const header = "id,type,value,status,reason,added_by,hit_count,expires_at,created_at";
     const csv    = [
       header,
-      ...rows.map(r => [
+      ...rows.map((r: any) => [
         r.id, r.type, `"${r.value.replace(/"/g, '""')}"`,
         r.status, r.reason ?? "", r.addedBy ?? "",
         r.hitCount, r.expiresAt?.toISOString() ?? "",

@@ -190,7 +190,7 @@ export default function MarketingHubPage() {
               View all <ChevronRight className="h-3 w-3" />
             </Link>
           </div>
-          <div className="divide-y" style={{ divideColor: "rgba(255,255,255,0.04)" }}>
+          <div className="divide-y">
             {active.length === 0 && (
               <div className="px-5 py-8 text-center text-white/30 text-[13px]">
                 No campaigns running
@@ -242,7 +242,7 @@ export default function MarketingHubPage() {
               Full analytics <ChevronRight className="h-3 w-3" />
             </Link>
           </div>
-          <div className="divide-y" style={{ divideColor: "rgba(255,255,255,0.04)" }}>
+          <div className="divide-y">
             {(d?.topCampaigns ?? []).length === 0 && (
               <div className="px-5 py-8 text-center text-white/30 text-[13px]">No data yet</div>
             )}

@@ -39,15 +39,15 @@ export async function GET(req: NextRequest) {
     }),
   ]);
 
-  const userIds = records.map(r => r.userId);
+  const userIds = records.map((r: any) => r.userId);
   const users   = await prisma.user.findMany({
     where:  { id: { in: userIds } },
     select: { id: true, name: true, email: true, phone: true },
   });
-  const userMap = Object.fromEntries(users.map(u => [u.id, u]));
+  const userMap = Object.fromEntries(users.map((u: any) => [u.id, u]));
 
   return NextResponse.json({
-    records: records.map(r => ({ ...r, user: userMap[r.userId] ?? null })),
+    records: records.map((r: any) => ({ ...r, user: userMap[r.userId] ?? null })),
     total,
     page,
     limit,

@@ -225,7 +225,7 @@ export default function CustomerDetailPage() {
             <div className="px-5 py-4 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
               <h2 className="text-white font-bold text-[14px]">Recent Orders</h2>
             </div>
-            <div className="divide-y" style={{ divideColor: "rgba(255,255,255,0.04)" }}>
+            <div className="divide-y">
               {(orders ?? []).slice(0, 10).map((o) => (
                 <div key={o.id} className="flex items-center gap-3 px-5 py-3">
                   <div className="flex-1">
@@ -277,7 +277,7 @@ export default function CustomerDetailPage() {
             <div className="px-4 py-3 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
               <h3 className="text-white font-bold text-[13px]">Risk Action History</h3>
             </div>
-            <div className="divide-y max-h-80 overflow-y-auto" style={{ divideColor: "rgba(255,255,255,0.04)" }}>
+            <div className="divide-y max-h-80 overflow-y-auto">
               {(fraudLogs ?? []).map((log) => (
                 <div key={log.id} className="px-4 py-3">
                   <p className="text-white text-[12px] font-medium">{log.action.replace(/_/g, " ")}</p>

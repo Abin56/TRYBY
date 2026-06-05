@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
   const sourceStocks = await prisma.warehouseStock.findMany({
     where:   { warehouseId: fromWarehouseId, variantId: { in: variantIds } },
     include: {
-      variant: { select: { id: true, sku: true, productId: true } },
+      variant: { select: { id: true, sku: true, productId: true, size: true, color: true } },
       product: { select: { id: true, name: true } },
     },
   });

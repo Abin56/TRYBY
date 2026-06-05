@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
       shipment: {
         select: {
           trackingNumber: true,
-          carrier:        true,
+          carrierName:    true,
           status:         true,
           estimatedAt:    true,
           trackingUrl:    true,

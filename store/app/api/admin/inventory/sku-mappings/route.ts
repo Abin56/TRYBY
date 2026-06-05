@@ -8,11 +8,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { UserRole } from "@prisma/client";
+import { UserRole, AdminRole } from "@prisma/client";
 import { z } from "zod";
 
 function adminOnly(role?: string) {
-  return role !== UserRole.ADMIN && role !== UserRole.SUPER_ADMIN;
+  return role !== UserRole.ADMIN && role !== AdminRole.SUPER_ADMIN;
 }
 
 const PAGE_SIZE = 50;

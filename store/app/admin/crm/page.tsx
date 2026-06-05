@@ -178,7 +178,7 @@ export default function CrmDashboardPage() {
               View all <ChevronRight className="h-3 w-3" />
             </Link>
           </div>
-          <div className="divide-y" style={{ divideColor: "rgba(255,255,255,0.04)" }}>
+          <div className="divide-y">
             {topCustomers.map((c, i) => (
               <Link key={c.userId} href={`/admin/crm/customers/${c.userId}`}
                 className="flex items-center gap-3 px-5 py-3 hover:bg-white/02 transition-colors">
@@ -244,7 +244,7 @@ export default function CrmDashboardPage() {
           <div className="px-5 py-4 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
             <h2 className="text-white font-bold text-[14px]">Recent Activity</h2>
           </div>
-          <div className="divide-y max-h-72 overflow-y-auto" style={{ divideColor: "rgba(255,255,255,0.04)" }}>
+          <div className="divide-y max-h-72 overflow-y-auto">
             {recentActivity.slice(0, 12).map((a) => {
               const Icon = ACTIVITY_ICONS[a.type] ?? Activity;
               return (

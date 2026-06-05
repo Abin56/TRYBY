@@ -93,7 +93,7 @@ async function resolveDeepLink(path: string): Promise<DeepLinkResult> {
       webFallback: `https://tryby.in/products/${slug}`,
       meta: product ? {
         title:    product.name,
-        imageUrl: (product.images as string[])[0] ?? undefined,
+        imageUrl: product.images[0]?.url ?? undefined,
       } : undefined,
     };
   }

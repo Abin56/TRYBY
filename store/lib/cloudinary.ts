@@ -94,8 +94,8 @@ export async function uploadFile(
   if (file instanceof File || file instanceof Blob) {
     form.append("file", file);
   } else {
-    // Buffer — convert to Blob
-    form.append("file", new Blob([file]));
+    // Buffer — convert to Blob (cast to Uint8Array to satisfy strict BlobPart typing)
+    form.append("file", new Blob([new Uint8Array(file)]));
   }
   form.append("folder",       opts.folder);
   form.append("timestamp",    String(timestamp));

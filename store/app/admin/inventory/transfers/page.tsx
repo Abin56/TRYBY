@@ -105,7 +105,7 @@ function CreateTransferModal({
       if (!res.ok) return;
       const data = await res.json();
       const opts: VariantOption[] = (data.stocks ?? [])
-        .filter((s: { variant: { sku: string; size: string | null; }; product: { name: string }; stock: number; variant: { id: string } }) =>
+        .filter((s: { variant: { id: string; sku: string; size: string | null; }; product: { name: string }; stock: number }) =>
           s.variant.sku.toLowerCase().includes(variantSearch.toLowerCase()) ||
           s.product.name.toLowerCase().includes(variantSearch.toLowerCase())
         )

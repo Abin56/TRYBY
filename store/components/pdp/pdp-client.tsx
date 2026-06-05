@@ -136,6 +136,7 @@ export function PDPClient({ product, related }: Props) {
     for (let i = 0; i < qty; i++) {
       addItem({
         id:             selectedVariant?.id ?? `${product.id}-${selectedSize}`,
+        variantId:      selectedVariant?.id ?? `${product.id}-${selectedSize}`,
         name:           `${product.name} (${selectedSize})`,
         slug:           product.slug,
         price:          activePrice,

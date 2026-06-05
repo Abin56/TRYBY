@@ -57,6 +57,7 @@ function WishlistCard({ item, onRemove }: { item: WishlistItem; onRemove: (id: s
     if (!variant || !inStock) return;
     addItem({
       id:             variant.id,
+      variantId:      variant.id,
       name:           product.name,
       slug:           product.slug,
       price,

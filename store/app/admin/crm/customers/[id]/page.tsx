@@ -451,7 +451,7 @@ export default function CustomerDetailPage() {
         {/* Activity */}
         {tab === "activity" && (
           <div className="rounded-xl overflow-hidden" style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.06)" }}>
-            <div className="divide-y" style={{ divideColor: "rgba(255,255,255,0.04)" }}>
+            <div className="divide-y divide-white/[0.04]">
               {activity.map((a) => (
                 <div key={a.id} className="flex items-start gap-3 px-5 py-3">
                   <div className="h-6 w-6 rounded-full bg-white/05 flex items-center justify-center shrink-0 mt-0.5">

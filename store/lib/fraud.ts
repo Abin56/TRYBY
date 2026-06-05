@@ -46,20 +46,20 @@ export async function recomputeCustomerRisk(userId: string): Promise<void> {
   ]);
 
   const totalOrders       = orders.length;
-  const totalReturns      = orders.filter(o => ["RETURNED", "RETURN_REQUESTED"].includes(o.status)).length;
-  const totalRefunds      = orders.filter(o => o.status === "REFUNDED").length;
+  const totalReturns      = orders.filter((o: any) => ["RETURNED", "RETURN_REQUESTED"].includes(o.status)).length;
+  const totalRefunds      = orders.filter((o: any) => o.status === "REFUNDED").length;
   const totalRefundAmount = orders
-    .filter(o => ["REFUNDED", "RETURNED"].includes(o.status))
-    .reduce((s, o) => s + Number(o.total), 0);
+    .filter((o: any) => ["REFUNDED", "RETURNED"].includes(o.status))
+    .reduce((s: number, o: any) => s + Number(o.total), 0);
   const avgOrderValue     = totalOrders > 0
-    ? orders.reduce((s, o) => s + Number(o.total), 0) / totalOrders
+    ? orders.reduce((s: number, o: any) => s + Number(o.total), 0) / totalOrders
     : 0;
 
   const totalCodOrders    = codOrders.length;
-  const totalCodDelivered = codOrders.filter(o => o.status === "DELIVERED").length;
-  const totalCodCancelled = codOrders.filter(o => ["CANCELLED", "RETURNED"].includes(o.status)).length;
+  const totalCodDelivered = codOrders.filter((o: any) => o.status === "DELIVERED").length;
+  const totalCodCancelled = codOrders.filter((o: any) => ["CANCELLED", "RETURNED"].includes(o.status)).length;
 
-  const recentOrders = orders.filter(o => o.createdAt >= d30).length;
+  const recentOrders = orders.filter((o: any) => o.createdAt >= d30).length;
 
   let score = 0;
 
