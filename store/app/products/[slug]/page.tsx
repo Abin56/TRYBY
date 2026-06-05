@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { PDPClient } from "@/components/pdp/pdp-client";
+import { serialize } from "@/lib/serialize";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -47,5 +48,5 @@ export default async function PDPPage({ params }: Props) {
 
   const related = await getRelated({ id: product.id, sport: product.sport, categoryId: product.categoryId });
 
-  return <PDPClient product={product} related={related} />;
+  return <PDPClient product={serialize(product)} related={serialize(related)} />;
 }

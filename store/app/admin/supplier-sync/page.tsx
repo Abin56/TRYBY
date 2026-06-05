@@ -500,6 +500,7 @@ export default function SupplierSyncPage() {
           {/* Stock logs */}
           {logTab === "stock" && (
             <div className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.06)" }}>
+              <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr style={{ background: "rgba(255,255,255,0.04)" }}>
@@ -538,12 +539,14 @@ export default function SupplierSyncPage() {
                   )}
                 </tbody>
               </table>
+              </div>
             </div>
           )}
 
           {/* Price logs */}
           {logTab === "price" && (
             <div className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.06)" }}>
+              <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr style={{ background: "rgba(255,255,255,0.04)" }}>
@@ -573,6 +576,7 @@ export default function SupplierSyncPage() {
                   )}
                 </tbody>
               </table>
+              </div>
             </div>
           )}
 
@@ -618,6 +622,7 @@ export default function SupplierSyncPage() {
           <section>
             <h2 className="text-base font-bold text-white mb-3 flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-yellow-400" /> Products Hidden Due to Out-of-Stock (7 days)</h2>
             <div className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.06)" }}>
+              <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr style={{ background: "rgba(255,255,255,0.04)" }}>
@@ -638,6 +643,7 @@ export default function SupplierSyncPage() {
                   )}
                 </tbody>
               </table>
+              </div>
             </div>
           </section>
 
@@ -645,6 +651,7 @@ export default function SupplierSyncPage() {
           <section>
             <h2 className="text-base font-bold text-white mb-3 flex items-center gap-2"><BarChart2 className="h-4 w-4 text-purple-400" /> Automatically Repriced (7 days)</h2>
             <div className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.06)" }}>
+              <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr style={{ background: "rgba(255,255,255,0.04)" }}>
@@ -668,6 +675,7 @@ export default function SupplierSyncPage() {
                   )}
                 </tbody>
               </table>
+              </div>
             </div>
           </section>
         </div>

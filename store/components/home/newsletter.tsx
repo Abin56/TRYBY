@@ -79,7 +79,7 @@ export function NewsletterSection() {
       {/* Red glow blob */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] rounded-full"
+        className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] max-w-full h-[400px] rounded-full"
         style={{
           background: "radial-gradient(ellipse, rgba(255,59,48,0.18) 0%, transparent 65%)",
           filter: "blur(80px)",
@@ -88,7 +88,7 @@ export function NewsletterSection() {
       {/* Gold accent glow */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -bottom-16 left-1/2 -translate-x-1/2 w-[500px] h-[200px] rounded-full"
+        className="pointer-events-none absolute -bottom-16 left-1/2 -translate-x-1/2 w-[500px] max-w-full h-[200px] rounded-full"
         style={{
           background: "radial-gradient(ellipse, rgba(255,184,0,0.12) 0%, transparent 70%)",
           filter: "blur(60px)",

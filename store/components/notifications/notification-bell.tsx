@@ -166,7 +166,7 @@ export function NotificationBell() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 6, scale: 0.97 }}
             transition={{ type: "spring", stiffness: 380, damping: 28 }}
-            className="absolute right-0 top-full mt-2 w-[360px] rounded-2xl bg-white overflow-hidden z-[200]"
+            className="absolute right-0 top-full mt-2 w-[360px] max-w-[calc(100vw-1rem)] rounded-2xl bg-white overflow-hidden z-[200]"
             style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.14), 0 0 0 1px rgba(0,0,0,0.06)" }}
           >
             {/* Header */}

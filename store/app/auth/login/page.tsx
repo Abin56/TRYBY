@@ -8,20 +8,24 @@ import { Eye, EyeOff, Mail, Lock, Globe2 } from "lucide-react";
 
 // Determine where to send the user after login based on their role.
 function roleDestination(role: string, callbackUrl: string): string {
-  // If there's an explicit callbackUrl that isn't just "/" respect it —
-  // unless it's an admin/supplier path for the wrong role (safety).
-  const hasCallback = callbackUrl && callbackUrl !== "/";
+  // Safety: reject absolute URLs (open-redirect prevention) and /auth loops.
+  const safe =
+    callbackUrl &&
+    callbackUrl !== "/" &&
+    callbackUrl.startsWith("/") &&          // must be relative
+    !callbackUrl.startsWith("/auth") &&     // avoid loops back to login
+    !callbackUrl.startsWith("//");          // reject protocol-relative URLs
 
   if (role === "ADMIN") {
-    if (hasCallback && callbackUrl.startsWith("/admin")) return callbackUrl;
+    if (safe && callbackUrl.startsWith("/admin")) return callbackUrl;
     return "/admin";
   }
   if (role === "SUPPLIER") {
-    if (hasCallback && callbackUrl.startsWith("/supplier")) return callbackUrl;
+    if (safe && callbackUrl.startsWith("/supplier")) return callbackUrl;
     return "/supplier/dashboard";
   }
-  // CUSTOMER
-  if (hasCallback && !callbackUrl.startsWith("/admin") && !callbackUrl.startsWith("/supplier")) {
+  // CUSTOMER — honour any safe non-privileged path
+  if (safe && !callbackUrl.startsWith("/admin") && !callbackUrl.startsWith("/supplier")) {
     return callbackUrl;
   }
   return "/";
@@ -74,14 +78,14 @@ function LoginForm() {
   async function handleGoogle() {
     setGoogleLoading(true);
     try {
-      // Google OAuth requires a full browser redirect — NextAuth handles the callback.
-      // We pass a post-login destination that reads the role and routes correctly.
-      // After callback, NextAuth redirects to callbackUrl; the role-based routing
-      // happens on the callback page or the destination page's own auth check.
+      // Always route through /auth/google-redirect so the server component reads
+      // the fully-committed session cookie before sending the browser to the final
+      // destination. Passing callbackUrl directly to Google causes RSC fetch races
+      // where Next.js starts fetching /checkout's RSC before the cookie is stored.
+      const dest = callbackUrl && callbackUrl !== "/" ? callbackUrl : "/";
       await signIn("google", {
-        callbackUrl: callbackUrl && callbackUrl !== "/" ? callbackUrl : "/auth/google-redirect",
+        callbackUrl: `/auth/google-redirect?next=${encodeURIComponent(dest)}`,
       });
-      // If signIn returns (popup blocked or error), reset the spinner.
     } catch {
       setError("Could not open Google sign-in. Please try again.");
       setGoogleLoading(false);

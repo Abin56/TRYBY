@@ -1,16 +1,13 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
 
+// Auth guard is handled entirely by proxy.ts at the edge.
+// Removing the server-side auth() call here prevents RSC navigation failures
+// where the layout's redirect() breaks the RSC stream during client navigation.
 export const metadata: Metadata = {
   title: "Checkout",
   robots: { index: false, follow: false },
 };
 
-export default async function CheckoutLayout({ children }: { children: React.ReactNode }) {
-  const session = await auth();
-  if (!session?.user) {
-    redirect("/auth/login?callbackUrl=/checkout");
-  }
+export default function CheckoutLayout({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }

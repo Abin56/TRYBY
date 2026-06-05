@@ -186,6 +186,7 @@ export default function AdminReviewsPage() {
         </div>
       ) : (
         <div className="rounded-2xl overflow-hidden" style={{ background: "#1A1A1A", border: "1px solid rgba(255,255,255,0.06)" }}>
+          <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
@@ -318,6 +319,7 @@ export default function AdminReviewsPage() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 

@@ -55,7 +55,7 @@ export default function MaintenancePage() {
           style={{ background: "linear-gradient(to bottom, rgba(245,197,24,0.8), transparent)" }} />
         <div className="absolute top-0 right-1/4 w-2 h-full opacity-08"
           style={{ background: "linear-gradient(to bottom, rgba(245,197,24,0.6), transparent)" }} />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] rounded-full"
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] max-w-full h-[400px] rounded-full"
           style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(245,197,24,0.18) 0%, transparent 70%)", filter: "blur(40px)" }} />
         <div className="absolute inset-0 opacity-[0.025]"
           style={{ backgroundImage: "repeating-linear-gradient(0deg,rgba(255,255,255,.5) 0,rgba(255,255,255,.5) 1px,transparent 1px,transparent 48px),repeating-linear-gradient(90deg,rgba(255,255,255,.5) 0,rgba(255,255,255,.5) 1px,transparent 1px,transparent 48px)" }} />

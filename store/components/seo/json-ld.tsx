@@ -146,6 +146,11 @@ export function ProductJsonLd({
   rating?: number;
   reviewCount?: number;
 }) {
+  // Coerce to plain JS number — Prisma Decimal objects arrive here when the
+  // server component passes data directly instead of through a fetch() call.
+  const priceNum        = Number(price);
+  const comparePriceNum = comparePrice !== undefined ? Number(comparePrice) : undefined;
+
   const productUrl = `${BASE_URL}/products/${slug}`;
 
   const schema: Record<string, unknown> = {
@@ -169,11 +174,11 @@ export function ProductJsonLd({
       "@id": `${productUrl}/#offer`,
       url: productUrl,
       priceCurrency: "INR",
-      price: price.toFixed(2),
-      ...(comparePrice && comparePrice > price && {
+      price: priceNum.toFixed(2),
+      ...(comparePriceNum && comparePriceNum > priceNum && {
         priceSpecification: {
           "@type": "UnitPriceSpecification",
-          price: price.toFixed(2),
+          price: priceNum.toFixed(2),
           priceCurrency: "INR",
           referenceQuantity: { "@type": "QuantitativeValue", value: 1 },
         },

@@ -38,7 +38,7 @@ export function HeroClient({ content }: { content: HeroContent }) {
               src={mobileImageUrl}
               alt={`${headline} — TRYBY Sports`}
               fill priority
-              sizes="100vw"
+              sizes="(max-width: 767px) 100vw, 0px"
               className="object-cover"
               style={{ objectPosition: "50% 4%" }}
             />

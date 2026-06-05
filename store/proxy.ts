@@ -110,8 +110,16 @@ export default auth(async (req) => {
 
   // ── Auth guards ────────────────────────────────────────────────────────
 
-  // Redirect already-authenticated users away from login/register pages
-  if (pathname.startsWith("/auth") && session) {
+  // Redirect already-authenticated users away from login/register pages.
+  // Exclude /auth/google-redirect — it must always render so it can read
+  // the session and route to the correct destination (including /checkout).
+  // Exclude /auth/error — must always be accessible regardless of session.
+  if (
+    pathname.startsWith("/auth") &&
+    !pathname.startsWith("/auth/google-redirect") &&
+    !pathname.startsWith("/auth/error") &&
+    session
+  ) {
     const role = session.user?.role;
     if (role === "ADMIN")    return NextResponse.redirect(new URL("/admin", req.url));
     if (role === "SUPPLIER") return NextResponse.redirect(new URL("/supplier/dashboard", req.url));
@@ -143,16 +151,24 @@ export default auth(async (req) => {
     }
   }
 
-  if (pathname.startsWith("/supplier") && pathname !== "/supplier/apply") {
+  if (
+    pathname.startsWith("/supplier") &&
+    pathname !== "/supplier/apply" &&
+    pathname !== "/supplier/login"
+  ) {
     if (!session) {
-      const loginUrl = new URL("/auth/login", req.url);
-      loginUrl.searchParams.set("callbackUrl", pathname);
-      return NextResponse.redirect(loginUrl);
+      return NextResponse.redirect(new URL("/supplier/login", req.url));
     }
     if (session.user?.role !== "SUPPLIER") return NextResponse.redirect(new URL("/", req.url));
   }
 
-  if ((pathname.startsWith("/checkout") || pathname.startsWith("/orders")) && !session) {
+  // /checkout requires auth; /orders/track is public (guest order tracking)
+  if (pathname.startsWith("/checkout") && !session) {
+    const loginUrl = new URL("/auth/login", req.url);
+    loginUrl.searchParams.set("callbackUrl", pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+  if (pathname.startsWith("/orders") && !pathname.startsWith("/orders/track") && !session) {
     const loginUrl = new URL("/auth/login", req.url);
     loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);
@@ -168,6 +184,7 @@ export const config = {
     "/account/:path*",
     "/admin/:path*",
     "/supplier/:path*",
+    "/checkout",          // root path — was missing, causing proxy to skip it
     "/checkout/:path*",
     "/orders/:path*",
     // Run maintenance check on all public store pages

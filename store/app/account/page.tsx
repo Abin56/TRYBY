@@ -44,7 +44,7 @@ function RewardsPanel({ userId }: { userId: string }) {
         </p>
         <p className="text-[12px] text-white/50 mt-1">≈ <span className="text-white font-bold">₹{rupeesValue}</span> redeemable</p>
         {balance >= 100 && (
-          <Link href="/checkout"
+          <Link href="/checkout" prefetch={false}
             className="inline-flex items-center gap-1.5 mt-4 rounded-xl px-4 py-2 font-black text-[12px] text-[#0D0D0D] hover:opacity-90"
             style={{ background: "#E8FF47", fontFamily: "'Barlow Condensed', sans-serif", letterSpacing: "0.06em" }}>
             <Gift className="h-3.5 w-3.5" /> REDEEM AT CHECKOUT

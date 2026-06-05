@@ -4,6 +4,8 @@ import { auth } from "@/lib/auth";
 import { SupplierSidebar } from "./_components/sidebar";
 import { PanelThemeProvider } from "@/components/providers/panel-theme-provider";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: { default: "Supplier — TRYBY", template: "%s | TRYBY Supplier" },
   robots: { index: false, follow: false },

@@ -4,6 +4,8 @@ import { auth } from "@/lib/auth";
 import { AdminSidebar } from "./_components/sidebar";
 import { PanelThemeProvider } from "@/components/providers/panel-theme-provider";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: { default: "Admin — TRYBY", template: "%s | TRYBY Admin" },
   robots: { index: false, follow: false },

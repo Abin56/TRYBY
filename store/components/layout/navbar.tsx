@@ -71,7 +71,7 @@ function AccountDropdown({ onClose }: { onClose: () => void }) {
         {/* Links */}
         <div className="space-y-0.5 mb-3">
           {ACCOUNT_MENU.map(({ icon: Icon, label, href }) => (
-            <Link key={href} href={href} onClick={onClose}
+            <Link key={href} href={href} onClick={onClose} prefetch={false}
               className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-[12px] font-medium text-[#374151] hover:bg-[#F5F5F7] transition-colors duration-150">
               <Icon className="h-3.5 w-3.5 text-[#6B7280]" />
               {label}
@@ -207,7 +207,7 @@ export function Navbar() {
           </Link>
 
           {/* Account */}
-          <Link href={session?.user ? "/account" : "/auth/login"} className="flex h-11 w-11 items-center justify-center rounded-xl text-white/70 hover:text-white active:bg-white/10 transition-colors" aria-label="Account">
+          <Link href={session?.user ? "/account" : "/auth/login"} prefetch={false} className="flex h-11 w-11 items-center justify-center rounded-xl text-white/70 hover:text-white active:bg-white/10 transition-colors" aria-label="Account">
             <User className="h-[18px] w-[18px]" />
           </Link>
 
@@ -537,6 +537,7 @@ export function Navbar() {
                     <Link
                       href="/account"
                       onClick={closeDrawer}
+                      prefetch={false}
                       className="flex w-full items-center justify-center h-12 rounded-xl font-black text-[#0D0D0D] transition-opacity duration-150 hover:opacity-90 active:scale-[0.98]"
                       style={{ background: "#F5C518", fontFamily: "'Barlow Condensed', sans-serif", fontSize: "15px", letterSpacing: "0.08em", boxShadow: "0 4px 16px rgba(245,197,24,0.3)" }}
                     >

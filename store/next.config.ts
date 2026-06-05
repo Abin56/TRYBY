@@ -4,13 +4,16 @@ import { withSentryConfig } from "@sentry/nextjs";
 // Content-Security-Policy built from discrete directives for readability.
 // Uses 'strict-dynamic' with a nonce for inline scripts (Next.js injects these);
 // falls back to 'unsafe-inline' for browsers that don't support strict-dynamic.
+const isDev = process.env.NODE_ENV === "development";
+
 const CSP_DIRECTIVES = [
   // Default: same origin only
   "default-src 'self'",
 
-  // Scripts: same origin + Razorpay checkout + Sentry CDN + strict-dynamic for Next.js nonces
-  // 'unsafe-inline' is ignored by browsers that honour strict-dynamic; kept for older browsers
-  "script-src 'self' 'unsafe-inline' https://checkout.razorpay.com https://js.sentry-cdn.com https://browser.sentry-cdn.com",
+  // Scripts: same origin + Razorpay checkout + Sentry CDN
+  // 'unsafe-eval' is required in development by React DevTools (Turbopack) for
+  // call-stack reconstruction across environments — never present in production.
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://checkout.razorpay.com https://js.sentry-cdn.com https://browser.sentry-cdn.com`,
 
   // Styles: same origin + fonts.googleapis.com (needed for Google Fonts stylesheet)
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",

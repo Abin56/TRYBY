@@ -17,10 +17,10 @@ export default function NotFound() {
       {/* ── Stadium atmosphere ── */}
       <div aria-hidden="true" className="pointer-events-none">
         {/* Yellow glow — top center (stadium spotlight) */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[500px] rounded-full opacity-20"
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] max-w-full h-[500px] rounded-full opacity-20"
           style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(245,197,24,0.5) 0%, transparent 65%)", filter: "blur(60px)" }} />
         {/* Left edge glow */}
-        <div className="absolute top-1/3 -left-40 w-[400px] h-[400px] rounded-full opacity-10"
+        <div className="absolute top-1/3 -left-40 w-[400px] max-w-full h-[400px] rounded-full opacity-10"
           style={{ background: "radial-gradient(circle, rgba(245,197,24,0.4) 0%, transparent 65%)", filter: "blur(80px)" }} />
         {/* Subtle grid */}
         <div className="absolute inset-0 opacity-[0.03]"

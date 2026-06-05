@@ -7,16 +7,21 @@ import Link from "next/link";
 import { Eye, EyeOff, User, Mail, Lock, Globe2 } from "lucide-react";
 
 function roleDestination(role: string, callbackUrl: string): string {
-  const hasCallback = callbackUrl && callbackUrl !== "/";
+  const safe =
+    callbackUrl &&
+    callbackUrl !== "/" &&
+    callbackUrl.startsWith("/") &&
+    !callbackUrl.startsWith("/auth") &&
+    !callbackUrl.startsWith("//");
   if (role === "ADMIN") {
-    if (hasCallback && callbackUrl.startsWith("/admin")) return callbackUrl;
+    if (safe && callbackUrl.startsWith("/admin")) return callbackUrl;
     return "/admin";
   }
   if (role === "SUPPLIER") {
-    if (hasCallback && callbackUrl.startsWith("/supplier")) return callbackUrl;
+    if (safe && callbackUrl.startsWith("/supplier")) return callbackUrl;
     return "/supplier/dashboard";
   }
-  if (hasCallback && !callbackUrl.startsWith("/admin") && !callbackUrl.startsWith("/supplier")) {
+  if (safe && !callbackUrl.startsWith("/admin") && !callbackUrl.startsWith("/supplier")) {
     return callbackUrl;
   }
   return "/";
@@ -88,8 +93,9 @@ function RegisterForm() {
   async function handleGoogle() {
     setGoogleLoading(true);
     try {
+      const dest = callbackUrl && callbackUrl !== "/" ? callbackUrl : "/";
       await signIn("google", {
-        callbackUrl: callbackUrl && callbackUrl !== "/" ? callbackUrl : "/auth/google-redirect",
+        callbackUrl: `/auth/google-redirect?next=${encodeURIComponent(dest)}`,
       });
     } catch {
       setErrors({ form: "Could not open Google sign-in. Please try again." });

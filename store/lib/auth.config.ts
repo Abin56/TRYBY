@@ -54,8 +54,11 @@ export const authConfig = {
       }
       return session;
     },
-    authorized({ auth }) {
-      return !!auth;
+    // Don't block at the authorized() level — our middleware handles
+    // route-specific guards explicitly. Returning true here allows all
+    // requests through; the middleware function below does the real checks.
+    authorized() {
+      return true;
     },
   },
 } satisfies NextAuthConfig;

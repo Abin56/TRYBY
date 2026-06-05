@@ -297,6 +297,7 @@ function OrderSummary() {
         {/* Checkout CTA */}
         <Link
           href="/checkout"
+          prefetch={false}
           className="flex w-full items-center justify-center gap-2 h-12 rounded-full font-bold text-[14px] text-white bg-[#0D0D0D] hover:opacity-85 active:scale-[0.98] transition-all duration-200"
           style={{ fontFamily: "'Barlow Condensed', sans-serif", letterSpacing: "0.05em" }}
         >

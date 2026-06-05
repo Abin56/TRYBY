@@ -176,7 +176,7 @@ function PaymentPageInner() {
       <div className="w-full max-w-[460px]">
 
         <div className="flex items-center gap-3 mb-6">
-          <Link href="/checkout" className="flex h-9 w-9 items-center justify-center rounded-xl text-[#888] hover:text-[#0D0D0D] hover:bg-white transition-all">
+          <Link href="/checkout" prefetch={false} className="flex h-9 w-9 items-center justify-center rounded-xl text-[#888] hover:text-[#0D0D0D] hover:bg-white transition-all">
             <ChevronLeft className="h-5 w-5" />
           </Link>
           <h1 className="text-[22px] font-black text-[#0D0D0D]" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>

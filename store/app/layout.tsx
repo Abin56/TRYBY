@@ -115,12 +115,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${barlow.variable} h-full antialiased`}>
+    <html lang="en" className={`${inter.variable} ${barlow.variable} h-full antialiased`} data-scroll-behavior="smooth">
       <head>
         {/* theme-color — browser chrome on mobile */}
         <meta name="theme-color" content="#0D0D0D" />
       </head>
-      <body className="bg-white text-[#111827] min-h-full flex flex-col">
+      <body className="bg-white text-[#111827] min-h-full flex flex-col overflow-x-hidden">
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[999] focus:rounded-lg focus:bg-[#FF3B30] focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"

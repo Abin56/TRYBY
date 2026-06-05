@@ -133,8 +133,7 @@ export function CartDrawer() {
                     </button>
                   </motion.div>
                 ) : (
-                  <div className="space-y-3">
-                    {items.map((item) => (
+                    items.map((item) => (
                       <motion.div
                         key={item.variantId}
                         layout
@@ -142,7 +141,7 @@ export function CartDrawer() {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 20, height: 0, marginBottom: 0 }}
                         transition={{ duration: 0.25, ease: "easeOut" }}
-                        className="flex gap-4 rounded-2xl bg-[#F9FAFB] border border-[#E5E7EB] p-3"
+                        className="flex gap-4 rounded-2xl bg-[#F9FAFB] border border-[#E5E7EB] p-3 mb-3"
                       >
                         {/* Image */}
                         <Link
@@ -211,8 +210,7 @@ export function CartDrawer() {
                           </div>
                         </div>
                       </motion.div>
-                    ))}
-                  </div>
+                    ))
                 )}
               </AnimatePresence>
             </div>
@@ -257,6 +255,7 @@ export function CartDrawer() {
                 <Link
                   href="/checkout"
                   onClick={closeCart}
+                  prefetch={false}
                   className="shimmer-btn flex w-full h-12 items-center justify-center gap-2 rounded-xl bg-[#111827] text-sm font-bold text-white hover:bg-[#1F2937] transition-colors shadow-[0_4px_12px_rgba(0,0,0,0.15)]"
                 >
                   Checkout Now

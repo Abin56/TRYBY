@@ -299,7 +299,10 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden; /* prevent horizontal scroll on any page */
+}
 
 body {
   background-color: #FFFFFF;
@@ -308,6 +311,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.6;
+  overflow-x: hidden; /* belt-and-suspenders: block horizontal scroll */
 }
 
 ::selection {
