@@ -536,3 +536,20 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ============================================================
+   MOBILE INPUT ZOOM FIX (iOS Safari)
+   iOS auto-zooms the viewport when a form control with a font
+   size < 16px receives focus, then never zooms back cleanly —
+   the reported mobile/tablet "zoom-in/zoom-out" glitch.
+   Enlarge form-control text to 16px on touch devices only so the
+   desktop design is unchanged. No layout is restructured.
+   ============================================================ */
+
+@media (pointer: coarse) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}

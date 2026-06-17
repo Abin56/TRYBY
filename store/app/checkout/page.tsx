@@ -187,6 +187,21 @@ export default function CheckoutPage() {
         addressId = addr.id;
       }
 
+      // Sync the client cart (Zustand/localStorage) into the server cart so that
+      // /api/orders — which builds the order from the DB cart — sees the items.
+      // Without this the server cart is empty and order creation fails with
+      // "Cart is empty" even though the UI shows items.
+      const syncRes = await fetch("/api/cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: items.map(i => ({ variantId: i.variantId, quantity: i.quantity })) }),
+      });
+      if (!syncRes.ok) {
+        setErrors({ form: "Could not prepare your cart — please try again." });
+        setPlacing(false);
+        return;
+      }
+
       // Create order
       const orderRes = await fetch("/api/orders", {
         method: "POST",
@@ -206,6 +221,11 @@ export default function CheckoutPage() {
       }
 
       const order = await orderRes.json();
+
+      // Order placed — the server cart was consumed inside the order transaction.
+      // Clear the client cart too so back-navigation can't create a duplicate
+      // order from the same items; the user continues from the pending order.
+      clearCart();
 
       // COD — no Razorpay
       // For now route to payment page with orderId

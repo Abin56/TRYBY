@@ -26,9 +26,15 @@ export function CartClearer() {
       return;
     }
 
-    // User changed (logout → null, or switch to different account).
+    // User changed.
     if (prevUserIdRef.current !== currentUserId) {
-      clearCart();
+      // Only clear when LEAVING an authenticated session (logout) or switching
+      // to a different account. Do NOT clear on guest(null) → user login: a guest
+      // who builds a cart and then signs in at checkout must keep their cart,
+      // otherwise the guest → login → checkout flow loses all items.
+      if (prevUserIdRef.current !== null) {
+        clearCart();
+      }
       prevUserIdRef.current = currentUserId;
     }
   }, [session?.user?.id, status, clearCart]);
