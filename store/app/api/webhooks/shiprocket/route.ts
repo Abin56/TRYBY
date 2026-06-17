@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import crypto from "crypto";
 import { ShipmentStatus, OrderStatus } from "@prisma/client";
 import { sendShippingUpdate } from "@/lib/email";
 import { notifyOrderShipped, notifyOrderDelivered } from "@/lib/notifications";
+import {
+  isShiprocketSecretConfigured,
+  verifyShiprocketSignature,
+} from "@/lib/shipping/webhook-auth";
 
 // ── Signature verification ────────────────────────────────────────────────────
 // Priority: DB SiteSettings["shiprocket_credentials"].webhookSecret → env var.
@@ -18,17 +21,6 @@ async function getWebhookSecret(): Promise<string | null> {
     if (secret) return secret;
   } catch { /* fallthrough */ }
   return process.env.SHIPROCKET_WEBHOOK_SECRET ?? null;
-}
-
-function verifySignature(rawBody: string, signature: string | null, secret: string | null): boolean {
-  if (!secret) return true; // unenforced when no secret configured
-  if (!signature) return false;
-  const expected = crypto.createHmac("sha256", secret).update(rawBody).digest("hex");
-  try {
-    return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature));
-  } catch {
-    return false;
-  }
 }
 
 // ── Status mapping ────────────────────────────────────────────────────────────
@@ -135,7 +127,16 @@ export async function POST(req: NextRequest) {
     ?? null;
 
   const secret = await getWebhookSecret();
-  if (!verifySignature(rawBody, signature, secret)) {
+
+  // Fail CLOSED: a missing/unconfigured secret is a server misconfiguration,
+  // not an auth failure — surface it as 500 so it is caught in monitoring and
+  // never causes us to silently process forged, unsigned webhooks.
+  if (!isShiprocketSecretConfigured(secret)) {
+    console.error("[shiprocket-webhook] SHIPROCKET_WEBHOOK_SECRET not configured — rejecting");
+    return NextResponse.json({ error: "Webhook secret not configured" }, { status: 500 });
+  }
+
+  if (!verifyShiprocketSignature(rawBody, signature, secret)) {
     console.warn("[shiprocket-webhook] signature mismatch — rejecting");
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }

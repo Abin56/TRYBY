@@ -2,14 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { ShipmentStatus, OrderStatus } from "@prisma/client";
 import { sendShippingUpdate } from "@/lib/email";
+import {
+  isDelhiveryTokenConfigured,
+  verifyDelhiveryToken,
+} from "@/lib/shipping/webhook-auth";
 
 // Delhivery sends shipment status updates via webhook (push tracking).
-// Auth: shared secret in X-Delhivery-Token header (optional).
+// Auth: a shared token in the X-Delhivery-Token / Authorization header.
+// (Delhivery does not HMAC-sign the body, so token comparison is correct —
+//  but it must be constant-time and MUST be enforced in EVERY environment.)
 
-function verifyToken(token: string | null): boolean {
-  const secret = process.env.DELHIVERY_WEBHOOK_TOKEN;
-  if (!secret || secret.startsWith("REPLACE")) return true;  // not enforced if not set
-  return token === secret;
+/** Canonical env name, falling back to the legacy one. */
+function getWebhookSecret(): string | null {
+  return process.env.DELHIVERY_WEBHOOK_SECRET ?? process.env.DELHIVERY_WEBHOOK_TOKEN ?? null;
 }
 
 // ── Status mapping ────────────────────────────────────────────────────────────
@@ -49,8 +54,17 @@ function matchStatus(raw: string): ShipmentStatus | null {
 // ── Main handler ──────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
+  const secret = getWebhookSecret();
+
+  // Fail CLOSED: an unconfigured/placeholder token is a server misconfiguration
+  // — surface as 500 so monitoring catches it; never process forged webhooks.
+  if (!isDelhiveryTokenConfigured(secret)) {
+    console.error("[delhivery-webhook] DELHIVERY_WEBHOOK_SECRET not configured — rejecting");
+    return NextResponse.json({ error: "Webhook secret not configured" }, { status: 500 });
+  }
+
   const token = req.headers.get("x-delhivery-token") ?? req.headers.get("authorization")?.replace("Bearer ", "");
-  if (!verifyToken(token ?? null)) {
+  if (!verifyDelhiveryToken(token ?? null, secret)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

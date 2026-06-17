@@ -1,0 +1,43 @@
+import { defineConfig, devices } from "@playwright/test";
+
+/**
+ * Playwright config for the TRYBY E2E QA harness.
+ *
+ * Target environment is chosen by env var (NEVER hardcode production):
+ *   E2E_BASE_URL   — base URL under test (default http://localhost:3000)
+ *
+ * Prerequisites before `npm run test:e2e`:
+ *   1. A QA/staging DB seeded with `npm run seed:test`.
+ *   2. The app running against that DB (E2E_BASE_URL pointing at it).
+ *   3. For payment specs: RAZORPAY_* keys must be TEST-mode keys.
+ *
+ * See tests/playwright/README.md.
+ */
+
+const BASE_URL = process.env.E2E_BASE_URL ?? "http://localhost:3000";
+
+export default defineConfig({
+  testDir: "../e2e",
+  testMatch: "**/*.spec.ts",
+  timeout: 60_000,
+  expect: { timeout: 10_000 },
+  fullyParallel: true,
+  forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 1 : 0,
+  workers: process.env.CI ? 2 : undefined,
+  reporter: [
+    ["list"],
+    ["html", { outputFolder: "../../playwright-report", open: "never" }],
+    ["json", { outputFile: "../../playwright-results.json" }],
+  ],
+  use: {
+    baseURL: BASE_URL,
+    trace: "on-first-retry",
+    screenshot: "only-on-failure",
+    video: "retain-on-failure",
+    actionTimeout: 15_000,
+  },
+  projects: [
+    { name: "chromium", use: { ...devices["Desktop Chrome"] } },
+  ],
+});
