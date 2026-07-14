@@ -134,7 +134,7 @@ export function SocialProofSection() {
                   </div>
                 ))}
               </div>
-              <span className="text-[12px] font-semibold text-[#555]">4.8 avg rating</span>
+              <span className="text-[12px] font-semibold text-[#555]">Customer reviews</span>
             </div>
           </div>
           <ReviewsCarousel />

@@ -49,7 +49,7 @@ async function main() {
   await prisma.announcementMessage.deleteMany();
   await prisma.announcementMessage.createMany({
     data: [
-      { message: "🏏 Official IPL 2025 Jerseys Now Live — Shop Before Stock Runs Out!", ctaText: "Shop Now", ctaUrl: "/products?sport=CRICKET", isActive: true, sortOrder: 1 },
+      { message: "🏏 Official IPL 2026 Jerseys Now Live — Shop Before Stock Runs Out!", ctaText: "Shop Now", ctaUrl: "/products?sport=CRICKET", isActive: true, sortOrder: 1 },
       { message: "Free delivery on orders above ₹499 · Easy 7-day returns", isActive: true, sortOrder: 2 },
       { message: "⚡ Use code TRYBY10 for 10% off your first order", isActive: true, sortOrder: 3 },
     ],
@@ -152,7 +152,7 @@ async function main() {
         secondaryCtaUrl: "/products?filter=sale",
         desktopImageUrl: "/hero-desktop.png",
         mobileImageUrl: "/hero-mobile.png",
-        badgeText: "New Season 2025",
+        badgeText: "New Season 2026",
         showBadge: true,
       },
     },
@@ -205,14 +205,13 @@ async function main() {
             ],
           },
           {
-            heading: "Support",
+            heading: "Help",
             links: [
-              { label: "Track Order",   url: "/orders/track" },
-              { label: "Returns",       url: "/returns" },
-              { label: "Size Guide",    url: "/size-guide" },
-              { label: "Contact Us",    url: "/contact" },
-              { label: "FAQ",           url: "/faq" },
-              { label: "Shipping Info", url: "/shipping" },
+              { label: "FAQ",               url: "/faq" },
+              { label: "Shipping Policy",   url: "/shipping" },
+              { label: "Returns & Refunds", url: "/returns" },
+              { label: "Track My Order",    url: "/orders" },
+              { label: "Contact Us",        url: "/contact" },
             ],
           },
           {
@@ -220,16 +219,15 @@ async function main() {
             links: [
               { label: "About TRYBY",     url: "/about" },
               { label: "Partner Program", url: "/supplier/apply" },
-              { label: "Careers",         url: "/careers" },
-              { label: "Blog",            url: "/blog" },
             ],
           },
           {
             heading: "Legal",
             links: [
-              { label: "Privacy Policy",   url: "/privacy" },
-              { label: "Terms of Service", url: "/terms" },
-              { label: "Refund Policy",    url: "/refund-policy" },
+              { label: "Privacy Policy",     url: "/privacy-policy" },
+              { label: "Terms & Conditions", url: "/terms" },
+              { label: "Cookie Policy",      url: "/cookies" },
+              { label: "Disclaimer",         url: "/disclaimer" },
             ],
           },
         ],

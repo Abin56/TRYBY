@@ -8,6 +8,8 @@ import {
   ChevronDown, CheckCircle2, Clock, AlertTriangle, Filter,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { describeFetchError } from "@/lib/api";
+import { FetchError } from "@/components/ui/fetch-error";
 
 const STORE_API = process.env.NEXT_PUBLIC_STORE_URL ?? "http://localhost:3000";
 
@@ -470,6 +472,7 @@ export default function CampaignsPage() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [total,     setTotal]     = useState(0);
   const [loading,   setLoading]   = useState(true);
+  const [error,     setError]     = useState<string | null>(null);
   const [creating,  setCreating]  = useState(false);
   const [typeFilter,setTypeFilter]= useState<CampaignType | "ALL">("ALL");
   const [statusFilter, setStatusFilter] = useState<CampaignStatus | "ALL">("ALL");
@@ -477,6 +480,7 @@ export default function CampaignsPage() {
 
   const load = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const params = new URLSearchParams();
       if (typeFilter !== "ALL")   params.set("type",   typeFilter);
@@ -485,7 +489,7 @@ export default function CampaignsPage() {
       const data = await res.json();
       setCampaigns(data.campaigns ?? []);
       setTotal(data.total ?? 0);
-    } catch { /* show empty state */ }
+    } catch (err) { setError(describeFetchError(err)); }
     finally { setLoading(false); }
   }, [typeFilter, statusFilter]);
 
@@ -531,6 +535,8 @@ export default function CampaignsPage() {
           </button>
         </div>
       </div>
+
+      {error && <FetchError message={error} onRetry={load} loading={loading} />}
 
       {/* KPI bar */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
+import { normalizeCourierAddress } from "@/lib/shipping";
 
 const schema = z.object({
   type: z.enum(["SHIPPING", "BILLING"]).default("SHIPPING"),
@@ -39,6 +40,13 @@ export async function POST(req: NextRequest) {
 
   const data = body.data;
 
+  // Reconcile state/city/pincode against the pincode at the source, so the wrong
+  // state the form sometimes submits (e.g. Karnataka for a Kerala pincode) is
+  // corrected once here instead of breaking courier serviceability later. This
+  // only corrects a state that is clearly wrong for the pincode — it never
+  // applies a hardcoded/default state.
+  const norm = normalizeCourierAddress({ city: data.city, state: data.state, pincode: data.pincode });
+
   // If setting as default, unset all existing defaults of same type
   if (data.isDefault) {
     await prisma.address.updateMany({
@@ -48,7 +56,7 @@ export async function POST(req: NextRequest) {
   }
 
   const address = await prisma.address.create({
-    data: { ...data, userId: session.user.id },
+    data: { ...data, city: norm.city, state: norm.state, pincode: norm.pincode, userId: session.user.id },
   });
   return NextResponse.json(address, { status: 201 });
 }

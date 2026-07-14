@@ -89,7 +89,7 @@ export function AboutHero() {
           >
             {[
               { icon: ShieldCheck, label: "Official Licensed Products", color: "#059669", bg: "#F0FDF4", border: "#BBF7D0" },
-              { icon: TrendingUp, label: "50,000+ Active Buyers", color: "#2563EB", bg: "#EFF6FF", border: "#BFDBFE" },
+              { icon: TrendingUp, label: "Pan-India Delivery", color: "#2563EB", bg: "#EFF6FF", border: "#BFDBFE" },
               { icon: Zap, label: "Founded 2026", color: "#FF3B30", bg: "#FFF5F4", border: "#FECACA" },
             ].map(({ icon: Icon, label, color, bg, border }) => (
               <span
@@ -111,7 +111,7 @@ export function AboutHero() {
             className="flex flex-col sm:flex-row gap-3"
           >
             <Link
-              href="/partners"
+              href="/supplier/apply"
               className="shimmer-btn inline-flex items-center justify-center gap-2 rounded-xl bg-[#FF3B30] px-6 py-3 text-sm font-bold text-white uppercase tracking-wide shadow-[0_2px_8px_rgba(255,59,48,0.35)] hover:bg-[#E5352B] hover:shadow-[0_4px_16px_rgba(255,59,48,0.45)] hover:-translate-y-0.5 transition-all duration-150"
             >
               Become a Supplier

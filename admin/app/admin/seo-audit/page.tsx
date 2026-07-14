@@ -8,6 +8,8 @@ import {
   ExternalLink, ShieldCheck, BarChart3, Zap, Eye,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { describeFetchError } from "@/lib/api";
+import { FetchError } from "@/components/ui/fetch-error";
 
 const STORE_URL = process.env.NEXT_PUBLIC_STORE_URL ?? "http://localhost:3000";
 const SITE_URL  = "https://www.tryby.in";
@@ -618,14 +620,18 @@ const CATEGORY_ICONS: Record<string, React.ElementType> = {
 export default function SEOAuditPage() {
   const [result,   setResult]   = useState<AuditResult | null>(null);
   const [loading,  setLoading]  = useState(false);
+  const [error,    setError]    = useState<string | null>(null);
   const [tab,      setTab]      = useState<"checks" | "pages" | "products">("checks");
   const [category, setCategory] = useState("All");
 
   const run = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const r = await runAudit();
       setResult(r);
+    } catch (err) {
+      setError(describeFetchError(err));
     } finally {
       setLoading(false);
     }
@@ -672,6 +678,8 @@ export default function SEOAuditPage() {
           Re-run audit
         </button>
       </div>
+
+      {error && <FetchError message={error} onRetry={run} loading={loading} />}
 
       {/* Score + summary */}
       <AnimatePresence mode="wait">

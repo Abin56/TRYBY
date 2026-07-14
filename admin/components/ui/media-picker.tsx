@@ -6,6 +6,8 @@ import {
   Image as ImageIcon, Search, X, Check, Upload, Loader2, ZoomIn, Filter,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { describeFetchError } from "@/lib/api";
+import { FetchError } from "@/components/ui/fetch-error";
 
 const STORE_API = process.env.NEXT_PUBLIC_STORE_URL ?? "http://localhost:3000";
 
@@ -55,10 +57,12 @@ export function MediaPicker({ value, onChange, label = "Image", hint, accept }: 
   const [pages, setPages] = useState(1);
   const [selected, setSelected] = useState<MediaAsset | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const params = new URLSearchParams({ page: String(page), limit: "24" });
       if (typeFilter) params.set("type", typeFilter);
@@ -67,6 +71,9 @@ export function MediaPicker({ value, onChange, label = "Image", hint, accept }: 
       const data = await res.json();
       setAssets(data.assets ?? []);
       setPages(data.pages ?? 1);
+    } catch (err) {
+      // Store API unreachable / blocked — surface instead of crashing the picker.
+      setError(describeFetchError(err));
     } finally {
       setLoading(false);
     }
@@ -88,7 +95,11 @@ export function MediaPicker({ value, onChange, label = "Image", hint, accept }: 
         const asset = await res.json();
         setAssets((prev) => [asset, ...prev]);
         setSelected(asset);
+      } else {
+        setError(`Upload failed (HTTP ${res.status}).`);
       }
+    } catch (err) {
+      setError(describeFetchError(err));
     } finally {
       setUploading(false);
     }
@@ -201,6 +212,11 @@ export function MediaPicker({ value, onChange, label = "Image", hint, accept }: 
 
               {/* Grid */}
               <div className="flex-1 overflow-y-auto p-5">
+                {error && (
+                  <div className="mb-4">
+                    <FetchError message={error} onRetry={load} loading={loading} />
+                  </div>
+                )}
                 {loading ? (
                   <div className="flex justify-center py-16"><Loader2 className="h-5 w-5 animate-spin text-[#9CA3AF]" /></div>
                 ) : assets.length === 0 ? (

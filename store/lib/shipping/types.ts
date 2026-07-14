@@ -21,6 +21,11 @@ export interface ServiceabilityResult {
   estimatedDays: number | null;
   quotes:        CourierQuote[];
   reason?:       string;           // if not serviceable
+  // ── Deterministic-layer status fields (additive; existing consumers read
+  //    `serviceable`/`reason`, these mirror them for spec-style { success, message }) ──
+  success?:      boolean;          // mirrors `serviceable`
+  message?:      string;           // human-readable status (mirrors `reason` when set)
+  fallback?:     boolean;          // true when serviceable via the no-live-quotes fallback
 }
 
 export interface CreateShipmentInput {

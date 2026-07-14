@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Save, Search, Globe, AlertCircle, CheckCircle2, Loader2,
   Eye, EyeOff, ChevronDown, ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { describeFetchError } from "@/lib/api";
+import { FetchError } from "@/components/ui/fetch-error";
 
 const STORE_API = process.env.NEXT_PUBLIC_STORE_URL ?? "http://localhost:3000";
 
@@ -258,14 +260,19 @@ function PageSEOEditor({
 export default function SEOPage() {
   const [settings, setSettings] = useState<SiteSettings[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [activeKey, setActiveKey] = useState(PAGES[0].key);
 
-  useEffect(() => {
+  const load = useCallback(() => {
+    setLoading(true);
+    setError(null);
     fetch(`${STORE_API}/api/admin/seo`, { credentials: "include" })
       .then(r => r.json())
       .then((data: SiteSettings[]) => { setSettings(data); setLoading(false); })
-      .catch(() => setLoading(false));
+      .catch((err) => { setError(describeFetchError(err)); setLoading(false); });
   }, []);
+
+  useEffect(() => { load(); }, [load]);
 
   const onSaved = (s: SiteSettings) => {
     setSettings(prev =>
@@ -284,6 +291,8 @@ export default function SEOPage() {
         <h1 className="text-xl font-extrabold text-[#111827]">SEO Manager</h1>
         <p className="text-sm text-[#9CA3AF]">Manage meta tags, Open Graph and indexing per page</p>
       </div>
+
+      {error && <FetchError message={error} onRetry={load} loading={loading} />}
 
       <div className="grid lg:grid-cols-[220px_1fr] gap-6">
         {/* Page list */}

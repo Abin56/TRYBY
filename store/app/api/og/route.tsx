@@ -185,7 +185,7 @@ export async function GET() {
           {/* Trust stats row */}
           <div style={{ display: "flex", gap: "32px" }}>
             {[
-              { val: "25K+", label: "Orders Delivered" },
+              { val: "2–5", label: "Day Delivery" },
               { val: "7-Day", label: "Easy Returns" },
               { val: "100%", label: "Secure Payments" },
             ].map(({ val, label }) => (

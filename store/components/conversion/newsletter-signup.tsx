@@ -19,7 +19,7 @@ export function NewsletterSignup({
   variant  = "inline",
   source   = "homepage",
   title    = "Get exclusive deals & new arrivals",
-  subtitle = "Join 18,000+ sports fans. No spam, ever.",
+  subtitle = "Be first to know about new drops & flash sales. No spam, ever.",
   className,
 }: NewsletterSignupProps) {
   const [email,   setEmail]   = useState("");

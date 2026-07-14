@@ -14,6 +14,10 @@ import type {
   CreateShipmentInput, CreateShipmentResult,
   TrackShipmentResult, GenerateLabelResult, CancelShipmentResult,
 } from "./types";
+import {
+  normalizePincode, normalizeCourierAddress,
+  logCourierRequest, logCourierResponse,
+} from "./serviceability";
 
 const BASE_URL = "https://apiv2.shiprocket.in/v1/external";
 
@@ -134,15 +138,17 @@ export class ShiprocketProvider implements ShippingProvider {
   ): Promise<ServiceabilityResult> {
     try {
       const params = new URLSearchParams({
-        pickup_postcode:   fromPincode,
-        delivery_postcode: toPincode,
+        pickup_postcode:   normalizePincode(fromPincode) ?? fromPincode,
+        delivery_postcode: normalizePincode(toPincode) ?? toPincode,
         weight:            String(kgFromGrams(weightGrams)),
         cod:               isCOD ? "1" : "0",
         declared_value:    String(orderValue),
       });
 
+      logCourierRequest("shiprocket", "serviceability", Object.fromEntries(params));
       const res  = await srFetch(`/courier/serviceability/?${params}`);
       const data = await res.json();
+      logCourierResponse("shiprocket", "serviceability", res.status, data);
 
       if (!res.ok || data.status !== 200) {
         return {
@@ -206,6 +212,10 @@ export class ShiprocketProvider implements ShippingProvider {
     try {
       const creds = await resolveCredentials().catch(() => ({ pickupLocation: "Primary" }));
 
+      // Reconcile state/city/pincode against the destination pincode so we never
+      // ship with a wrong/defaulted state (e.g. Karnataka on a Kerala pincode).
+      const addr = normalizeCourierAddress({ city: input.city, state: input.state, pincode: input.pincode });
+
       const body = {
         order_id:              input.orderNumber,
         order_date:            new Date().toISOString().slice(0, 10),
@@ -213,9 +223,9 @@ export class ShiprocketProvider implements ShippingProvider {
         billing_customer_name: input.customerName,
         billing_last_name:     "",
         billing_address:       input.address,
-        billing_city:          input.city,
-        billing_pincode:       input.pincode,
-        billing_state:         input.state,
+        billing_city:          addr.city,
+        billing_pincode:       addr.pincode,
+        billing_state:         addr.state,
         billing_country:       "India",
         billing_email:         input.customerEmail ?? "",
         billing_phone:         input.customerPhone,
@@ -236,8 +246,10 @@ export class ShiprocketProvider implements ShippingProvider {
         ...(input.courierId ? { courier_id: input.courierId } : {}),
       };
 
+      logCourierRequest("shiprocket", "create-order", body);
       const res  = await srFetch("/orders/create/adhoc", { method: "POST", body: JSON.stringify(body) });
       const data = await res.json();
+      logCourierResponse("shiprocket", "create-order", res.status, data);
 
       if (!res.ok || !data.order_id) {
         return { success: false, error: data.message ?? "Shiprocket order creation failed", rawResponse: data };

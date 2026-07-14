@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import { formatRelative } from "@/lib/format";
 import { cn } from "@/lib/cn";
+import { describeFetchError } from "@/lib/api";
+import { FetchError } from "@/components/ui/fetch-error";
 
 const STORE_API = process.env.NEXT_PUBLIC_STORE_URL ?? "http://localhost:3000";
 
@@ -107,15 +109,19 @@ const ACTION_LABELS: Record<string, string> = {
 export default function SystemPage() {
   const [data,     setData]    = useState<SystemData | null>(null);
   const [loading,  setLoading] = useState(true);
+  const [error,    setError]   = useState<string | null>(null);
   const [lastFetch, setLastFetch] = useState<Date | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const res = await fetch(`${STORE_API}/api/admin/system`, { credentials: "include" });
       const d   = await res.json();
       setData(d);
       setLastFetch(new Date());
+    } catch (err) {
+      setError(describeFetchError(err));
     } finally {
       setLoading(false);
     }
@@ -154,6 +160,8 @@ export default function SystemPage() {
           </button>
         </div>
       </div>
+
+      {error && <FetchError message={error} onRetry={load} loading={loading} />}
 
       {/* ── DB Status banner ── */}
       {loading && !data ? (

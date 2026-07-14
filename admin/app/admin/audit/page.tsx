@@ -8,6 +8,8 @@ import {
 } from "lucide-react";
 import { formatDate, formatRelative } from "@/lib/format";
 import { cn } from "@/lib/cn";
+import { describeFetchError } from "@/lib/api";
+import { FetchError } from "@/components/ui/fetch-error";
 
 const STORE_API = process.env.NEXT_PUBLIC_STORE_URL ?? "http://localhost:3000";
 
@@ -81,6 +83,7 @@ function ActionBadge({ action }: { action: string }) {
 export default function AuditPage() {
   const [data,    setData]    = useState<AuditData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error,   setError]   = useState<string | null>(null);
   const [search,  setSearch]  = useState("");
   const [resource,setResource]= useState("");
   const [page,    setPage]    = useState(1);
@@ -88,12 +91,15 @@ export default function AuditPage() {
 
   const load = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const params = new URLSearchParams({ page: String(page) });
       if (search)   params.set("q", search);
       if (resource) params.set("resource", resource);
       const res = await fetch(`${STORE_API}/api/admin/audit?${params}`, { credentials: "include" });
       setData(await res.json());
+    } catch (err) {
+      setError(describeFetchError(err));
     } finally {
       setLoading(false);
     }
@@ -123,6 +129,9 @@ export default function AuditPage() {
           <RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} />
         </button>
       </div>
+
+      {/* Error banner — shown when the store API can't be reached or returns an error */}
+      {error && <FetchError message={error} onRetry={load} loading={loading} />}
 
       {/* Toolbar */}
       <div className="flex flex-wrap gap-2">

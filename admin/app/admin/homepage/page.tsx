@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence, Reorder } from "framer-motion";
 import {
   GripVertical, Eye, EyeOff, Save, Loader2, CheckCircle2,
   AlertCircle, LayoutDashboard, ChevronRight, ExternalLink,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { describeFetchError } from "@/lib/api";
+import { FetchError } from "@/components/ui/fetch-error";
 
 const STORE_API = process.env.NEXT_PUBLIC_STORE_URL ?? "http://localhost:3000";
 
@@ -163,17 +165,29 @@ interface ContentBlock {
 function ContentBlocksPanel() {
   const [blocks, setBlocks] = useState<ContentBlock[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetch(`${STORE_API}/api/admin/content`, { credentials: "include" })
-      .then((r) => r.json())
-      .then((data: ContentBlock[]) => { setBlocks(data); setLoading(false); })
-      .catch(() => setLoading(false));
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`${STORE_API}/api/admin/content`, { credentials: "include" });
+      const data: ContentBlock[] = await res.json();
+      setBlocks(data);
+    } catch (err) {
+      setError(describeFetchError(err));
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => { load(); }, [load]);
 
   const updateStatus = (key: string, status: "DRAFT" | "PUBLISHED") => {
     setBlocks((prev) => prev.map((b) => b.key === key ? { ...b, status } : b));
   };
+
+  if (error) return <FetchError message={error} onRetry={load} loading={loading} />;
 
   if (loading) return <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-[#9CA3AF]" /></div>;
 

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Barlow_Condensed } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/layout/navbar";
@@ -109,6 +109,17 @@ export const metadata: Metadata = {
   category: "sports",
 };
 
+// Explicit viewport (Next 16 `viewport` export). Matches the framework default
+// of device-width / initial-scale 1 but pins it intentionally for launch.
+// Zoom is deliberately left enabled (no maximumScale / userScalable:false) so
+// the page stays accessible — text inflation is handled via text-size-adjust
+// in globals.css, not by disabling pinch-zoom.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#0D0D0D",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -116,10 +127,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} ${barlow.variable} h-full antialiased`} data-scroll-behavior="smooth">
-      <head>
-        {/* theme-color — browser chrome on mobile */}
-        <meta name="theme-color" content="#0D0D0D" />
-      </head>
       <body className="bg-white text-[#111827] min-h-full flex flex-col overflow-x-hidden">
         <a
           href="#main-content"

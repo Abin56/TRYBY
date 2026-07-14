@@ -12,6 +12,10 @@ import type {
   CreateShipmentInput, CreateShipmentResult,
   TrackShipmentResult, GenerateLabelResult, CancelShipmentResult,
 } from "./types";
+import {
+  normalizePincode, normalizeCourierAddress,
+  logCourierRequest, logCourierResponse,
+} from "./serviceability";
 
 function getBase(): string {
   return process.env.DELHIVERY_API_BASE ?? "https://express.delhivery.com";
@@ -50,15 +54,17 @@ export class DelhiveryProvider implements ShippingProvider {
       const params = new URLSearchParams({
         md:     "S",                             // Surface mode
         ss:     "Delivered",
-        d_pin:  toPincode,
-        o_pin:  _fromPincode,
+        d_pin:  normalizePincode(toPincode) ?? toPincode,
+        o_pin:  normalizePincode(_fromPincode) ?? _fromPincode,
         cgm:    String(Math.ceil(weightGrams)),  // weight in grams
         pt:     isCOD ? "COD" : "Pre-paid",
         cod:    isCOD ? "Y" : "N",
       });
 
+      logCourierRequest("delhivery", "serviceability", Object.fromEntries(params));
       const res  = await dlFetch(`/api/kinko/v1/invoice/charges/.json?${params}`);
       const data = await res.json();
+      logCourierResponse("delhivery", "serviceability", res.status, data);
 
       if (!res.ok || !data.success) {
         return { serviceable: false, codAvailable: false, estimatedDays: null, quotes: [], reason: data.error ?? "Not serviceable" };
@@ -98,6 +104,10 @@ export class DelhiveryProvider implements ShippingProvider {
       const awb = waybillData.waybill_list?.[0] ?? waybillData.waybill;
       if (!awb) return { success: false, error: "Could not allocate waybill", rawResponse: waybillData };
 
+      // Reconcile state/city/pincode against the destination pincode so we never
+      // ship with a wrong/defaulted state (e.g. Karnataka on a Kerala pincode).
+      const addr = normalizeCourierAddress({ city: input.city, state: input.state, pincode: input.pincode });
+
       // Step 2: Create shipment
       const shipData = {
         format:  "json",
@@ -105,9 +115,9 @@ export class DelhiveryProvider implements ShippingProvider {
           shipments: [{
             name:             input.customerName,
             add:              input.address,
-            pin:              input.pincode,
-            city:             input.city,
-            state:            input.state,
+            pin:              addr.pincode,
+            city:             addr.city,
+            state:            addr.state,
             country:          "India",
             phone:            input.customerPhone,
             order:            input.orderNumber,
@@ -139,6 +149,7 @@ export class DelhiveryProvider implements ShippingProvider {
         }),
       };
 
+      logCourierRequest("delhivery", "create-shipment", JSON.parse(shipData.data));
       const form = new URLSearchParams(shipData);
       const res  = await fetch(`${getBase()}/api/cmu/create.json`, {
         method:  "POST",
@@ -146,6 +157,7 @@ export class DelhiveryProvider implements ShippingProvider {
         body:    form,
       });
       const data = await res.json();
+      logCourierResponse("delhivery", "create-shipment", res.status, data);
 
       const packages = data.packages ?? [];
       if (!packages.length || packages[0].status !== "Success") {

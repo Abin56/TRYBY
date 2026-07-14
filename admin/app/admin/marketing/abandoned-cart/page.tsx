@@ -7,6 +7,8 @@ import {
   TrendingUp, Clock, CheckCircle2, XCircle, AlertTriangle, Send,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { describeFetchError } from "@/lib/api";
+import { FetchError } from "@/components/ui/fetch-error";
 
 const STORE_API = process.env.NEXT_PUBLIC_STORE_URL ?? "http://localhost:3000";
 
@@ -144,11 +146,13 @@ export default function AbandonedCartPage() {
   const [carts,   setCarts]   = useState<AbandonedCart[]>([]);
   const [summary, setSummary] = useState<Summary | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error,   setError]   = useState<string | null>(null);
   const [statusFilter, setFilter] = useState<AbandonedCartStatus | "ALL">("ALL");
   const [recovering, setRecovering] = useState<AbandonedCart | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const params = new URLSearchParams();
       if (statusFilter !== "ALL") params.set("status", statusFilter);
@@ -156,7 +160,7 @@ export default function AbandonedCartPage() {
       const data = await res.json();
       setCarts(data.carts ?? []);
       setSummary(data.summary ?? null);
-    } catch { /* empty state */ }
+    } catch (err) { setError(describeFetchError(err)); }
     finally { setLoading(false); }
   }, [statusFilter]);
 
@@ -177,6 +181,8 @@ export default function AbandonedCartPage() {
           <RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} />
         </button>
       </div>
+
+      {error && <FetchError message={error} onRetry={load} loading={loading} />}
 
       {/* Summary KPIs */}
       {summary && (

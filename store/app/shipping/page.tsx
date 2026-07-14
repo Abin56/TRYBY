@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   alternates: { canonical: `${BASE}/shipping` },
   openGraph: {
     title: "Shipping Policy | TRYBY Sports",
-    description: "Standard delivery 3–5 days (₹49), Express 1–2 days (₹149). Free shipping on orders ₹499+. Pan-India — 25,000+ pincodes.",
+    description: "Standard delivery 3–5 days (₹49), Express 1–2 days (₹149). Free shipping on orders ₹499+. Pan-India delivery via trusted courier partners.",
     url: `${BASE}/shipping`,
     siteName: "TRYBY Sports",
     type: "website",
@@ -34,7 +34,7 @@ const SHIPPING_CARDS = [
       { label: "Estimated Time", value: "3–5 business days" },
       { label: "Shipping Cost", value: "₹49" },
       { label: "Free Shipping", value: "Orders above ₹499" },
-      { label: "Coverage", value: "Pan-India (25,000+ pincodes)" },
+      { label: "Coverage", value: "Pan-India" },
     ],
   },
   {
@@ -103,7 +103,7 @@ export default function ShippingPage() {
             {
               icon: "📍",
               title: "Delivery Coverage",
-              body: "We deliver pan-India to 25,000+ serviceable pincodes via our courier partners. Some remote or rural pincodes may not be serviceable or may experience additional delays of 1–3 business days. You can verify deliverability at checkout by entering your pincode. Delivery to J&K, Northeast states, and Andaman & Nicobar Islands may take additional time.",
+              body: "We deliver pan-India via our courier partners. Some remote or rural pincodes may not be serviceable or may experience additional delays of 1–3 business days. You can verify deliverability at checkout by entering your pincode. Delivery to J&K, Northeast states, and Andaman & Nicobar Islands may take additional time.",
             },
             {
               icon: "🔍",

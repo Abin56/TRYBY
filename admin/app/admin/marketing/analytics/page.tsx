@@ -11,6 +11,8 @@ import {
   Tooltip, ResponsiveContainer, CartesianGrid,
 } from "recharts";
 import { cn } from "@/lib/cn";
+import { describeFetchError } from "@/lib/api";
+import { FetchError } from "@/components/ui/fetch-error";
 
 const STORE_API = process.env.NEXT_PUBLIC_STORE_URL ?? "http://localhost:3000";
 
@@ -93,17 +95,20 @@ const TYPE_COLOR: Record<string, string> = {
 export default function MarketingAnalyticsPage() {
   const [data,    setData]    = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error,   setError]   = useState<string | null>(null);
   const [period,  setPeriod]  = useState<Period>(30);
 
   const load = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const res = await fetch(`${STORE_API}/api/admin/marketing-analytics?days=${period}`, { credentials: "include" });
       if (!res.ok) throw new Error("API error");
       const d = await res.json();
       setData(d);
-    } catch {
+    } catch (err) {
       setData(buildFallback(period));
+      setError(describeFetchError(err));
     } finally {
       setLoading(false);
     }
@@ -157,6 +162,8 @@ export default function MarketingAnalyticsPage() {
           </button>
         </div>
       </div>
+
+      {error && <FetchError message={error} onRetry={load} loading={loading} />}
 
       {loading ? (
         <div className="flex justify-center py-20"><Loader2 className="h-6 w-6 animate-spin text-[#9CA3AF]" /></div>

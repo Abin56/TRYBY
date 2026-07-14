@@ -7,7 +7,7 @@ import { ArrowRight, CheckCircle } from "lucide-react";
 
 const PERKS = [
   "Zero upfront listing fees",
-  "Access to 50,000+ verified buyers",
+  "Access to a fast-growing base of verified buyers",
   "Real-time inventory management",
   "Official certification badge on listings",
   "Dedicated supplier support team",
@@ -48,7 +48,7 @@ export function PartnerWithTRYBYSection() {
               </span>
             </h2>
             <p className="text-[#A0A0A0] text-base leading-relaxed max-w-xl mb-8">
-              Join India&apos;s fastest-growing sports marketplace. List your gear, reach sport buyers,
+              Join TRYBY, a premium sports marketplace built for India. List your gear, reach sport buyers,
               and grow your brand with zero risk.
             </p>
 
@@ -88,10 +88,10 @@ export function PartnerWithTRYBYSection() {
             className="grid grid-cols-2 gap-4"
           >
             {[
-              { value: "50K+", label: "Active Buyers", sub: "Verified sports enthusiasts", emoji: "🏅" },
+              { value: "48h",  label: "Onboarding",   sub: "Quick supplier setup", emoji: "🏅" },
               { value: "2-5",  label: "Days Delivery", sub: "Pan-India coverage", emoji: "🚚" },
               { value: "₹0",   label: "Listing Fee",   sub: "Pay only when you sell", emoji: "💰" },
-              { value: "98%",  label: "Payout Rate",   sub: "On-time every cycle", emoji: "✅" },
+              { value: "Weekly", label: "Payouts",     sub: "Direct bank transfer", emoji: "✅" },
             ].map((stat, i) => (
               <motion.div
                 key={stat.label}

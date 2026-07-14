@@ -302,6 +302,11 @@
 html {
   scroll-behavior: smooth;
   overflow-x: hidden; /* prevent horizontal scroll on any page */
+  /* Stop mobile browsers (iOS Safari / Chrome) from auto-inflating text in
+     landscape and on high-DPI screens — the root cause of the "zoomed-in /
+     scaled-up" feel. Pins text to the author-specified sizes at all widths. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {

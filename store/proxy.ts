@@ -5,6 +5,53 @@ import { authConfig } from "@/lib/auth.config";
 // Edge-safe auth — no Prisma, no bcrypt.
 const { auth } = NextAuth(authConfig);
 
+// ── CORS for the separate admin dashboard app ──────────────────────────────
+// The admin dashboard is its own Next.js app on a DIFFERENT origin and calls
+// /api/admin/* with `credentials: "include"`. A credentialed cross-origin
+// request only succeeds when the response echoes the EXACT caller origin in
+// `Access-Control-Allow-Origin` (never `*`) plus
+// `Access-Control-Allow-Credentials: true`, and preflight OPTIONS is answered;
+// otherwise the browser rejects `fetch()` with "Failed to fetch". next.config
+// `headers()` can't echo a dynamic origin, so we do it here.
+//
+// Only origins in ADMIN_ORIGINS are trusted (comma-separated; set in prod to the
+// admin URL, e.g. "https://admin.tryby.in"). Default covers local dev where the
+// store runs on :3000 and the admin app auto-picks :3001.
+const ADMIN_ALLOWED_ORIGINS = (process.env.ADMIN_ORIGINS ?? "http://localhost:3001,http://127.0.0.1:3001")
+  .split(",")
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+function withAdminCors(req: NextRequest): NextResponse {
+  const origin    = req.headers.get("origin") ?? "";
+  const isAllowed = ADMIN_ALLOWED_ORIGINS.includes(origin);
+
+  // Preflight — answer directly so the browser proceeds to the real request.
+  if (req.method === "OPTIONS") {
+    const headers = new Headers({
+      "Access-Control-Allow-Methods": "GET,POST,PUT,PATCH,DELETE,OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type,Authorization",
+      "Access-Control-Max-Age":       "86400",
+      "Vary":                         "Origin",
+    });
+    if (isAllowed) {
+      headers.set("Access-Control-Allow-Origin", origin);
+      headers.set("Access-Control-Allow-Credentials", "true");
+    }
+    return new NextResponse(null, { status: 204, headers });
+  }
+
+  // Actual request — pass through to the route handler, attaching CORS headers
+  // for trusted origins only (untrusted/same-origin get none, which is correct).
+  const res = NextResponse.next();
+  res.headers.set("Vary", "Origin");
+  if (isAllowed) {
+    res.headers.set("Access-Control-Allow-Origin", origin);
+    res.headers.set("Access-Control-Allow-Credentials", "true");
+  }
+  return res;
+}
+
 // ── Maintenance mode check ─────────────────────────────────────────────────
 // Fetch cached status from our own API endpoint (60s ISR cache).
 
@@ -87,6 +134,13 @@ function getClientIp(req: NextRequest): string {
 export default auth(async (req) => {
   const { pathname } = req.nextUrl;
   const session = req.auth;
+
+  // Cross-origin admin dashboard API calls: handle CORS (incl. preflight) and
+  // short-circuit before the maintenance/auth-guard logic, which only applies
+  // to store page routes. The /api/admin/* route handlers enforce their own auth.
+  if (pathname.startsWith("/api/admin")) {
+    return withAdminCors(req);
+  }
 
   // Skip maintenance check for admin routes and the status API itself
   const isAdminRoute  = pathname.startsWith("/admin");
@@ -179,6 +233,8 @@ export default auth(async (req) => {
 
 export const config = {
   matcher: [
+    // Cross-origin CORS for the admin dashboard app (handled before guards)
+    "/api/admin/:path*",
     // Protect auth-gated routes
     "/auth/:path*",
     "/account/:path*",

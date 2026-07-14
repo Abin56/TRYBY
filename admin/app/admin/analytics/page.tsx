@@ -7,11 +7,11 @@ import {
 } from "recharts";
 import { formatPrice, formatCompact, formatNumber } from "@/lib/format";
 import { cn } from "@/lib/cn";
+import { fetchJson, describeFetchError } from "@/lib/api";
+import { FetchError } from "@/components/ui/fetch-error";
 import {
   ArrowUpRight, ArrowDownRight, AlertTriangle, RefreshCw, Package,
 } from "lucide-react";
-
-const STORE_API = process.env.NEXT_PUBLIC_STORE_URL ?? "http://localhost:3000";
 
 const PERIODS = ["7D", "14D", "30D", "90D"] as const;
 type Period = typeof PERIODS[number];
@@ -80,12 +80,19 @@ export default function AnalyticsPage() {
   const [period,  setPeriod]  = useState<Period>("30D");
   const [data,    setData]    = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error,   setError]   = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
-      const res = await fetch(`${STORE_API}/api/admin/analytics?days=${PERIOD_DAYS[period]}`, { credentials: "include" });
-      setData(await res.json());
+      setData(await fetchJson<AnalyticsData>(`/api/admin/analytics?days=${PERIOD_DAYS[period]}`));
+    } catch (err) {
+      // fetch() rejects with a TypeError ("Failed to fetch") when the store API
+      // is unreachable or blocks the cross-origin request — catch it here so it
+      // surfaces as an error state instead of an unhandled runtime crash.
+      setData(null);
+      setError(describeFetchError(err));
     } finally {
       setLoading(false);
     }
@@ -123,6 +130,9 @@ export default function AnalyticsPage() {
           </button>
         </div>
       </div>
+
+      {/* Error banner — shown when the store API can't be reached or returns an error */}
+      {error && <FetchError message={error} onRetry={load} loading={loading} />}
 
       {/* KPI cards */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">

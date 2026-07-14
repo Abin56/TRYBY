@@ -33,7 +33,7 @@ const supplierCards = [
 
 const benefits = [
   "Zero upfront cost — pay only on sales",
-  "Access to 50,000+ active sports buyers",
+  "Access to a fast-growing base of high-intent sports buyers",
   "Full logistics and payment infrastructure handled",
   "Dedicated account manager for your first 90 days",
   "Co-marketing opportunities on TRYBY channels",
@@ -70,7 +70,7 @@ export function AboutSupplierCTA() {
           </h2>
           <p className="text-base text-[#9CA3AF] max-w-xl mx-auto">
             We work with official distributors, brands, and manufacturers across India.
-            List your products on TRYBY and reach 50,000+ active sports buyers who are
+            List your products on TRYBY and reach high-intent sports buyers who are
             ready to buy.
           </p>
         </motion.div>
@@ -105,7 +105,7 @@ export function AboutSupplierCTA() {
 
             <div className="flex flex-col sm:flex-row gap-3">
               <Link
-                href="/partners"
+                href="/supplier/apply"
                 className="shimmer-btn inline-flex items-center justify-center gap-2 rounded-xl bg-[#FF3B30] px-6 py-3.5 text-sm font-bold text-white uppercase tracking-wide shadow-[0_2px_12px_rgba(255,59,48,0.40)] hover:bg-[#E5352B] hover:shadow-[0_4px_20px_rgba(255,59,48,0.50)] hover:-translate-y-0.5 transition-all duration-150"
               >
                 Become a Supplier
@@ -166,7 +166,7 @@ export function AboutSupplierCTA() {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
             <div className="text-center sm:text-left">
               <p className="text-sm font-bold text-white mb-0.5">
-                Already trusted by 50+ brands &amp; distributors
+                Now onboarding our founding brands &amp; distributors
               </p>
               <p className="text-xs text-[#6B7280]">
                 From official cricket gear distributors to independent gym equipment brands
@@ -174,9 +174,9 @@ export function AboutSupplierCTA() {
             </div>
             <div className="flex items-center gap-8">
               {[
-                { val: "₹2Cr+", lbl: "GMV Processed" },
-                { val: "50+", lbl: "Active Suppliers" },
-                { val: "4.8★", lbl: "Supplier Rating" },
+                { val: "0%", lbl: "Upfront Cost" },
+                { val: "Weekly", lbl: "Payouts" },
+                { val: "48 hrs", lbl: "Onboarding" },
               ].map(({ val, lbl }) => (
                 <div key={lbl} className="text-center">
                   <div

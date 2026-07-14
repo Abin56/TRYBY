@@ -8,12 +8,12 @@ import { trendingProducts } from "@/data/mock";
 import { cn } from "@/lib/cn";
 
 const TRENDING_SEARCHES = [
-  "Desk organizer",
-  "Posture corrector",
-  "Travel bags",
-  "LED lamp",
-  "Milk frother",
-  "Cable organizer",
+  "Cricket jersey",
+  "Football jersey",
+  "IPL jersey",
+  "Gym t-shirt",
+  "Running tee",
+  "Sports shorts",
 ];
 
 function formatPrice(n: number) {

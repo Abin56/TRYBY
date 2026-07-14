@@ -198,7 +198,7 @@ export function ReviewsSection() {
             id="reviews-heading"
             className="section-headline text-[clamp(28px,5vw,44px)] text-[#111827] mb-5"
           >
-            Trusted by 50,000+ Athletes.
+            Trusted by Athletes Across India.
           </h2>
           {/* Live badge — shows real DB data when available, falls back to nothing */}
           <LiveRatingBadge />

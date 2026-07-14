@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useCartStore } from "@/store/cart";
 import { cn } from "@/lib/cn";
+import { ServiceableAreasTest } from "@/components/shipping/serviceable-areas";
 
 type DeliveryMethod = "standard" | "express";
 
@@ -297,6 +298,9 @@ export default function CheckoutPage() {
                 {errors.form}
               </div>
             )}
+
+            {/* Test-only: visible list of mock serviceable areas (renders only in mock mode) */}
+            <ServiceableAreasTest />
 
             {/* Delivery address */}
             <div className="bg-white rounded-[20px] border border-[#ECECEC] overflow-hidden" style={{ boxShadow: "0 1px 12px rgba(0,0,0,0.04)" }}>

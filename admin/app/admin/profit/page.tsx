@@ -6,6 +6,8 @@ import {
 } from "lucide-react";
 import { formatPrice, formatNumber } from "@/lib/format";
 import { cn } from "@/lib/cn";
+import { describeFetchError } from "@/lib/api";
+import { FetchError } from "@/components/ui/fetch-error";
 
 const STORE_API = process.env.NEXT_PUBLIC_STORE_URL ?? "http://localhost:3000";
 
@@ -137,13 +139,17 @@ function ProductTable({ products, title, variant }: {
 export default function ProfitPage() {
   const [data,    setData]    = useState<ProfitData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error,   setError]   = useState<string | null>(null);
   const [days,    setDays]    = useState<DaysOpt>(30);
 
   const load = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const res = await fetch(`${STORE_API}/api/admin/profit?days=${days}`, { credentials: "include" });
       setData(await res.json());
+    } catch (err) {
+      setError(describeFetchError(err));
     } finally {
       setLoading(false);
     }
@@ -173,6 +179,8 @@ export default function ProfitPage() {
           </button>
         </div>
       </div>
+
+      {error && <FetchError message={error} onRetry={load} loading={loading} />}
 
       {/* Alerts */}
       {data && (data.alerts.missingCost > 0 || data.alerts.lowStock > 0) && (

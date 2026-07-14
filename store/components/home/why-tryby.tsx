@@ -5,10 +5,10 @@ import { useRef, useState, useEffect } from "react";
 import { ShieldCheck, Truck, IndianRupee, RefreshCcw } from "lucide-react";
 
 const STATS = [
-  { value: 50000, suffix: "+", label: "Orders Shipped" },
-  { value: 27000, suffix: "+", label: "Pincodes Served" },
-  { value: 98, suffix: "%", label: "Customer Satisfaction" },
+  { value: 2, suffix: "–5 Days", label: "Pan-India Delivery" },
   { value: 7, suffix: "-Day", label: "Easy Returns" },
+  { value: 4, suffix: "", label: "Sport Categories" },
+  { value: 100, suffix: "%", label: "Secure Payments" },
 ];
 
 const WHY_ITEMS = [
@@ -24,7 +24,7 @@ const WHY_ITEMS = [
     color: "#2196F3",
     bg: "rgba(33,150,243,0.08)",
     title: "Fast Pan-India Delivery",
-    desc: "Reach 27,000+ pincodes in 2-5 days. Express shipping available.",
+    desc: "Fast nationwide shipping in 2–5 days. Express delivery available.",
   },
   {
     icon: IndianRupee,

@@ -10,6 +10,8 @@ import {
 import { Drawer } from "@/components/ui/drawer";
 import { formatDate, formatRelative } from "@/lib/format";
 import { cn } from "@/lib/cn";
+import { describeFetchError } from "@/lib/api";
+import { FetchError } from "@/components/ui/fetch-error";
 
 const STORE_API = process.env.NEXT_PUBLIC_STORE_URL ?? "http://localhost:3000";
 
@@ -404,6 +406,7 @@ export default function UsersPage() {
   const [members,  setMembers]  = useState<TeamMember[]>([]);
   const [total,    setTotal]    = useState(0);
   const [loading,  setLoading]  = useState(true);
+  const [error,    setError]    = useState<string | null>(null);
   const [search,   setSearch]   = useState("");
   const [roleFilter, setRole]   = useState<AdminRole | "">("");
   const [creating, setCreating] = useState(false);
@@ -411,6 +414,7 @@ export default function UsersPage() {
 
   const load = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const params = new URLSearchParams({ page: "1" });
       if (search) params.set("q", search);
@@ -419,6 +423,8 @@ export default function UsersPage() {
       const data = await res.json();
       setMembers(data.members ?? []);
       setTotal(data.total ?? 0);
+    } catch (err) {
+      setError(describeFetchError(err));
     } finally {
       setLoading(false);
     }
@@ -446,6 +452,9 @@ export default function UsersPage() {
           <UserPlus className="h-3.5 w-3.5" /> Add Admin
         </button>
       </div>
+
+      {/* Error banner — shown when the store API can't be reached or returns an error */}
+      {error && <FetchError message={error} onRetry={load} loading={loading} />}
 
       {/* Role summary chips */}
       <div className="flex flex-wrap gap-2">

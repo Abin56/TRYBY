@@ -9,6 +9,8 @@ import {
   XCircle, Plus, ChevronDown,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { describeFetchError } from "@/lib/api";
+import { FetchError } from "@/components/ui/fetch-error";
 
 const STORE_API = process.env.NEXT_PUBLIC_STORE_URL ?? "http://localhost:3000";
 
@@ -208,6 +210,7 @@ export default function AdminNotificationsPage() {
   const [notifs,  setNotifs]  = useState<NotifRecord[]>([]);
   const [total,   setTotal]   = useState(0);
   const [loading, setLoading] = useState(true);
+  const [error,   setError]   = useState<string | null>(null);
   const [stats,   setStats]   = useState<{ category: string; _count: { _all: number } }[]>([]);
   const [delivStats, setDelivStats] = useState<DeliveryStat[]>([]);
   const [q,       setQ]       = useState("");
@@ -215,6 +218,7 @@ export default function AdminNotificationsPage() {
 
   const load = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const params = new URLSearchParams();
       if (category !== "ALL") params.set("category", category);
@@ -225,6 +229,8 @@ export default function AdminNotificationsPage() {
       setTotal(d.total ?? 0);
       setStats(d.stats ?? []);
       setDelivStats(d.deliveryStats ?? []);
+    } catch (err) {
+      setError(describeFetchError(err));
     } finally {
       setLoading(false);
     }
@@ -255,6 +261,8 @@ export default function AdminNotificationsPage() {
           <RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} />
         </button>
       </div>
+
+      {error && <FetchError message={error} onRetry={load} loading={loading} />}
 
       <div className="grid lg:grid-cols-[380px_1fr] gap-6">
         {/* Left: Send panel */}

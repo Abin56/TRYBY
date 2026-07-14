@@ -71,7 +71,7 @@ export default async function HomePage() {
         variant="banner"
         source="homepage-banner"
         title="Get exclusive deals & new arrivals"
-        subtitle="Join 18,000+ sports fans. New jerseys, flash sales & offers — straight to your inbox."
+        subtitle="New jerseys, flash sales & offers — straight to your inbox."
       />
     </>
   );

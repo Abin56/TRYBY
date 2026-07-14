@@ -9,6 +9,8 @@ import {
   MessageCircle, Bell, Mail, MousePointer,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { describeFetchError } from "@/lib/api";
+import { FetchError } from "@/components/ui/fetch-error";
 
 const STORE_URL = process.env.NEXT_PUBLIC_STORE_URL ?? "http://localhost:3000";
 
@@ -458,14 +460,21 @@ const ALL_CATEGORIES: Category[] = [
 export default function ConversionAuditPage() {
   const [data,     setData]     = useState<AuditData | null>(null);
   const [loading,  setLoading]  = useState(true);
+  const [error,    setError]    = useState<string | null>(null);
   const [category, setCategory] = useState<Category | "All">("All");
   const [tab,      setTab]      = useState<"findings" | "report">("findings");
 
   const run = useCallback(() => {
     setLoading(true);
+    setError(null);
     setTimeout(() => {
-      setData(buildAudit());
-      setLoading(false);
+      try {
+        setData(buildAudit());
+      } catch (err) {
+        setError(describeFetchError(err));
+      } finally {
+        setLoading(false);
+      }
     }, 600);
   }, []);
 
@@ -500,6 +509,8 @@ export default function ConversionAuditPage() {
           Re-run
         </button>
       </div>
+
+      {error && <FetchError message={error} onRetry={run} loading={loading} />}
 
       <AnimatePresence mode="wait">
         {loading && !data ? (

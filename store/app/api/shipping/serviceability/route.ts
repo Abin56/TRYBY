@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { aggregateServiceability } from "@/lib/shipping";
+import { findServiceableArea } from "@/lib/shipping/serviceable-pincodes";
 
 // Public route — called from checkout to check if pincode is deliverable.
 // No auth required (customer-facing).
@@ -52,4 +53,32 @@ export async function GET(req: NextRequest) {
   return NextResponse.json(result, {
     headers: { "Cache-Control": "s-maxage=3600, stale-while-revalidate=86400" },
   });
+}
+
+/**
+ * POST { pincode } — dummy/mock serviceability check against the hard-coded
+ * SERVICEABLE_AREAS list. Lets checkout be tested without a live courier API.
+ * Always answers from the mock list (independent of the live GET above).
+ */
+export async function POST(req: NextRequest) {
+  const body = await req.json().catch(() => ({}));
+  const pincode = String((body as { pincode?: unknown }).pincode ?? "").replace(/\D/g, "");
+
+  if (!/^\d{6}$/.test(pincode)) {
+    return NextResponse.json(
+      { success: false, serviceable: false, message: "Enter a valid 6-digit pincode" },
+      { status: 400 },
+    );
+  }
+
+  const area = findServiceableArea(pincode);
+  if (!area) {
+    return NextResponse.json({
+      success: false,
+      serviceable: false,
+      message: "Delivery not available for this pincode",
+    });
+  }
+
+  return NextResponse.json({ success: true, serviceable: true, data: area });
 }

@@ -7,6 +7,8 @@ import {
   ArrowUpRight, ArrowDownRight, Heart, RotateCcw, Zap, Award,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { describeFetchError } from "@/lib/api";
+import { FetchError } from "@/components/ui/fetch-error";
 
 const STORE_URL = process.env.NEXT_PUBLIC_STORE_URL ?? "http://localhost:3000";
 
@@ -113,9 +115,11 @@ function buildMockData(): RetentionData {
 export default function RetentionPage() {
   const [data,    setData]    = useState<RetentionData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error,   setError]   = useState<string | null>(null);
 
   const load = useCallback(() => {
     setLoading(true);
+    setError(null);
     // Try real API first, fall back to mock
     fetch(`${STORE_URL}/api/admin/analytics`, { credentials: "include" })
       .then(r => r.json())
@@ -123,7 +127,7 @@ export default function RetentionPage() {
         // Use mock data for retention-specific metrics until backend is wired
         setData(buildMockData());
       })
-      .catch(() => setData(buildMockData()))
+      .catch((err) => { setError(describeFetchError(err)); setData(buildMockData()); })
       .finally(() => setLoading(false));
   }, []);
 
@@ -159,6 +163,8 @@ export default function RetentionPage() {
           <RefreshCw className="h-3.5 w-3.5" /> Refresh
         </button>
       </div>
+
+      {error && <FetchError message={error} onRetry={load} loading={loading} />}
 
       {/* KPI row */}
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-2 lg:grid-cols-4 gap-4">

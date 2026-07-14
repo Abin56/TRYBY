@@ -8,6 +8,8 @@ import {
   Filter,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { describeFetchError } from "@/lib/api";
+import { FetchError } from "@/components/ui/fetch-error";
 
 const STORE_API = process.env.NEXT_PUBLIC_STORE_URL ?? "http://localhost:3000";
 
@@ -332,6 +334,7 @@ function AssetDetail({
 export default function MediaPage() {
   const [assets, setAssets] = useState<MediaAsset[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
@@ -343,6 +346,7 @@ export default function MediaPage() {
 
   const load = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const params = new URLSearchParams({ page: String(page) });
       if (typeFilter) params.set("type", typeFilter);
@@ -353,6 +357,8 @@ export default function MediaPage() {
       setAssets(data.assets ?? []);
       setTotal(data.total ?? 0);
       setPages(data.pages ?? 1);
+    } catch (err) {
+      setError(describeFetchError(err));
     } finally {
       setLoading(false);
     }
@@ -388,6 +394,8 @@ export default function MediaPage() {
           <Upload className="h-3.5 w-3.5" /> Upload
         </button>
       </div>
+
+      {error && <FetchError message={error} onRetry={load} loading={loading} />}
 
       {/* Upload zone */}
       <AnimatePresence>

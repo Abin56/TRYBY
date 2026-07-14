@@ -11,6 +11,8 @@ import { Drawer } from "@/components/ui/drawer";
 import { useUIStore } from "@/store/ui";
 import { formatPrice, formatNumber, formatDate } from "@/lib/format";
 import { cn } from "@/lib/cn";
+import { describeFetchError } from "@/lib/api";
+import { FetchError } from "@/components/ui/fetch-error";
 
 const STORE_API = process.env.NEXT_PUBLIC_STORE_URL ?? "http://localhost:3000";
 
@@ -328,6 +330,7 @@ export default function ProductsPage() {
   const [total, setTotal] = useState(0);
   const [pages, setPages] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [search, setSearch]     = useState("");
   const [sportFilter, setSport] = useState("");
@@ -340,6 +343,7 @@ export default function ProductsPage() {
 
   const load = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const params = new URLSearchParams({
         page: String(page),
@@ -353,6 +357,8 @@ export default function ProductsPage() {
       setProducts(data.products ?? []);
       setTotal(data.total ?? 0);
       setPages(data.pages ?? 1);
+    } catch (err) {
+      setError(describeFetchError(err));
     } finally {
       setLoading(false);
     }
@@ -402,6 +408,8 @@ export default function ProductsPage() {
           </button>
         </div>
       </div>
+
+      {error && <FetchError message={error} onRetry={load} loading={loading} />}
 
       {/* Status filter tabs */}
       <div className="flex gap-1 border-b border-[#E5E7EB] pb-0">

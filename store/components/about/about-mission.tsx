@@ -8,7 +8,7 @@ const pillars = [
   "Pan-India delivery in 2–5 business days",
   "7-day no-questions returns",
   "Real-time order tracking from dispatch to door",
-  "Cash on Delivery available across 27,000+ pincodes",
+  "Cash on Delivery available pan-India",
   "Dedicated B2B supplier onboarding in under 48 hours",
 ];
 
@@ -132,8 +132,8 @@ export function AboutMission() {
             <div className="absolute -bottom-5 -left-5 rounded-2xl bg-white border border-[#E5E7EB] shadow-[0_8px_32px_rgba(0,0,0,0.10)] px-5 py-4 flex items-center gap-3">
               <span className="text-2xl">🏆</span>
               <div>
-                <div className="text-xs font-bold text-[#111827]">India&apos;s Fastest Growing</div>
-                <div className="text-xs text-[#9CA3AF]">Sports Commerce Platform · 2026</div>
+                <div className="text-xs font-bold text-[#111827]">Official TRYBY Platform</div>
+                <div className="text-xs text-[#9CA3AF]">Premium Sports Gear · Est. 2026</div>
               </div>
             </div>
           </motion.div>

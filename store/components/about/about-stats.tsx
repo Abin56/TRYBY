@@ -4,10 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 
 const stats = [
-  { value: 50000, suffix: "+", label: "Athletes Served", description: "Active buyers across India" },
-  { value: 98, suffix: "%", label: "Satisfaction Rate", description: "Verified purchase reviews" },
-  { value: 500, suffix: "+", label: "Products Listed", description: "Across 6 sport categories" },
-  { value: 27000, suffix: "+", label: "Pincodes Covered", description: "Pan-India delivery network" },
+  { value: 100, suffix: "%", label: "Secure Checkout", description: "UPI, cards & COD via Razorpay" },
+  { value: 7, suffix: "-Day", label: "Easy Returns", description: "Free pickup, hassle-free" },
+  { value: 2, suffix: "–5 Days", label: "Pan-India Delivery", description: "Fast shipping, dispatch to door" },
+  { value: 4, suffix: "", label: "Sport Categories", description: "Cricket, football, gym & running" },
 ];
 
 function useCountUp(target: number, duration = 1500, start = false) {
@@ -94,10 +94,10 @@ export function AboutStats() {
           className="text-center mb-12"
         >
           <p className="text-xs font-semibold uppercase tracking-widest text-[#FF3B30] mb-2">
-            By The Numbers
+            Why TRYBY
           </p>
           <h2 className="font-display font-bold text-3xl sm:text-4xl text-[#111827] tracking-tight">
-            The Scale We Operate At
+            What You Can Count On
           </h2>
         </motion.div>
 

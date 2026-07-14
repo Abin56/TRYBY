@@ -9,7 +9,7 @@ const SUPPLIER_BENEFITS = [
   {
     icon: TrendingUp,
     color: "#FF3B30",
-    title: "Reach 50,000+ Sport Buyers",
+    title: "Reach High-Intent Sport Buyers",
     desc: "List your products to our verified base of athletes and sports enthusiasts.",
   },
   {

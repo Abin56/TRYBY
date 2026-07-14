@@ -81,7 +81,7 @@ const FAQS: { category: string; items: { q: string; a: string }[] }[] = [
       },
       {
         q: "Do you deliver across all of India?",
-        a: "Yes, we deliver pan-India to 25,000+ pincodes. Some remote pincodes in J&K, Northeast India, and island territories may take additional time or may have limited service. You can verify delivery availability by entering your pincode at checkout.",
+        a: "Yes, we deliver pan-India through our courier partners. Some remote pincodes in J&K, Northeast India, and island territories may take additional time or may have limited service. You can verify delivery availability by entering your pincode at checkout.",
       },
       {
         q: "How do I track my order?",

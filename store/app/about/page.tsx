@@ -9,7 +9,7 @@ import { AboutSupplierCTA } from "@/components/about/about-supplier-cta";
 export const metadata: Metadata = {
   title: "About TRYBY Sports — India's Premium Sports Commerce Platform",
   description:
-    "TRYBY Sports is India's fastest-growing sports commerce platform. We connect 50,000+ athletes with official licensed gear from top brands. Partner with us to reach a passionate, high-intent sports audience.",
+    "TRYBY Sports is a premium sports commerce platform connecting athletes across India with official licensed gear from top brands. Partner with us to reach a passionate, high-intent sports audience.",
   keywords: [
     "TRYBY Sports about",
     "sports commerce India",
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "About TRYBY Sports — India's Premium Sports Commerce Platform",
     description:
-      "50,000+ athletes. ₹2Cr+ in sales. A serious B2B sports partner. Learn who we are and how we work.",
+      "Official licensed gear. Pan-India delivery. A serious B2B sports partner. Learn who we are and how we work.",
     type: "website",
   },
 };
